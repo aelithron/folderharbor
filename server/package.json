@@ -1,0 +1,29 @@
+{
+  "name": "folderharbor",
+  "version": "1.0.0",
+  "description": "A powerful multi-protocol file server!",
+  "homepage": "https://github.com/aelithron/folderharbor#readme",
+  "bugs": {
+    "url": "https://github.com/aelithron/folderharbor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aelithron/folderharbor.git"
+  },
+  "license": "MIT",
+  "author": "Aelithron",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^25.0.8",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0",
+    "jiti": "^2.6.1",
+    "typescript-eslint": "^8.53.0"
+  }
+}
