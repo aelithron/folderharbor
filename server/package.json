@@ -28,7 +28,7 @@
     "typescript-eslint": "^8.53.0"
   },
   "dependencies": {
-    "yargs": "^18.0.0",
+    "commander": "^14.0.2",
     "zod": "^4.3.5"
   }
 }

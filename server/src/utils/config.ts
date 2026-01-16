@@ -1,16 +1,17 @@
 import * as z from "zod";
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
 
-const Config = z.object({
+export const Config = z.object({
   database: z.string()
 });
-export default function getConfig(configPath?: string): z.Infer<typeof Config> {
+export default async function getConfig(configPath?: string): Promise<z.Infer<typeof Config>> {
   if (!configPath) configPath = "/etc/folderharbor/config.json";
-  if (!fs.existsSync(configPath)) {
-    
-  }
+  // if (!fs.existsSync(configPath)) {}
+  await fs.access(configPath);
   try {
-    return Config.parse(JSON.parse())
+    return Config.parse(JSON.parse());
+  } catch {
+    process.exit(1);
   }
 }
