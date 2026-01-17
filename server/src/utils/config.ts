@@ -13,16 +13,16 @@ export default async function getConfig(configPath?: string): Promise<z.Infer<ty
   } catch {
     if (configPath === "/etc/folderharbor/config.json") {
       console.warn("Default config is missing, copying...");
+      await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.copyFile(path.join(path.dirname(fileURLToPath(import.meta.url)), "../../example.config.json"), configPath, fs.constants.COPYFILE_EXCL);
     } else {
-      throw new Error("Location couldn't be found!");
+      throw new Error("Passed config path couldn't be found!");
     }
   }
   const configFile = await fs.readFile(configPath, "utf8");
   try {
     return Config.parse(JSON.parse(configFile));
   } catch (e) {
-    console.error(`Config is malformed!\n${e}`);
-    process.exit(1);
+    throw new Error(`Config file was incorrectly formatted! \n${e}`);
   }
 }
