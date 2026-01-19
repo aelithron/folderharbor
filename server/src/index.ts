@@ -2,8 +2,11 @@ import { program } from "commander";
 import type z from "zod";
 import path from "path";
 import getConfig, { Config } from "./utils/config.js";
+import startAPI from "./api/api.js";
+import type { Server } from "http";
 
-let config: z.Infer<typeof Config> | null = null;
+let config: z.Infer<typeof Config>;
+let api: Server;
 program
   .name("folderharbor").description("A powerful file server that supports many protocols")
   .option("-c, --config <path>", "path to server config")
@@ -15,13 +18,19 @@ async function startServer() {
     console.error('You started FolderHarbor as root! This is a security risk.\nIf you understand the risks, you can override this check with the "--allow-root-user" argument.');
     process.exit(1);
   }
-  console.log(`Starting FolderHarbor!`);
+  console.log(`Starting FolderHarbor...`);
   try {
     config = await getConfig(program.opts().allowPermissiveConfig, (program.opts().config as string | undefined) ? path.resolve(program.opts().config as string) : undefined);
   } catch (e) {
     console.error(`Config Error - ${e}`);
     process.exit(1);
   }
-  console.log("FolderHarbor ready!");
+  api = await startAPI(config.apiPort);
+}
+async function stopServer() {
+  console.log("Stopping FolderHarbor...");
+  api.close(() => console.log("Stopped API server."));
 }
 await startServer();
+process.on("SIGTERM", async () => await stopServer());
+process.on("SIGINT", async () => await stopServer());
