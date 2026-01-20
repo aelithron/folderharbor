@@ -15,6 +15,9 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
+    "dev": "nodemon -w package.json -w src -w config.json -w /etc/folderharbor/config.json -x 'tsx' --delay 2.5s ./src/index.ts",
+    "start": "node .",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ."
   },
@@ -25,6 +28,8 @@
     "eslint": "^9.39.2",
     "globals": "^17.0.0",
     "jiti": "^2.6.1",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.21.0",
     "typescript-eslint": "^8.53.0"
   },
   "dependencies": {
