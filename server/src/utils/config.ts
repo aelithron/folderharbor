@@ -4,7 +4,6 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 
 export const Config = z.object({
-  database: z.string().nonempty(),
   apiPort: z.int().positive()
 });
 export default async function getConfig(allowPermissive: boolean, configPath?: string): Promise<z.Infer<typeof Config>> {

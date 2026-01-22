@@ -40,5 +40,5 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "exclude": ["./eslint.config.ts", "./dist"]
+  "exclude": ["./eslint.config.ts", "./drizzle.config.ts", "./dist"]
 }

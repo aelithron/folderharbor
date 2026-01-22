@@ -4,6 +4,7 @@ import path from "path";
 import getConfig, { Config } from "./utils/config.js";
 import startAPI from "./api/api.js";
 import type { Server } from "http";
+import dotenv from "dotenv";
 
 let config: z.Infer<typeof Config>;
 let api: Server;
@@ -19,6 +20,7 @@ async function startServer() {
     process.exit(1);
   }
   console.log(`Starting FolderHarbor...`);
+  dotenv.config({ quiet: true });
   try {
     config = await getConfig(program.opts().allowPermissiveConfig, (program.opts().config as string | undefined) ? path.resolve(program.opts().config as string) : undefined);
   } catch (e) {
