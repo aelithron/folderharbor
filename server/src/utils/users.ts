@@ -20,5 +20,23 @@ export async function authUser(username: string, password: string): Promise<{ to
     return { error: "server" };
   }
   const authToken = crypto.randomBytes(32).toString("base64url");
+  // todo: write auth token to db
   return { token: authToken };
+}
+export async function createUser(username: string, password: string): Promise<{ success: boolean, code?: "server" | "username_used" }> {
+  try {
+    const userCheck = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
+    if (userCheck.length > 1) return { success: false, code: "username_used" };
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { success: false, code: "server" };
+  }
+  const hash = await argon2.hash(password);
+  try {
+    await db.insert(usersTable).values({ username: username, password: hash });
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { success: false, code: "server" };
+  }
+  return { success: true };
 }
