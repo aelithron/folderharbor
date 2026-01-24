@@ -5,7 +5,6 @@ import getConfig, { Config } from "./utils/config.js";
 import startAPI from "./api/api.js";
 import type { Server } from "http";
 import dotenv from "dotenv";
-import { authUser, createUser, getSession } from "./utils/users.js";
 
 let config: z.Infer<typeof Config>;
 let api: Server;
@@ -29,11 +28,6 @@ async function startServer() {
     process.exit(1);
   }
   api = await startAPI(config.apiPort);
-  // test
-  console.log(await createUser("test", "test123"));
-  const result = await authUser("test", "test123");
-  console.log(result);
-  console.log(await getSession((result as { token: string }).token));
 }
 async function stopServer() {
   console.log("Stopping FolderHarbor...");
