@@ -1,7 +1,7 @@
 import { program } from "commander";
 import type z from "zod";
 import path from "path";
-import getConfig, { Config } from "./utils/config.js";
+import loadConfig, { Config } from "./utils/config.js";
 import startAPI from "./api/api.js";
 import type { Server } from "http";
 import dotenv from "dotenv";
@@ -22,7 +22,7 @@ async function startServer() {
   console.log(`Starting FolderHarbor...`);
   dotenv.config({ quiet: true });
   try {
-    config = await getConfig(program.opts().allowPermissiveConfig, (program.opts().config as string | undefined) ? path.resolve(program.opts().config as string) : undefined);
+    config = await loadConfig(program.opts().allowPermissiveConfig, (program.opts().config as string | undefined) ? path.resolve(program.opts().config as string) : undefined);
   } catch (e) {
     console.error(`Config Error - ${e}`);
     process.exit(1);
@@ -36,3 +36,8 @@ async function stopServer() {
 await startServer();
 process.on("SIGTERM", async () => await stopServer());
 process.on("SIGINT", async () => await stopServer());
+
+export function getConfig(): z.Infer<typeof Config> | null {
+  if (!config) return null;
+  return config;
+}

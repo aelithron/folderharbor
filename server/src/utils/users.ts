@@ -4,6 +4,7 @@ import { sessionsTable, usersTable } from "./schema.js";
 import { eq } from "drizzle-orm";
 import * as argon2 from "argon2";
 import { DateTime } from "luxon";
+import { getConfig } from "../index.js";
 
 export async function createUser(username: string, password: string): Promise<{ success: boolean, code?: "server" | "username_used" }> {
   try {
@@ -15,7 +16,7 @@ export async function createUser(username: string, password: string): Promise<{ 
   }
   const hash = await argon2.hash(password);
   try {
-    await db.insert(usersTable).values({ username: username, password: hash, locked: false, autoUnlock: null });
+    await db.insert(usersTable).values({ username: username, password: hash, locked: false, failedLogins: 0 });
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { success: false, code: "server" };
@@ -58,19 +59,11 @@ export async function getSession(token: string): Promise<{ user: string, session
     }
     return { error: "invalid" };
   }
-  if (user[0].locked) {
-    if (user[0].autoUnlock && user[0].autoUnlock.getTime() <= new Date().getTime()) {
-      try {
-        await db.update(usersTable).set({ locked: false, autoUnlock: null }).where(eq(usersTable.username, user[0].username));
-      } catch (e) {
-        console.error(`Database Error - ${e}`);
-        return { error: "server" };
-      }
-    } else return { error: "locked" };
-  }
+  if (user[0].locked) return { error: "locked" };
   return { user: session[0].username, sessionID: session[0].id };
 }
-export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" | "locked" }> {
+export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" | "locked" | "rate_limited" }> {
+  const config = getConfig();
   let user;
   try {
     user = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
@@ -79,18 +72,28 @@ export async function createSession(username: string, password: string): Promise
     return { error: "server" };
   }
   if (!user || user.length < 1 || !user[0]) return { error: "not_found" };
-  if (user[0].locked) {
-    if (user[0].autoUnlock && user[0].autoUnlock.getTime() <= new Date().getTime()) {
+  if (user[0].locked) return { error: "locked" };
+  if (user[0].failedLogins >= (config?.failedLoginLimit || 5)) {
+    if (user[0].resetFailedLogins && user[0].resetFailedLogins.getTime() <= new Date().getTime()) {
       try {
-        await db.update(usersTable).set({ locked: false, autoUnlock: null }).where(eq(usersTable.username, user[0].username));
+        await db.update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.username, user[0].username));
+        user[0].failedLogins = 0;
+        user[0].resetFailedLogins = null;
       } catch (e) {
         console.error(`Database Error - ${e}`);
         return { error: "server" };
       }
-    } else return { error: "locked" };
+    } else return { error: "rate_limited" };
   }
   try {
-    if (!await argon2.verify(user[0].password, password)) return { error: "wrong_password" };
+    if (!await argon2.verify(user[0].password, password)) {
+      if (user[0].failedLogins + 1 >= (config?.failedLoginLimit || 5)) {
+        await db.update(usersTable).set({ failedLogins: user[0].failedLogins + 1, resetFailedLogins: DateTime.now().plus({ hours: 1 }).toJSDate() }).where(eq(usersTable.username, user[0].username));
+      } else {
+        await db.update(usersTable).set({ failedLogins: user[0].failedLogins + 1 }).where(eq(usersTable.username, user[0].username));
+      }
+      return { error: "wrong_password" };
+    }
   } catch (e) {
     console.error(`Server Error - ${e}`);
     return { error: "server" };
@@ -98,6 +101,7 @@ export async function createSession(username: string, password: string): Promise
   const token = crypto.randomBytes(32).toString("base64url");
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   try {
+    await db.update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.username, user[0].username));
     await db.insert(sessionsTable).values({ token: tokenHash, username: user[0].username, expiry: DateTime.now().plus({ weeks: 1 }).toJSDate() });
   } catch (e) {
     console.error(`Database Error - ${e}`);

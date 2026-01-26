@@ -4,9 +4,10 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 
 export const Config = z.object({
-  apiPort: z.int().positive()
+  apiPort: z.int().positive(),
+  failedLoginLimit: z.int().positive().default(5)
 });
-export default async function getConfig(allowPermissive: boolean, configPath?: string): Promise<z.Infer<typeof Config>> {
+export default async function loadConfig(allowPermissive: boolean, configPath?: string): Promise<z.Infer<typeof Config>> {
   if (!configPath) configPath = "/etc/folderharbor/config.json";
   try {
     await fs.access(configPath, fs.constants.F_OK);

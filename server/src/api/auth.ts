@@ -37,6 +37,10 @@ router.post("/signin", async (req, res) => {
         res.status(403);
         res.json({ error: "locked", message: "Your account is locked, please contact your administrator." });
         break;
+      case "rate_limited":
+        res.status(403);
+        res.json({ error: "rate_limited", message: "Too many failed login attempts, please wait before trying again or contact your administrator." });
+        break;
       default:
         res.status(500);
         res.json({ error: "unknown", message: "An unknown error occured." });
