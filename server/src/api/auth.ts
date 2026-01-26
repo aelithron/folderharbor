@@ -23,7 +23,7 @@ router.post("/signin", async (req, res) => {
     switch((authRes as { error: string }).error) {
       case "server":
         res.status(500);
-        res.json({ error: "server", message: "Something went wrong on the server's end, contact your administrator." });
+        res.json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
         break;
       case "not_found":
         res.status(400);
@@ -32,6 +32,10 @@ router.post("/signin", async (req, res) => {
       case "wrong_password":
         res.status(403);
         res.json({ error: "password", message: "Incorrect password." });
+        break;
+      case "locked":
+        res.status(403);
+        res.json({ error: "locked", message: "Your account is locked, please contact your administrator." });
         break;
       default:
         res.status(500);

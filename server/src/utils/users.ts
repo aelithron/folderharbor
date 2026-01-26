@@ -15,7 +15,7 @@ export async function createUser(username: string, password: string): Promise<{ 
   }
   const hash = await argon2.hash(password);
   try {
-    await db.insert(usersTable).values({ username: username, password: hash });
+    await db.insert(usersTable).values({ username: username, password: hash, locked: false, autoUnlock: null });
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { success: false, code: "server" };
@@ -23,7 +23,7 @@ export async function createUser(username: string, password: string): Promise<{ 
   return { success: true };
 }
 
-export async function getSession(token: string): Promise<{ user: string, sessionID: number } | { error: "server" | "invalid" | "expired" }> {
+export async function getSession(token: string): Promise<{ user: string, sessionID: number } | { error: "server" | "invalid" | "expired" | "locked" }> {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   let session;
   try {
@@ -42,9 +42,35 @@ export async function getSession(token: string): Promise<{ user: string, session
     }
     return { error: "expired" };
   }
+  let user;
+  try {
+    user = await db.select().from(usersTable).where(eq(usersTable.username, session[0].username));
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+  if (!user || user.length < 1 || !user[0]) {
+    try {
+      await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
+    } catch (e) {
+      console.error(`Database Error - ${e}`);
+      return { error: "server" };
+    }
+    return { error: "invalid" };
+  }
+  if (user[0].locked) {
+    if (user[0].autoUnlock && user[0].autoUnlock.getTime() <= new Date().getTime()) {
+      try {
+        await db.update(usersTable).set({ locked: false, autoUnlock: null }).where(eq(usersTable.username, user[0].username));
+      } catch (e) {
+        console.error(`Database Error - ${e}`);
+        return { error: "server" };
+      }
+    } else return { error: "locked" };
+  }
   return { user: session[0].username, sessionID: session[0].id };
 }
-export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" }> {
+export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" | "locked" }> {
   let user;
   try {
     user = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
@@ -53,6 +79,16 @@ export async function createSession(username: string, password: string): Promise
     return { error: "server" };
   }
   if (!user || user.length < 1 || !user[0]) return { error: "not_found" };
+  if (user[0].locked) {
+    if (user[0].autoUnlock && user[0].autoUnlock.getTime() <= new Date().getTime()) {
+      try {
+        await db.update(usersTable).set({ locked: false, autoUnlock: null }).where(eq(usersTable.username, user[0].username));
+      } catch (e) {
+        console.error(`Database Error - ${e}`);
+        return { error: "server" };
+      }
+    } else return { error: "locked" };
+  }
   try {
     if (!await argon2.verify(user[0].password, password)) return { error: "wrong_password" };
   } catch (e) {

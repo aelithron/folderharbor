@@ -1,8 +1,10 @@
-import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   username: text().primaryKey(),
-  password: text().notNull()
+  password: text().notNull(),
+  locked: boolean().default(false),
+  autoUnlock: timestamp({ mode: "date" })
 });
 export const sessionsTable = pgTable("sessions", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
