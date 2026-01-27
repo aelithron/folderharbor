@@ -22,7 +22,27 @@ export async function getPaths(userid: number): Promise<{ allow: string[], deny:
     console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
+  const allow = new Set<string>();
+  const deny = new Set<string>();
   for (const id of aclIDs) {
-    console.log(acls.find((acl) => acl.id === id));
+    const acl = acls.find((acl) => acl.id === id);
+    if (!acl) continue;
+    for (const path of acl.allow) allow.add(path);
+    for (const path of acl.deny) deny.add(path);
   }
+  return { allow: [...allow], deny: [...deny] };
+}
+export async function createACL(name: string, allow: string[], deny: string[]): Promise<{ id: number } | { error: "server" }> {
+  let acl;
+  try {
+    acl = await db.insert(aclsTable).values({ name, allow: [...(new Set(...allow))], deny: [...(new Set(...deny))] }).returning();
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+  if (!acl || !acl[0]) {
+    console.error(`Server Error - User not returned by database after creation`);
+    return { error: "server" };
+  }
+  return { id: acl[0].id };
 }
