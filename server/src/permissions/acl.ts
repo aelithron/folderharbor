@@ -1,6 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
 import db from "../utils/db.js";
 import { aclsTable, rolesTable, usersTable } from "../utils/schema.js";
+import path from "path";
 
 export async function getPaths(userid: number): Promise<{ allow: string[], deny: string[] } | { error: "server" | "not_found" }> {
   let user;
@@ -31,6 +32,24 @@ export async function getPaths(userid: number): Promise<{ allow: string[], deny:
     for (const path of acl.deny) deny.add(path);
   }
   return { allow: [...allow], deny: [...deny] };
+}
+export async function checkPath(userid: number, checkedPath: string): Promise<boolean> {
+  const paths = await getPaths(userid);
+  if ((paths as { error: string }).error) return false;
+  let allowed: boolean = false;
+  for (const allowedPath of (paths as { allow: string[], deny: string[] }).allow) {
+    if (path.matchesGlob(checkedPath, allowedPath)) {
+      allowed = true;
+      break;
+    }
+  }
+  for (const deniedPath of (paths as { allow: string[], deny: string[] }).deny) {
+    if (path.matchesGlob(checkedPath, deniedPath)) {
+      allowed = false;
+      break;
+    }
+  }
+  return allowed;
 }
 export async function createACL(name: string, allow: string[], deny: string[]): Promise<{ id: number } | { error: "server" }> {
   let acl;
