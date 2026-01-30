@@ -1,33 +1,10 @@
 import crypto from "crypto";
-import db from "./db.js";
-import { sessionsTable, usersTable } from "./schema.js";
+import db from "../utils/db.js";
+import { sessionsTable, usersTable } from "../utils/schema.js";
 import { eq } from "drizzle-orm";
 import * as argon2 from "argon2";
 import { DateTime } from "luxon";
 import { getConfig } from "../index.js";
-
-export async function createUser(username: string, password: string): Promise<{ id: number } | { error: "server" | "username_used" }> {
-  try {
-    const userCheck = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
-    if (userCheck.length >= 1) return { error: "username_used" };
-  } catch (e) {
-    console.error(`Database Error - ${e}`);
-    return { error: "server" };
-  }
-  const hash = await argon2.hash(password);
-  let newUser;
-  try {
-    newUser = await db.insert(usersTable).values({ username: username, password: hash }).returning();
-  } catch (e) {
-    console.error(`Database Error - ${e}`);
-    return { error: "server" };
-  }
-  if (!newUser || !newUser[0]) {
-    console.error(`Server Error - User not returned by database after creation`);
-    return { error: "server" };
-  }
-  return { id: newUser[0].id };
-}
 
 export async function getSession(token: string): Promise<{ userid: number, username: string, sessionID: number } | { error: "server" | "invalid" | "expired" | "locked" }> {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
@@ -125,22 +102,3 @@ export async function revokeSession(id: number): Promise<{ success: boolean } | 
     return { error: "server" };
   }
 }
-export async function editUser(userid: number, { username, password, locked, roles, acls, clearLoginAttempts }: { username?: string, password?: string, locked?: boolean, roles?: number[], acls?: number[], clearLoginAttempts?: boolean }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
-  try {
-    const user = await db.update(usersTable).set({ username, password, locked, roles, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userid)).returning();
-    if (!user || user.length < 1) return { error: "not_found" };
-  } catch (e) {
-    console.error(`Dattabase Error - ${e}`);
-    return { error: "server" };
-  }
-  return { success: true };
-}
-/*
-  // auth test thingy
-  console.log(await createUser("test", "test123"));
-  const result = await createSession("test", "test123");
-  console.log(result);
-  const authResult = await getSession((result as { token: string }).token);
-  console.log(authResult);
-  console.log(await revokeSession((authResult as { sessionID: number }).sessionID));
-*/

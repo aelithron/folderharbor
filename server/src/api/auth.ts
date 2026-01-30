@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { createSession } from "../utils/users.js";
+import { createSession } from "../users/users.js";
 const router: Router = express.Router();
 router.get("/", (req, res) => res.send("idk even anymore, tired :c"));
 router.post("/signin", async (req, res) => {

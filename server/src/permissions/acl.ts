@@ -3,10 +3,10 @@ import db from "../utils/db.js";
 import { aclsTable, rolesTable, usersTable } from "../utils/schema.js";
 import path from "path";
 
-export async function getPaths(userid: number): Promise<{ allow: string[], deny: string[] } | { error: "server" | "not_found" }> {
+export async function getPaths(userID: number): Promise<{ allow: string[], deny: string[] } | { error: "server" | "not_found" }> {
   let user;
   try {
-    user = await db.select().from(usersTable).where(eq(usersTable.id, userid));
+    user = await db.select().from(usersTable).where(eq(usersTable.id, userID));
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -33,8 +33,8 @@ export async function getPaths(userid: number): Promise<{ allow: string[], deny:
   }
   return { allow: [...allow], deny: [...deny] };
 }
-export async function checkPath(userid: number, checkedPath: string): Promise<boolean> {
-  const paths = await getPaths(userid);
+export async function checkPath(userID: number, checkedPath: string): Promise<boolean> {
+  const paths = await getPaths(userID);
   if ((paths as { error: string }).error) return false;
   let allowed: boolean = false;
   for (const allowedPath of (paths as { allow: string[], deny: string[] }).allow) {
@@ -54,7 +54,7 @@ export async function checkPath(userid: number, checkedPath: string): Promise<bo
 export async function createACL(name: string, allow: string[], deny: string[]): Promise<{ id: number } | { error: "server" }> {
   let acl;
   try {
-    acl = await db.insert(aclsTable).values({ name, allow: [...(new Set(...allow))], deny: [...(new Set(...deny))] }).returning();
+    acl = await db.insert(aclsTable).values({ name, allow: [...(new Set(...allow))], deny: [...(new Set(...deny))] }).returning({ id: aclsTable.id });
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -65,13 +65,34 @@ export async function createACL(name: string, allow: string[], deny: string[]): 
   }
   return { id: acl[0].id };
 }
-export async function editACL(aclid: number, { name, allow, deny }: { name: string, allow: string[], deny: string[] }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function getACL(aclID: number): Promise<{ name: string, allow: string[], deny: string[] } | { error: "server" | "not_found" }> {
+  let acl;
   try {
-    const acl = await db.update(aclsTable).set({ name, allow, deny }).where(eq(aclsTable.id, aclid)).returning();
+    acl = await db.select({ name: aclsTable.name, allow: aclsTable.allow, deny: aclsTable.deny }).from(aclsTable).where(eq(aclsTable.id, aclID)).limit(1);
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+  if (!acl || acl.length < 1 || !acl[0]) return { error: "not_found" };
+  return acl[0];
+}
+export async function editACL(aclID: number, { name, allow, deny }: { name: string, allow: string[], deny: string[] }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+  try {
+    const acl = await db.update(aclsTable).set({ name, allow, deny }).where(eq(aclsTable.id, aclID)).returning({ id: aclsTable.id });
     if (!acl || acl.length < 1) return { error: "not_found" };
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
   return { success: true };
+}
+export async function deleteACL(aclID: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+  try {
+    const acl = await db.delete(aclsTable).where(eq(aclsTable.id, aclID)).returning({ id: aclsTable.id });
+    if (!acl || acl.length < 1) return { error: "not_found" };
+    return { success: true };
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
 }
