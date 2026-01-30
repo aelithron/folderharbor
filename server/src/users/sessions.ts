@@ -5,8 +5,9 @@ import { eq } from "drizzle-orm";
 import * as argon2 from "argon2";
 import { DateTime } from "luxon";
 import { getConfig } from "../index.js";
+import type { Session } from "../types/folderharbor.js";
 
-export async function getSession(token: string): Promise<{ userid: number, username: string, sessionID: number } | { error: "server" | "invalid" | "expired" | "locked" }> {
+export async function getSession(token: string): Promise<Session | { error: "server" | "invalid" | "expired" | "locked" }> {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   let session;
   try {
@@ -42,7 +43,7 @@ export async function getSession(token: string): Promise<{ userid: number, usern
     return { error: "invalid" };
   }
   if (user[0].locked) return { error: "locked" };
-  return { userid: session[0].userid, username: user[0].username, sessionID: session[0].id };
+  return { userID: session[0].userid, username: user[0].username, sessionID: session[0].id };
 }
 export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" | "locked" | "rate_limited" }> {
   const config = getConfig();
@@ -92,9 +93,9 @@ export async function createSession(username: string, password: string): Promise
   }
   return { token };
 }
-export async function revokeSession(id: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function revokeSession(sessionID: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
-    const session = await db.delete(sessionsTable).where(eq(sessionsTable.id, id)).returning({ id: sessionsTable.id });
+    const session = await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
     if (!session || session.length < 1) return { error: "not_found" };
     return { success: true };
   } catch (e) {

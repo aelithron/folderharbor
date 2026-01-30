@@ -39,6 +39,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
   "exclude": ["./eslint.config.ts", "./drizzle.config.ts", "./dist"]
 }

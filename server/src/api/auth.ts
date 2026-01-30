@@ -1,9 +1,7 @@
 import express, { Router } from "express";
 import { createSession } from "../users/sessions.js";
+import { enforceAuth } from "./api.js";
 const router: Router = express.Router();
-router.get("/", async (req, res) => {
-
-});
 router.post("/", async (req, res) => {
   if (!req.body) {
     res.status(400);
@@ -54,6 +52,11 @@ router.post("/", async (req, res) => {
     res.json(authRes);
     return;
   }
+});
+
+router.use(enforceAuth());
+router.get("/", async (req, res) => {
+  
 });
 router.delete("/", async (req, res) => {
   
