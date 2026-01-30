@@ -1,8 +1,10 @@
 import express, { Router } from "express";
-import { createSession } from "../users/users.js";
+import { createSession } from "../users/sessions.js";
 const router: Router = express.Router();
-router.get("/", (req, res) => res.send("idk even anymore, tired :c"));
-router.post("/signin", async (req, res) => {
+router.get("/", async (req, res) => {
+
+});
+router.post("/", async (req, res) => {
   if (!req.body) {
     res.status(400);
     res.json({ error: "request_body", message: "Your request's body is empty or invalid." });
@@ -20,7 +22,7 @@ router.post("/signin", async (req, res) => {
   }
   const authRes = await createSession(req.body.username, req.body.password);
   if ((authRes as { error: string }).error) {
-    switch((authRes as { error: string }).error) {
+    switch ((authRes as { error: string }).error) {
       case "server":
         res.status(500);
         res.json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
@@ -52,5 +54,8 @@ router.post("/signin", async (req, res) => {
     res.json(authRes);
     return;
   }
+});
+router.delete("/", async (req, res) => {
+  
 });
 export { router };
