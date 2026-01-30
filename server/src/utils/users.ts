@@ -118,12 +118,22 @@ export async function createSession(username: string, password: string): Promise
 export async function revokeSession(id: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
     const session = await db.delete(sessionsTable).where(eq(sessionsTable.id, id)).returning({ id: sessionsTable.id });
-    if (session.length < 1) return { error: "not_found" };
+    if (!session || session.length < 1) return { error: "not_found" };
     return { success: true };
   } catch (e) {
-    console.error(`Server Error - ${e}`);
+    console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
+}
+export async function editUser(userid: number, { username, password, locked, roles, acls, clearLoginAttempts }: { username?: string, password?: string, locked?: boolean, roles?: number[], acls?: number[], clearLoginAttempts?: boolean }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+  try {
+    const user = await db.update(usersTable).set({ username, password, locked, roles, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userid)).returning();
+    if (!user || user.length < 1) return { error: "not_found" };
+  } catch (e) {
+    console.error(`Dattabase Error - ${e}`);
+    return { error: "server" };
+  }
+  return { success: true };
 }
 /*
   // auth test thingy

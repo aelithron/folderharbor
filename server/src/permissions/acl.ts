@@ -60,8 +60,18 @@ export async function createACL(name: string, allow: string[], deny: string[]): 
     return { error: "server" };
   }
   if (!acl || !acl[0]) {
-    console.error(`Server Error - User not returned by database after creation`);
+    console.error(`Server Error - ACL not returned by db after creation`);
     return { error: "server" };
   }
   return { id: acl[0].id };
+}
+export async function editACL(aclid: number, { name, allow, deny }: { name: string, allow: string[], deny: string[] }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+  try {
+    const acl = await db.update(aclsTable).set({ name, allow, deny }).where(eq(aclsTable.id, aclid)).returning();
+    if (!acl || acl.length < 1) return { error: "not_found" };
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+  return { success: true };
 }
