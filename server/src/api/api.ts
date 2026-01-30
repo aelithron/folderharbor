@@ -16,32 +16,30 @@ export default async function startAPI(port: number): Promise<Server> {
   return server;
 }
 
-async function auth(): Promise<RequestHandler> {
-  return async (req, res, next) => {
-    let token: string | null = null;
-    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) token = req.headers.authorization.split("Bearer ", 2)[1] as string;
-    if (!token && req.cookies["token"]) token = req.cookies["token"];
-    if (!token) return next();
-    const session = await getSession(token);
-    if ((session as { error: string }).error) {
-      switch ((session as { error: string }).error) {
-        case "server":
-          return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-        case "locked":
-        case "invalid":
-        case "expired":
-          req.sessionErr = (session as { error: string }).error;
-          req.session = undefined;
-          return next();
-        default:
-          return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-      }
+const auth: RequestHandler = async (req, res, next) => {
+  let token: string | null = null;
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) token = req.headers.authorization.split("Bearer ", 2)[1] as string;
+  if (!token && req.cookies["token"]) token = req.cookies["token"];
+  if (!token) return next();
+  const session = await getSession(token);
+  if ((session as { error: string }).error) {
+    switch ((session as { error: string }).error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "locked":
+      case "invalid":
+      case "expired":
+        req.sessionErr = (session as { error: string }).error;
+        req.session = undefined;
+        return next();
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
-    req.session = session as Session;
-    req.sessionErr = undefined;
-    next();
-  };
-}
+  }
+  req.session = session as Session;
+  req.sessionErr = undefined;
+  next();
+};
 export function enforceAuth(): RequestHandler {
   return (req, res, next) => {
     if (req.sessionErr) {

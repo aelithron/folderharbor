@@ -43,7 +43,7 @@ export async function getSession(token: string): Promise<Session | { error: "ser
     return { error: "invalid" };
   }
   if (user[0].locked) return { error: "locked" };
-  return { userID: session[0].userid, username: user[0].username, sessionID: session[0].id };
+  return { userID: session[0].userid, username: user[0].username, sessionID: session[0].id, expiry: session[0].expiry };
 }
 export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" | "locked" | "rate_limited" }> {
   const config = getConfig();

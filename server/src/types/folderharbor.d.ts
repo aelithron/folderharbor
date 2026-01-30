@@ -1,4 +1,4 @@
-export type Session = { userID: number, username: string, sessionID: number }
+export type Session = { userID: number, username: string, sessionID: number, expiry: Date }
 
 declare global {
   namespace Express {
