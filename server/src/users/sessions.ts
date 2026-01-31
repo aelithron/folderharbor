@@ -103,6 +103,18 @@ export async function revokeSession(sessionID: number): Promise<{ success: boole
     return { error: "server" };
   }
 }
+export async function extendSession(sessionID: number, until?: Date): Promise<{ success: boolean } | { error: "server" | "not_found" | "invalid_date" }> {
+  if (!until) until = DateTime.now().plus({ weeks: 1 }).toJSDate();
+  if (until.getTime() < new Date().getTime()) return { error: "invalid_date" };
+  try {
+    const session = await db.update(sessionsTable).set({ expiry: until }).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
+    if (!session || session.length < 1) return { error: "not_found" };
+    return { success: true };
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+}
 
 export async function getUserSessions(userID: number): Promise<{ sessions: { id: number, createdAt: Date, expiry: Date }[] } | { error: "server" | "no_sessions" }> {
   let sessions;

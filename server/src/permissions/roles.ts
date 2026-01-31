@@ -37,3 +37,13 @@ export async function editRole(roleID: number, { name, acls }: { name?: string, 
   }
   return { success: true };
 }
+export async function deleteRole(roleID: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+  try {
+    const role = await db.delete(rolesTable).where(eq(rolesTable.id, roleID)).returning();
+    if (!role || role.length < 1) return { error: "not_found" };
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+  return { success: true };
+}
