@@ -35,15 +35,15 @@ export async function getPaths(userID: number): Promise<{ allow: string[], deny:
 }
 export async function checkPath(userID: number, checkedPath: string): Promise<boolean> {
   const paths = await getPaths(userID);
-  if ((paths as { error: string }).error) return false;
+  if ("error" in paths) return false;
   let allowed: boolean = false;
-  for (const allowedPath of (paths as { allow: string[], deny: string[] }).allow) {
+  for (const allowedPath of paths.allow) {
     if (path.matchesGlob(checkedPath, allowedPath)) {
       allowed = true;
       break;
     }
   }
-  for (const deniedPath of (paths as { allow: string[], deny: string[] }).deny) {
+  for (const deniedPath of paths.deny) {
     if (path.matchesGlob(checkedPath, deniedPath)) {
       allowed = false;
       break;

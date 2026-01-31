@@ -3,7 +3,6 @@ import type { Server } from "http";
 import { router as authRouter } from "./auth.js";
 import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
-import type { Session } from "../types/folderharbor.js";
 export default async function startAPI(port: number): Promise<Server> {
   const app = express();
   app.use(express.json());
@@ -22,21 +21,21 @@ const auth: RequestHandler = async (req, res, next) => {
   if (!token && req.cookies["token"]) token = req.cookies["token"];
   if (!token) return next();
   const session = await getSession(token);
-  if ((session as { error: string }).error) {
-    switch ((session as { error: string }).error) {
+  if ("error" in session) {
+    switch (session.error) {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
       case "locked":
       case "invalid":
       case "expired":
-        req.sessionErr = (session as { error: string }).error;
+        req.sessionErr = session.error;
         req.session = undefined;
         return next();
       default:
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  req.session = session as Session;
+  req.session = session;
   req.sessionErr = undefined;
   next();
 };
