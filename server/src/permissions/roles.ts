@@ -4,10 +4,10 @@ import { eq, inArray } from "drizzle-orm";
 import type { Permission } from "./permissions.js";
 import { getUser } from "../users/users.js";
 
-export async function createRole(name: string, acls?: number[]): Promise<{ id: number } | { error: "server" }> {
+export async function createRole(name: string, { permissions, acls }: { permissions?: Permission[], acls?: number[] }): Promise<{ id: number } | { error: "server" }> {
   let role;
   try {
-    role = await db.insert(rolesTable).values({ name, acls }).returning();
+    role = await db.insert(rolesTable).values({ name, permissions, acls }).returning();
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -29,9 +29,9 @@ export async function getRole(roleID: number): Promise<{ name: string, permissio
   if (!role || role.length < 1 || !role[0]) return { error: "not_found" };
   return role[0];
 }
-export async function editRole(roleID: number, { name, acls }: { name?: string, acls?: number[] }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function editRole(roleID: number, { name, permissions, acls }: { name?: string, permissions?: Permission[], acls?: number[] }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
-    const role = await db.update(rolesTable).set({ name, acls }).where(eq(rolesTable.id, roleID)).returning();
+    const role = await db.update(rolesTable).set({ name, permissions, acls }).where(eq(rolesTable.id, roleID)).returning();
     if (!role || role.length < 1) return { error: "not_found" };
   } catch (e) {
     console.error(`Database Error - ${e}`);

@@ -4,6 +4,7 @@ import { aclsTable } from "../utils/schema.js";
 import path from "path";
 import { getUser } from "../users/users.js";
 import { getUserRoles } from "./roles.js";
+import micromatch from "micromatch";
 
 export async function getPaths(userID: number): Promise<{ allow: string[], deny: string[] } | { error: "server" | "not_found" }> {
   const user = await getUser(userID);
@@ -31,26 +32,17 @@ export async function getPaths(userID: number): Promise<{ allow: string[], deny:
 }
 export async function checkPath(userID: number, checkedPath: string): Promise<boolean> {
   const paths = await getPaths(userID);
+  console.log(paths);
   if ("error" in paths) return false;
   let allowed: boolean = false;
-  for (const allowedPath of paths.allow) {
-    if (path.matchesGlob(checkedPath, allowedPath)) {
-      allowed = true;
-      break;
-    }
-  }
-  for (const deniedPath of paths.deny) {
-    if (path.matchesGlob(checkedPath, deniedPath)) {
-      allowed = false;
-      break;
-    }
-  }
+  if (micromatch.isMatch(path.normalize(checkedPath), paths.allow, { dot: true })) allowed = true;
+  if (micromatch.isMatch(path.normalize(checkedPath), paths.deny, { dot: true })) allowed = false;
   return allowed;
 }
 export async function createACL(name: string, allow: string[], deny: string[]): Promise<{ id: number } | { error: "server" }> {
   let acl;
   try {
-    acl = await db.insert(aclsTable).values({ name, allow: [...(new Set(...allow))], deny: [...(new Set(...deny))] }).returning({ id: aclsTable.id });
+    acl = await db.insert(aclsTable).values({ name, allow, deny }).returning({ id: aclsTable.id });
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -72,7 +64,7 @@ export async function getACL(aclID: number): Promise<{ name: string, allow: stri
   if (!acl || acl.length < 1 || !acl[0]) return { error: "not_found" };
   return acl[0];
 }
-export async function editACL(aclID: number, { name, allow, deny }: { name: string, allow: string[], deny: string[] }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function editACL(aclID: number, { name, allow, deny }: { name?: string, allow?: string[], deny?: string[] }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
     const acl = await db.update(aclsTable).set({ name, allow, deny }).where(eq(aclsTable.id, aclID)).returning({ id: aclsTable.id });
     if (!acl || acl.length < 1) return { error: "not_found" };
