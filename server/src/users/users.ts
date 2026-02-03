@@ -2,7 +2,7 @@ import db from "../utils/db.js";
 import { usersTable } from "../utils/schema.js";
 import { eq } from "drizzle-orm";
 import * as argon2 from "argon2";
-import type { Permission } from "../permissions/permissions.js";
+import { type Permission } from "../permissions/permissions.js";
 
 export async function createUser(username: string, password: string): Promise<{ id: number } | { error: "server" | "username_used" }> {
   try {
@@ -26,10 +26,10 @@ export async function createUser(username: string, password: string): Promise<{ 
   }
   return { id: newUser[0].id };
 }
-export async function getUser(userID: number): Promise<{ username: string, roles: number[], acls: number[], locked: boolean, failedLogins: number } | { error: "server" | "not_found" }> {
+export async function getUser(userID: number): Promise<{ username: string, roles: number[], permissions: Permission[], acls: number[], locked: boolean, failedLogins: number } | { error: "server" | "not_found" }> {
   let user;
   try {
-    user = await db.select({ username: usersTable.username, roles: usersTable.roles, acls: usersTable.acls, locked: usersTable.locked, failedLogins: usersTable.failedLogins }).from(usersTable).where(eq(usersTable.id, userID)).limit(1);
+    user = await db.select({ username: usersTable.username, roles: usersTable.roles, permissions: usersTable.permissions, acls: usersTable.acls, locked: usersTable.locked, failedLogins: usersTable.failedLogins }).from(usersTable).where(eq(usersTable.id, userID)).limit(1);
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -39,7 +39,7 @@ export async function getUser(userID: number): Promise<{ username: string, roles
 }
 export async function editUser(userid: number, { username, password, locked, roles, permissions, acls, clearLoginAttempts }: { username?: string, password?: string, locked?: boolean, roles?: number[], permissions?: Permission[], acls?: number[], clearLoginAttempts?: boolean }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
-    const user = await db.update(usersTable).set({ username, password, locked, roles, permissions, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userid)).returning();
+    const user = await db.update(usersTable).set({ username, password: (password ? await argon2.hash(password) : undefined), locked, roles, permissions, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userid)).returning();
     if (!user || user.length < 1) return { error: "not_found" };
   } catch (e) {
     console.error(`Dattabase Error - ${e}`);

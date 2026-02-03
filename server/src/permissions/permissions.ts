@@ -1,7 +1,5 @@
-import { inArray } from "drizzle-orm";
 import { getUser } from "../users/users.js";
-import { rolesTable } from "../utils/schema.js";
-import db from "../utils/db.js";
+import { getUserRoles } from "./roles.js";
 
 export const permissions: { id: `${"users" | "sessions" | "roles" | "acls" | "config"}:${string}`, description: string }[] = [
   { id: "users:create", description: "Create new users" },
@@ -27,12 +25,9 @@ export type Permission = (typeof permissions)[number]["id"];
 export async function checkPermission(userID: number, permission: Permission): Promise<boolean | { error: "server" | "not_found" }> {
   const user = await getUser(userID);
   if ("error" in user) return { error: user.error };
-  let roles;
-  try {
-    roles = await db.select().from(rolesTable).where(inArray(rolesTable.id, user.roles));
-  } catch (e) {
-    console.error(`Database Error - ${e}`);
-    return { error: "server" };
-  }
-  
+  if (user.permissions.find((userPerm) => userPerm === permission)) return true;
+  const roles = await getUserRoles(userID);
+  if ("error" in roles) return { error: roles.error };
+  for (const role of roles) if (role.permissions.find((userPerm) => userPerm === permission)) return true;
+  return false;
 }

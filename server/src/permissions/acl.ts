@@ -1,18 +1,19 @@
 import { eq, inArray } from "drizzle-orm";
 import db from "../utils/db.js";
-import { aclsTable, rolesTable } from "../utils/schema.js";
+import { aclsTable } from "../utils/schema.js";
 import path from "path";
 import { getUser } from "../users/users.js";
+import { getUserRoles } from "./roles.js";
 
 export async function getPaths(userID: number): Promise<{ allow: string[], deny: string[] } | { error: "server" | "not_found" }> {
   const user = await getUser(userID);
   if ("error" in user) return { error: user.error };
+  const roles = await getUserRoles(userID);
+  if ("error" in roles) return { error: roles.error };
   const aclIDs = new Set<number>([...user.acls]);
-  let roles;
+  for (const role of roles) for (const acl of role.acls) aclIDs.add(acl);
   let acls;
   try {
-    roles = await db.select().from(rolesTable).where(inArray(rolesTable.id, user.roles));
-    for (const role of roles) for (const acl of role.acls) aclIDs.add(acl);
     acls = await db.select().from(aclsTable).where(inArray(aclsTable.id, [...aclIDs]));
   } catch (e) {
     console.error(`Database Error - ${e}`);
