@@ -32,7 +32,6 @@ export async function getPaths(userID: number): Promise<{ allow: string[], deny:
 }
 export async function checkPath(userID: number, checkedPath: string): Promise<boolean> {
   const paths = await getPaths(userID);
-  console.log(paths);
   if ("error" in paths) return false;
   let allowed: boolean = false;
   if (micromatch.isMatch(path.normalize(checkedPath), paths.allow, { dot: true })) allowed = true;
