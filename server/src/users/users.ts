@@ -2,6 +2,7 @@ import db from "../utils/db.js";
 import { usersTable } from "../utils/schema.js";
 import { eq } from "drizzle-orm";
 import * as argon2 from "argon2";
+import type { Permission } from "../permissions/permissions.js";
 
 export async function createUser(username: string, password: string): Promise<{ id: number } | { error: "server" | "username_used" }> {
   try {
@@ -36,9 +37,9 @@ export async function getUser(userID: number): Promise<{ username: string, roles
   if (!user || user.length < 1 || !user[0]) return { error: "not_found" };
   return user[0];
 }
-export async function editUser(userid: number, { username, password, locked, roles, acls, clearLoginAttempts }: { username?: string, password?: string, locked?: boolean, roles?: number[], acls?: number[], clearLoginAttempts?: boolean }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function editUser(userid: number, { username, password, locked, roles, permissions, acls, clearLoginAttempts }: { username?: string, password?: string, locked?: boolean, roles?: number[], permissions?: Permission[], acls?: number[], clearLoginAttempts?: boolean }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
-    const user = await db.update(usersTable).set({ username, password, locked, roles, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userid)).returning();
+    const user = await db.update(usersTable).set({ username, password, locked, roles, permissions, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userid)).returning();
     if (!user || user.length < 1) return { error: "not_found" };
   } catch (e) {
     console.error(`Dattabase Error - ${e}`);

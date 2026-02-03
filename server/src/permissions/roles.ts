@@ -1,6 +1,7 @@
 import db from "../utils/db.js";
 import { rolesTable } from "../utils/schema.js";
 import { eq } from "drizzle-orm";
+import type { Permission } from "./permissions.js";
 
 export async function createRole(name: string, acls?: number[]): Promise<{ id: number } | { error: "server" }> {
   let role;
@@ -16,10 +17,10 @@ export async function createRole(name: string, acls?: number[]): Promise<{ id: n
   }
   return { id: role[0].id };
 }
-export async function getRole(roleID: number): Promise<{ name: string, acls: number[] } | { error: "server" | "not_found" }> {
+export async function getRole(roleID: number): Promise<{ name: string, permissions: Permission[], acls: number[] } | { error: "server" | "not_found" }> {
   let role;
   try {
-    role = await db.select({ name: rolesTable.name, acls: rolesTable.acls }).from(rolesTable).where(eq(rolesTable.id, roleID)).limit(1);
+    role = await db.select({ name: rolesTable.name, permissions: rolesTable.permissions, acls: rolesTable.acls }).from(rolesTable).where(eq(rolesTable.id, roleID)).limit(1);
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
