@@ -116,12 +116,12 @@ export async function extendSession(sessionID: number, until?: Date): Promise<{ 
   }
 }
 
-export async function getUserSessions(userID: number): Promise<{ sessions: { id: number, createdAt: Date, expiry: Date }[] } | { error: "server" | "no_sessions" }> {
+export async function getUserSessions(userID: number): Promise<{ id: number, createdAt: Date, expiry: Date }[]  | { error: "server" | "no_sessions" }> {
   let sessions;
   try {
     sessions = await db.select({ id: sessionsTable.id, createdAt: sessionsTable.createdAt, expiry: sessionsTable.expiry }).from(sessionsTable).where(eq(sessionsTable.userid, userID));
     if (!sessions || sessions.length < 1) return { error: "no_sessions" };
-    return { sessions };
+    return sessions;
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };

@@ -1,6 +1,7 @@
 import express, { type RequestHandler } from "express";
 import type { Server } from "http";
 import { router as authRouter } from "./auth.js";
+import { router as fileRouter } from "./file.js";
 import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
 export default async function startAPI(port: number): Promise<Server> {
@@ -10,6 +11,7 @@ export default async function startAPI(port: number): Promise<Server> {
   app.use(auth);
   app.get("/", (req, res) => res.json({ server: "FolderHarbor" }));
   app.use("/auth", authRouter);
+  app.use("/files", fileRouter);
   const server = app.listen(port);
   server.on("listening", () => console.log(`API server running (port ${port})`));
   return server;
