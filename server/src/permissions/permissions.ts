@@ -5,7 +5,8 @@ export const permissions: { id: `${"users" | "sessions" | "roles" | "acls" | "co
   { id: "users:create", description: "Create new users" },
   { id: "users:read", description: "Read users' information (to a limited degree)" },
   { id: "users:read.full", description: "Read users' full information" },
-  { id: "users:edit", description: "Modify the information of other users" },
+  { id: "users:edit", description: "Modify limited information of other users" },
+  { id: "users:edit.full", description: "Modify the full information of other users" },
   { id: "users:delete", description: "Delete users" },
   { id: "users:lock", description: "Block/unblock a user from logging in" },
   
