@@ -64,6 +64,6 @@ router.delete("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  return res.status(204).clearCookie("token");
+  return res.status(204).clearCookie("token").end();
 });
 export { router };

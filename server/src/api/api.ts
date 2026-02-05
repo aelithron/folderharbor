@@ -5,12 +5,18 @@ import { router as meRouter } from "./me.js";
 import { router as adminRouter } from "./admin/admin.js";
 import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
+import { getConfig } from "../index.js";
 export default async function startAPI(port: number): Promise<Server> {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
   app.use(auth);
-  app.get("/", (req, res) => res.json({ server: "FolderHarbor" }));
+  app.get("/", (req, res) => res.send("FolderHarbor Server"));
+  app.get("/clientconfig", (req, res) => {
+    const config = getConfig();
+    if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
+    res.json({ selfUsernameChanges: config.selfUsernameChanges });
+  });
   app.use("/auth", authRouter);
   app.use("/me", meRouter);
   app.use("/admin", adminRouter);

@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import { enforceAuth } from "./api.js";
 import { editUser, getUser } from "../users/users.js";
-import { getUserSessions } from "../users/sessions.js";
+import { getUserSessions, revokeSession } from "../users/sessions.js";
 import { getConfig } from "../index.js";
 const router: Router = express.Router();
 router.use(enforceAuth());
@@ -52,6 +52,26 @@ router.patch("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  return res.json({ });
+  return res.json({ success: true });
+});
+router.delete("/session", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!req.body.sessionID || isNaN(Number.parseInt(req.body.sessionID))) return res.status(400).json({ error: "session_id", message: "Your request doesn't contain a valid 'sessionID'." });
+  if (Number.parseInt(req.body.sessionID) === req.session.sessionID) return res.status(400).json({ error: "active_session", message: "You can't remove your active session this way, please sign out instead!" });
+  const result = await revokeSession(Number.parseInt(req.body.sessionID));
+  if ("error" in result) {
+    switch(result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "This session doesn't exist!" });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ success: true });
 });
 export { router };
