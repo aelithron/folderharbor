@@ -37,9 +37,13 @@ export async function getUser(userID: number): Promise<{ username: string, roles
   if (!user || user.length < 1 || !user[0]) return { error: "not_found" };
   return user[0];
 }
-export async function editUser(userid: number, { username, password, locked, roles, permissions, acls, clearLoginAttempts }: { username?: string, password?: string, locked?: boolean, roles?: number[], permissions?: Permission[], acls?: number[], clearLoginAttempts?: boolean }): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function editUser(userID: number, { username, password, locked, roles, permissions, acls, clearLoginAttempts }: { username?: string, password?: string, locked?: boolean, roles?: number[], permissions?: Permission[], acls?: number[], clearLoginAttempts?: boolean }): Promise<{ success: boolean } | { error: "server" | "not_found" | "username_used" }> {
   try {
-    const user = await db.update(usersTable).set({ username, password: (password ? await argon2.hash(password) : undefined), locked, roles, permissions, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userid)).returning();
+    if (username) {
+      const userCheck = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
+      if (userCheck.length >= 1 && userCheck[0]!.id !== userID) return { error: "username_used" };
+    }
+    const user = await db.update(usersTable).set({ username, password: (password ? await argon2.hash(password) : undefined), locked, roles, permissions, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userID)).returning();
     if (!user || user.length < 1) return { error: "not_found" };
   } catch (e) {
     console.error(`Dattabase Error - ${e}`);
@@ -47,9 +51,9 @@ export async function editUser(userid: number, { username, password, locked, rol
   }
   return { success: true };
 }
-export async function deleteUser(userid: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function deleteUser(userID: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
-    const user = await db.delete(usersTable).where(eq(usersTable.id, userid)).returning({ id: usersTable.id });
+    const user = await db.delete(usersTable).where(eq(usersTable.id, userID)).returning({ id: usersTable.id });
     if (!user || user.length < 1) return { error: "not_found" };
     return { success: true };
   } catch (e) {
