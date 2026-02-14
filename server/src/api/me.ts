@@ -40,6 +40,7 @@ router.patch("/", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
+  if (Object.keys(req.body).length === 0) return res.json({ success: true, message: "No data provided to change." });
   if (req.body.username && !getConfig()?.selfUsernameChanges) return res.status(400).json({ error: "username_change", message: "Changing your own username is disabled, please ask your administrator to change it instead." });
   const result = await editUser(req.session.userID, { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts });
   if ("error" in result) {

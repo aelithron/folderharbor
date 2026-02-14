@@ -51,6 +51,7 @@ router.patch("/:userID", async (req, res) => {
   } else if (await checkPermission(req.session.userID, "users:edit")) {
     accessLevel = "limited";
   } else return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (Object.keys(req.body).length === 0) return res.json({ success: true, message: "No data provided to change." });
   let result;
   if (accessLevel === "full") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: ((req.body.roles && (req.body.roles as number[]).length > 0) ? req.body.roles : undefined), acls: ((req.body.acls && (req.body.acls as number[]).length > 0) ? req.body.acls : undefined), permissions: ((req.body.permissions && (req.body.permissions as string[]).length > 0) ? req.body.permissions : undefined) });
   if (accessLevel === "limited") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts });
@@ -59,6 +60,8 @@ router.patch("/:userID", async (req, res) => {
     switch (result.error) {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided user doesn't exist." });
       case "username_used":
         return res.status(400).json({ error: "username_used", message: "This username has already been used! Please pick another and try again." });
       default:
@@ -74,13 +77,14 @@ router.patch("/:userID/lock", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "users:lock")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (req.body.locked !== true && req.body.locked !== false) return res.status(400).json({ error: "request_body", message: "Your request's body is missing a valid 'locked' attribute (not a boolean)." });
+  if (Number.parseInt(req.params.userID) === req.session.userID) return res.status(400).json({ error: "editing_self", message: "You can't lock/unlock yourself." });
   const result = await editUser(parseInt(req.params.userID), { locked: req.body.locked });
   if ("error" in result) {
     switch (result.error) {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-      case "username_used":
-        return res.status(400).json({ error: "username_used", message: "This username has already been used! Please pick another and try again." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided user doesn't exist." });
       default:
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }

@@ -1,7 +1,6 @@
 import express, { Router } from "express";
 import { createSession, revokeSession } from "../users/sessions.js";
 import { enforceAuth } from "./api.js";
-import { getUser } from "../users/users.js";
 const router: Router = express.Router();
 router.post("/", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
@@ -28,26 +27,6 @@ router.post("/", async (req, res) => {
 });
 
 router.use(enforceAuth());
-router.get("/", async (req, res) => {
-  if (!req.session) {
-    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
-    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-  }
-  const user = await getUser(req.session.userID);
-  if ("error" in user) {
-    switch (user.error) {
-      case "server":
-        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-      case "not_found":
-        return res.status(400).json({ error: "not_found", message: "Error looking up your session, please sign in again." });
-      default:
-        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-    }
-  } else {
-    // todo: extend with more session info
-    return res.json({ id: req.session.userID, username: req.session.username, sessionExpiry: req.session.expiry });
-  }
-});
 router.delete("/", async (req, res) => {
   if (!req.session) {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
