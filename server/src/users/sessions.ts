@@ -28,12 +28,12 @@ export async function getSession(token: string): Promise<Session | { error: "ser
   }
   let user;
   try {
-    user = await db.select().from(usersTable).where(eq(usersTable.id, session[0].id));
+    user = await db.select().from(usersTable).where(eq(usersTable.id, session[0].userid));
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
-  if (!user || user.length < 1 || !user[0]) {
+  if (!user || user.length === 0 || !user[0]) {
     try {
       await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
     } catch (e) {
