@@ -8,6 +8,14 @@
 			"problemMatcher": [],
 			"label": "npm: dev - server",
 			"detail": "tsx ./src/index.ts"
+		},
+		{
+			"type": "npm",
+			"script": "dev",
+			"path": "web",
+			"problemMatcher": [],
+			"label": "npm: dev - web",
+			"detail": "vite"
 		}
 	]
 }

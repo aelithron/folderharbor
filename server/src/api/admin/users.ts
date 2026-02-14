@@ -11,7 +11,7 @@ router.get("/:userID", async (req, res) => {
   let accessLevel: "full" | "limited" | null = null;
   if (await checkPermission(req.session.userID, "users:read.full")) {
     accessLevel = "full";
-  } else if (!accessLevel && await checkPermission(req.session.userID, "users:read")) {
+  } else if (await checkPermission(req.session.userID, "users:read")) {
     accessLevel = "limited";
   } else return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   const otherUser = await getUser(parseInt(req.params.userID));
@@ -48,12 +48,13 @@ router.patch("/:userID", async (req, res) => {
   let accessLevel: "full" | "limited" | null = null;
   if (await checkPermission(req.session.userID, "users:edit.full")) {
     accessLevel = "full";
-  } else if (!accessLevel && await checkPermission(req.session.userID, "users:edit")) {
+  } else if (await checkPermission(req.session.userID, "users:edit")) {
     accessLevel = "limited";
   } else return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   let result;
   if (accessLevel === "full") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts });
   if (accessLevel === "limited") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts });
+  if (result === undefined) return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
   if ("error" in result) {
     switch (result.error) {
       case "server":
