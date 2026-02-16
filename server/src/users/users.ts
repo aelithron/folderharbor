@@ -46,7 +46,7 @@ export async function editUser(userID: number, { username, password, locked, rol
     const user = await db.update(usersTable).set({ username, password: (password ? await argon2.hash(password) : undefined), locked, roles, permissions, acls, failedLogins: (clearLoginAttempts ? 0 : undefined), resetFailedLogins: (clearLoginAttempts ? null : undefined) }).where(eq(usersTable.id, userID)).returning();
     if (!user || user.length < 1) return { error: "not_found" };
   } catch (e) {
-    console.error(`Dattabase Error - ${e}`);
+    console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
   return { success: true };
