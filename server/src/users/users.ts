@@ -61,6 +61,14 @@ export async function deleteUser(userID: number): Promise<{ success: boolean } |
     return { error: "server" };
   }
 }
+export async function getAllUsers(): Promise<{ id: number, username: string }[] | { error: "server" }> {
+  try {
+    return await db.select({ id: usersTable.id, username: usersTable.username }).from(usersTable);
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+}
 /*
   // auth test thingy
   console.log(await createUser("test", "test123"));

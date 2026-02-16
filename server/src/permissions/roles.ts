@@ -61,3 +61,11 @@ export async function getUserRoles(userID: number): Promise<{ id: number, name: 
   }
   return roles;
 }
+export async function getAllRoles(): Promise<{ id: number, name: string }[] | { error: "server" }> {
+  try {
+    return await db.select({ id: rolesTable.id, name: rolesTable.name }).from(rolesTable);
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+}

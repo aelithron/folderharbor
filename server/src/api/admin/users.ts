@@ -1,8 +1,25 @@
 import express, { Router } from "express";
 import { checkPermission } from "../../permissions/permissions.js";
-import { createUser, editUser, getUser } from "../../users/users.js";
+import { createUser, deleteUser, editUser, getAllUsers, getUser } from "../../users/users.js";
 import { getUserSessions } from "../../users/sessions.js";
 const router: Router = express.Router();
+router.get("/", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!await checkPermission(req.session.userID, "users:list")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  const users = await getAllUsers();
+  if ("error" in users) {
+    switch (users.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json(users);
+});
 router.post("/", async (req, res) => {
   if (!req.session) {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
@@ -103,6 +120,25 @@ router.patch("/:userID/lock", async (req, res) => {
   if (req.body.locked !== true && req.body.locked !== false) return res.status(400).json({ error: "request_body", message: "Your request's body is missing a valid 'locked' attribute (not a boolean)." });
   if (Number.parseInt(req.params.userID) === req.session.userID) return res.status(400).json({ error: "editing_self", message: "You can't lock/unlock yourself." });
   const result = await editUser(parseInt(req.params.userID), { locked: req.body.locked });
+  if ("error" in result) {
+    switch (result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided user doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ success: true });
+});
+router.delete("/:userID", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!await checkPermission(req.session.userID, "users:delete")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  const result = await deleteUser(parseInt(req.params.userID));
   if ("error" in result) {
     switch (result.error) {
       case "server":
