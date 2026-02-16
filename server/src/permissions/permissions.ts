@@ -1,13 +1,14 @@
 import { getUser } from "../users/users.js";
 import { getUserRoles } from "./roles.js";
 
-export const permissions: { id: `${"users" | "sessions" | "roles" | "acls" | "config"}:${string}`, description: string }[] = [
+export const permissions: { id: `${"users" | "roles" | "acls" | "config"}:${string}`, description: string }[] = [
   { id: "users:create", description: "Create new users" },
   { id: "users:read", description: "Read users' information (to a limited degree)" },
   { id: "users:read.full", description: "Read users' full information" },
   { id: "users:edit", description: "Modify limited information of other users" },
   { id: "users:edit.full", description: "Modify the full information of other users" },
   { id: "users:delete", description: "Delete users" },
+  { id: "users:grant", description: "Gtant permissions and roles to users" },
   { id: "users:lock", description: "Block/unblock a user from logging in" },
   
   { id: "roles:create", description: "Create new roles" },
@@ -20,7 +21,10 @@ export const permissions: { id: `${"users" | "sessions" | "roles" | "acls" | "co
   { id: "acls:read", description: "Read ACLs and their paths" },
   { id: "acls:edit", description: "Modify ACL names and paths" },
   { id: "acls:delete", description: "Delete ACLs" },
-  { id: "acls:list", description: "Get a list of ACL names and IDs" }
+  { id: "acls:list", description: "Get a list of ACL names and IDs" },
+
+  { id: "config:read", description: "Read config settings" },
+  { id: "config:write", description: "Change most config settings (not global exclusions)" }
 ];
 export type Permission = (typeof permissions)[number]["id"];
 export async function checkPermission(userID: number, permission: Permission): Promise<boolean | { error: "server" | "not_found" }> {

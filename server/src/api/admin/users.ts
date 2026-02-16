@@ -1,8 +1,30 @@
 import express, { Router } from "express";
 import { checkPermission } from "../../permissions/permissions.js";
-import { editUser, getUser } from "../../users/users.js";
+import { createUser, editUser, getUser } from "../../users/users.js";
 import { getUserSessions } from "../../users/sessions.js";
 const router: Router = express.Router();
+router.post("/", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!await checkPermission(req.session.userID, "users:create")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
+  if (!req.body.username || (req.body.username as string).length < 1) return res.status(400).json({ error: "username", message: "Your request doesn't include a username." });
+  if (!req.body.password || (req.body.password as string).length < 1) return res.status(400).json({ error: "password", message: "Your request doesn't include a password." });
+  const newUser = await createUser(req.body.username, req.body.password);
+  if ("error" in newUser) {
+    switch (newUser.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "username_used":
+        return res.status(400).json({ error: "username_used", message: "This username has already been used! Please pick another and try again." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ id: newUser.id });
+});
 router.get("/:userID", async (req, res) => {
   if (!req.session) {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
@@ -51,6 +73,7 @@ router.patch("/:userID", async (req, res) => {
   } else if (await checkPermission(req.session.userID, "users:edit")) {
     accessLevel = "limited";
   } else return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (Object.keys(req.body).length === 0) return res.json({ success: true, message: "No data provided to change." });
   let result;
   if (accessLevel === "full") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: ((req.body.roles && (req.body.roles as number[]).length > 0) ? req.body.roles : undefined), acls: ((req.body.acls && (req.body.acls as number[]).length > 0) ? req.body.acls : undefined), permissions: ((req.body.permissions && (req.body.permissions as string[]).length > 0) ? req.body.permissions : undefined) });
@@ -76,6 +99,7 @@ router.patch("/:userID/lock", async (req, res) => {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "users:lock")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (req.body.locked !== true && req.body.locked !== false) return res.status(400).json({ error: "request_body", message: "Your request's body is missing a valid 'locked' attribute (not a boolean)." });
   if (Number.parseInt(req.params.userID) === req.session.userID) return res.status(400).json({ error: "editing_self", message: "You can't lock/unlock yourself." });
   const result = await editUser(parseInt(req.params.userID), { locked: req.body.locked });
