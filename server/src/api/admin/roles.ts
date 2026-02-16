@@ -1,6 +1,7 @@
 import express, { Router } from "express";
-import { checkPermission } from "../../permissions/permissions.js";
-import { getAllRoles } from "../../permissions/roles.js";
+import { checkPermission, permissions } from "../../permissions/permissions.js";
+import { createRole, getAllRoles } from "../../permissions/roles.js";
+import { getAllACLs } from "../../permissions/acl.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {
@@ -26,6 +27,30 @@ router.post("/", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "roles:create")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
+  if (!req.body.name || (req.body.name as string).trim().length < 1) return res.status(400).json({ error: "name", message: 'No role name ("name" parameter) provided, please include one and try again.' });
+  if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!permissions.find(otherNode => otherNode.id === node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
+  if (Array.isArray(req.body.acls)) {
+    const acls = await getAllACLs();
+    if ("error" in acls) {
+      switch (acls.error) {
+        case "server":
+          return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+        default:
+          return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+      }
+    }
+    for (const id of req.body.acls) if (!acls.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
+  }
+  const role = await createRole(req.body.name, { permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : []), acls: (Array.isArray(req.body.acls) ? req.body.acls : []) });
+  if ("error" in role) {
+    switch (role.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ id: role.id });
 });
 router.get("/:roleID", async (req, res) => {
   if (!req.session) {

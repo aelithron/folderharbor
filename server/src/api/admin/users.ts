@@ -1,7 +1,9 @@
 import express, { Router } from "express";
-import { checkPermission } from "../../permissions/permissions.js";
+import { checkPermission, permissions } from "../../permissions/permissions.js";
 import { createUser, deleteUser, editUser, getAllUsers, getUser } from "../../users/users.js";
 import { getUserSessions } from "../../users/sessions.js";
+import { getAllACLs } from "../../permissions/acl.js";
+import { getAllRoles } from "../../permissions/roles.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {
@@ -93,7 +95,34 @@ router.patch("/:userID", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (Object.keys(req.body).length === 0) return res.json({ success: true, message: "No data provided to change." });
   let result;
-  if (accessLevel === "full") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: ((req.body.roles && (req.body.roles as number[]).length > 0) ? req.body.roles : undefined), acls: ((req.body.acls && (req.body.acls as number[]).length > 0) ? req.body.acls : undefined), permissions: ((req.body.permissions && (req.body.permissions as string[]).length > 0) ? req.body.permissions : undefined) });
+  if (accessLevel === "full") {
+    if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!permissions.find(otherNode => otherNode.id === node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
+    if (Array.isArray(req.body.acls)) {
+      const acls = await getAllACLs();
+      if ("error" in acls) {
+        switch (acls.error) {
+          case "server":
+            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+          default:
+            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+        }
+      }
+      for (const id of req.body.acls) if (!acls.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
+    }
+    if (Array.isArray(req.body.roles)) {
+      const roles = await getAllRoles();
+      if ("error" in roles) {
+        switch (roles.error) {
+          case "server":
+            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+          default:
+            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+        }
+      }
+      for (const id of req.body.roles) if (!roles.find(role => role.id === id)) return res.status(400).json({ error: "roles", message: `Role "${id}" doesn't exist, please correct this and try again.` });
+    }
+    result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: (Array.isArray(req.body.roles) ? req.body.roles : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined), permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined) });
+  }
   if (accessLevel === "limited") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts });
   if (result === undefined) return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
   if ("error" in result) {

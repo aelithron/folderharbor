@@ -83,3 +83,11 @@ export async function deleteACL(aclID: number): Promise<{ success: boolean } | {
     return { error: "server" };
   }
 }
+export async function getAllACLs(): Promise<{ id: number, name: string }[] | { error: "server" }> {
+  try {
+    return await db.select({ id: aclsTable.id, name: aclsTable.name }).from(aclsTable);
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+}
