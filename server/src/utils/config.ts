@@ -2,6 +2,7 @@ import * as z from "zod";
 import path from "path";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
+import { getConfig, setConfig } from "../index.js";
 
 export const Config = z.object({
   apiPort: z.int().positive(),
@@ -39,4 +40,20 @@ export default async function loadConfig(allowPermissive: boolean, configPath?: 
   } catch (e) {
     throw new Error(`The config file (${configPath}) was incorrectly formatted!\n${e}`);
   }
+}
+export async function editConfig(newConfig: Partial<z.Infer<typeof Config>>, configPath?: string): Promise<{ success: true } | { error: "malformed", message: string } | { error: "config_unloaded" | "editing_readonly" | "unwriteable" }> {
+  const oldConfig = getConfig();
+  if (!oldConfig) {
+    console.error("Server Error - The config isn't loaded, but was attempted to be edited!");
+    return { error: "config_unloaded" };
+  }
+  if (newConfig.globalExclusions) return { error: "editing_readonly" };
+  let config;
+  try {
+    config = Config.parse({ ...oldConfig, ...newConfig });
+  } catch (e) { return { error: "malformed", message: `${e}` }; }
+  if (!configPath) configPath = "/etc/folderharbor/config.json";
+  await fs.writeFile(configPath, JSON.stringify(config));
+  setConfig(config);
+  return { success: true };
 }

@@ -41,3 +41,4 @@ export function getConfig(): z.Infer<typeof Config> | null {
   if (!config) return null;
   return config;
 }
+export function setConfig(newConfig: z.Infer<typeof Config>) { config = newConfig; }
