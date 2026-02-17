@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import { checkPermission, permissions } from "../../permissions/permissions.js";
 import { createRole, deleteRole, editRole, getAllRoles, getRole } from "../../permissions/roles.js";
-import { getAllACLs } from "../../permissions/acl.js";
+import { getAllACLs } from "../../permissions/acls.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {

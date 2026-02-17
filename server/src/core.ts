@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { getPaths } from "./permissions/acl.js";
+import { getPaths } from "./permissions/acls.js";
 import type { Dirent } from "fs";
 import micromatch from "micromatch";
 

@@ -7,44 +7,6 @@ import { DateTime } from "luxon";
 import { getConfig } from "../index.js";
 import type { Session } from "../types/folderharbor.js";
 
-export async function getSession(token: string): Promise<Session | { error: "server" | "invalid" | "expired" | "locked" }> {
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  let session;
-  try {
-    session = await db.select().from(sessionsTable).where(eq(sessionsTable.token, tokenHash));
-  } catch (e) {
-    console.error(`Database Error - ${e}`);
-    return { error: "server" };
-  }
-  if (!session || session.length < 1 || !session[0]) return { error: "invalid" };
-  if (session[0].expiry.getTime() < new Date().getTime()) {
-    try {
-      await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
-    } catch (e) {
-      console.error(`Database Error - ${e}`);
-      return { error: "server" };
-    }
-    return { error: "expired" };
-  }
-  let user;
-  try {
-    user = await db.select().from(usersTable).where(eq(usersTable.id, session[0].userid));
-  } catch (e) {
-    console.error(`Database Error - ${e}`);
-    return { error: "server" };
-  }
-  if (!user || user.length === 0 || !user[0]) {
-    try {
-      await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
-    } catch (e) {
-      console.error(`Database Error - ${e}`);
-      return { error: "server" };
-    }
-    return { error: "invalid" };
-  }
-  if (user[0].locked) return { error: "locked" };
-  return { userID: session[0].userid, username: user[0].username, sessionID: session[0].id, expiry: session[0].expiry };
-}
 export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" | "locked" | "rate_limited" }> {
   const config = getConfig();
   let user;
@@ -93,9 +55,49 @@ export async function createSession(username: string, password: string): Promise
   }
   return { token };
 }
-export async function revokeSession(sessionID: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
+export async function getSession(token: string): Promise<Session | { error: "server" | "invalid" | "expired" | "locked" }> {
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  let session;
   try {
-    const session = await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
+    session = await db.select().from(sessionsTable).where(eq(sessionsTable.token, tokenHash));
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+  if (!session || session.length < 1 || !session[0]) return { error: "invalid" };
+  if (session[0].expiry.getTime() < new Date().getTime()) {
+    try {
+      await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
+    } catch (e) {
+      console.error(`Database Error - ${e}`);
+      return { error: "server" };
+    }
+    return { error: "expired" };
+  }
+  let user;
+  try {
+    user = await db.select().from(usersTable).where(eq(usersTable.id, session[0].userid));
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+  if (!user || user.length === 0 || !user[0]) {
+    try {
+      await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
+    } catch (e) {
+      console.error(`Database Error - ${e}`);
+      return { error: "server" };
+    }
+    return { error: "invalid" };
+  }
+  if (user[0].locked) return { error: "locked" };
+  return { userID: session[0].userid, username: user[0].username, sessionID: session[0].id, expiry: session[0].expiry };
+}
+export async function extendSession(sessionID: number, until?: Date): Promise<{ success: boolean } | { error: "server" | "not_found" | "invalid_date" }> {
+  if (!until) until = DateTime.now().plus({ weeks: 1 }).toJSDate();
+  if (until.getTime() < new Date().getTime()) return { error: "invalid_date" };
+  try {
+    const session = await db.update(sessionsTable).set({ expiry: until }).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
     if (!session || session.length < 1) return { error: "not_found" };
     return { success: true };
   } catch (e) {
@@ -103,11 +105,9 @@ export async function revokeSession(sessionID: number): Promise<{ success: boole
     return { error: "server" };
   }
 }
-export async function extendSession(sessionID: number, until?: Date): Promise<{ success: boolean } | { error: "server" | "not_found" | "invalid_date" }> {
-  if (!until) until = DateTime.now().plus({ weeks: 1 }).toJSDate();
-  if (until.getTime() < new Date().getTime()) return { error: "invalid_date" };
+export async function revokeSession(sessionID: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
-    const session = await db.update(sessionsTable).set({ expiry: until }).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
+    const session = await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
     if (!session || session.length < 1) return { error: "not_found" };
     return { success: true };
   } catch (e) {

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import * as argon2 from "argon2";
 import { type Permission } from "../permissions/permissions.js";
 
-export async function createUser(username: string, password: string): Promise<{ id: number } | { error: "server" | "username_used" }> {
+export async function createUser(username: string, password: string, { roles, acls, permissions, locked }: { roles?: number[], acls?: number[], permissions?: Permission[], locked?: boolean }): Promise<{ id: number } | { error: "server" | "username_used" }> {
   try {
     const userCheck = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
     if (userCheck.length >= 1) return { error: "username_used" };
@@ -15,7 +15,7 @@ export async function createUser(username: string, password: string): Promise<{ 
   const hash = await argon2.hash(password);
   let newUser;
   try {
-    newUser = await db.insert(usersTable).values({ username: username, password: hash }).returning();
+    newUser = await db.insert(usersTable).values({ username: username, password: hash, locked, permissions, acls, roles }).returning();
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };

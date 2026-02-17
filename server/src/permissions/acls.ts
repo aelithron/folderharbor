@@ -38,7 +38,7 @@ export async function checkPath(userID: number, checkedPath: string): Promise<bo
   if (micromatch.isMatch(path.normalize(checkedPath), paths.deny, { dot: true })) allowed = false;
   return allowed;
 }
-export async function createACL(name: string, allow: string[], deny: string[]): Promise<{ id: number } | { error: "server" }> {
+export async function createACL(name: string, { allow, deny }: { allow?: string[], deny?: string[] }): Promise<{ id: number } | { error: "server" }> {
   let acl;
   try {
     acl = await db.insert(aclsTable).values({ name, allow, deny }).returning({ id: aclsTable.id });
