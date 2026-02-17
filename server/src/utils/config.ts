@@ -6,7 +6,8 @@ import { fileURLToPath } from "url";
 export const Config = z.object({
   apiPort: z.int().positive(),
   failedLoginLimit: z.int().positive().default(5),
-  selfUsernameChanges: z.boolean().default(true)
+  selfUsernameChanges: z.boolean().default(true),
+  globalExclusions: z.array(z.string()).readonly()
 });
 export default async function loadConfig(allowPermissive: boolean, configPath?: string): Promise<z.Infer<typeof Config>> {
   if (!configPath) configPath = "/etc/folderharbor/config.json";

@@ -1,5 +1,23 @@
 {
   "apiPort": 3000,
   "failedLoginLimit": 5,
-  "selfUsernameChanges": true
+  "selfUsernameChanges": true,
+  "globalExclusions": [
+    "/bin/**",
+    "/boot/**",
+    "/dev/**",
+    "/etc/**",
+    "/lib/**",
+    "/lib64/**",
+    "/proc/**",
+    "/root/**",
+    "/run/**",
+    "/sbin/**",
+    "/sys/**",
+    "/usr/**",
+    "/var/**",
+    "/tmp/**",
+    "**/.ssh/**",
+    "**/.gnupg/**"
+  ]
 }

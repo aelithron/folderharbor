@@ -3,6 +3,7 @@ import path from "path";
 import { getPaths } from "./permissions/acls.js";
 import type { Dirent } from "fs";
 import micromatch from "micromatch";
+import { getConfig } from "./index.js";
 
 export async function listDir(userID: number, dirPath?: string): Promise<{ items: Dirent[] } | { error: "server" | "not_found" | "invalid_path" }> {
   if (!dirPath) dirPath = "/";
@@ -14,6 +15,7 @@ export async function listDir(userID: number, dirPath?: string): Promise<{ items
   for (const item of allItems) {
     let allowed = false;
     const itemPath = path.normalize(path.join(item.parentPath, item.name));
+    if (micromatch.isMatch(itemPath, getConfig()!.globalExclusions)) continue;
     if (micromatch.isMatch(itemPath, paths.allow, { dot: true })) allowed = true;
     if (micromatch.isMatch(itemPath, paths.deny, { dot: true })) allowed = false;
     if (item.isDirectory() && !allowed) {
