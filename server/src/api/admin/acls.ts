@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import { checkPermission } from "../../permissions/permissions.js";
-import { createACL, getACL, getAllACLs } from "../../permissions/acls.js";
+import { createACL, deleteACL, editACL, getACL, getAllACLs } from "../../permissions/acls.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {
@@ -55,6 +55,7 @@ router.get("/:aclID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  return res.json(acl);
 });
 router.patch("/:aclID", async (req, res) => {
   if (!req.session) {
@@ -63,6 +64,20 @@ router.patch("/:aclID", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "acls:edit")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
+  const updateParams = { name: req.body.name, allow: (Array.isArray(req.body.allow) ? req.body.allow : undefined), deny: (Array.isArray(req.body.deny) ? req.body.deny : undefined) };
+  if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
+  const result = await editACL(parseInt(req.params.aclID), updateParams);
+  if ("error" in result) { 
+    switch (result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided ACL doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ success: true });
 });
 router.delete("/:aclID", async (req, res) => {
   if (!req.session) {
@@ -70,5 +85,17 @@ router.delete("/:aclID", async (req, res) => {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "acls:delete")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+    const result = await deleteACL(parseInt(req.params.aclID));
+  if ("error" in result) { 
+    switch (result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided ACL doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ success: true });
 });
 export { router };

@@ -93,7 +93,6 @@ router.patch("/:userID", async (req, res) => {
     accessLevel = "limited";
   } else return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  if (Object.keys(req.body).length === 0) return res.json({ success: true, message: "No data provided to change." });
   let result;
   if (accessLevel === "full") {
     if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!permissions.find(otherNode => otherNode.id === node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
@@ -122,12 +121,12 @@ router.patch("/:userID", async (req, res) => {
       for (const id of req.body.roles) if (!roles.find(role => role.id === id)) return res.status(400).json({ error: "roles", message: `Role "${id}" doesn't exist, please correct this and try again.` });
     }
     const updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: (Array.isArray(req.body.roles) ? req.body.roles : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined), permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined) };
-    if (Object.keys(updateParams).length === 0) return res.json({ success: true, message: "Nothing to update." });
+    if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
     result = await editUser(parseInt(req.params.userID), updateParams);
   }
   if (accessLevel === "limited") {
     const updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
-    if (Object.keys(updateParams).length === 0) return res.json({ success: true, message: "Nothing to update." });
+    if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
     result = await editUser(parseInt(req.params.userID), updateParams);
   }
   if (result === undefined) return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
