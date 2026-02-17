@@ -29,8 +29,8 @@ router.post("/", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "users:create")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  if (!req.body.username || (req.body.username as string).length < 1) return res.status(400).json({ error: "username", message: "Your request doesn't include a username." });
-  if (!req.body.password || (req.body.password as string).length < 1) return res.status(400).json({ error: "password", message: "Your request doesn't include a password." });
+  if (!req.body.username || (req.body.username as string).length < 1) return res.status(400).json({ error: "username", message: 'No username ("username" parameter) provided.' });
+  if (!req.body.password || (req.body.password as string).length < 1) return res.status(400).json({ error: "password", message: 'No password ("password" parameter) provided.' });
   const newUser = await createUser(req.body.username, req.body.password, {  });
   if ("error" in newUser) {
     switch (newUser.error) {
@@ -121,9 +121,15 @@ router.patch("/:userID", async (req, res) => {
       }
       for (const id of req.body.roles) if (!roles.find(role => role.id === id)) return res.status(400).json({ error: "roles", message: `Role "${id}" doesn't exist, please correct this and try again.` });
     }
-    result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: (Array.isArray(req.body.roles) ? req.body.roles : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined), permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined) });
+    const updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: (Array.isArray(req.body.roles) ? req.body.roles : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined), permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined) };
+    if (Object.keys(updateParams).length === 0) return res.json({ success: true, message: "Nothing to update." });
+    result = await editUser(parseInt(req.params.userID), updateParams);
   }
-  if (accessLevel === "limited") result = await editUser(parseInt(req.params.userID), { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts });
+  if (accessLevel === "limited") {
+    const updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
+    if (Object.keys(updateParams).length === 0) return res.json({ success: true, message: "Nothing to update." });
+    result = await editUser(parseInt(req.params.userID), updateParams);
+  }
   if (result === undefined) return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
   if ("error" in result) {
     switch (result.error) {

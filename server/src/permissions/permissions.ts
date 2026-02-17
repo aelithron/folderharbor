@@ -9,7 +9,6 @@ export const permissions: { id: `${"users" | "roles" | "acls" | "config"}:${stri
   { id: "users:edit.full", description: "Modify the full information of other users" },
   { id: "users:delete", description: "Delete users" },
   { id: "users:list", description: "Get a list of users" },
-  { id: "users:grant", description: "Gtant permissions and roles to users" },
   { id: "users:lock", description: "Block/unblock a user from logging in" },
   
   { id: "roles:create", description: "Create new roles" },

@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import { checkPermission } from "../../permissions/permissions.js";
-import { createACL, getAllACLs } from "../../permissions/acls.js";
+import { createACL, getACL, getAllACLs } from "../../permissions/acls.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {
@@ -26,8 +26,8 @@ router.post("/", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "acls:create")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  if (!req.body.name || (req.body.name as string).trim().length < 1) return res.status(400).json({ error: "name", message: "ACL 'name' is missing, please resend after fixing!" });
-  const newACL = await createACL(req.body.name, {  });
+  if (!req.body.name || (req.body.name as string).trim().length < 1) return res.status(400).json({ error: "name", message: 'No ACL name ("name" parameter) provided' });
+  const newACL = await createACL(req.body.name, { allow: (Array.isArray(req.body.allow) ? req.body.allow : undefined), deny: (Array.isArray(req.body.deny) ? req.body.deny : undefined) });
   if ("error" in newACL) {
     switch (newACL.error) {
       case "server":
@@ -44,6 +44,17 @@ router.get("/:aclID", async (req, res) => {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "acls:read")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  const acl = await getACL(parseInt(req.params.aclID));
+  if ("error" in acl) {
+    switch (acl.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided ACL doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
 });
 router.patch("/:aclID", async (req, res) => {
   if (!req.session) {

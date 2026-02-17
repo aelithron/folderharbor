@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "roles:create")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  if (!req.body.name || (req.body.name as string).trim().length < 1) return res.status(400).json({ error: "name", message: 'No role name ("name" parameter) provided, please include one and try again.' });
+  if (!req.body.name || (req.body.name as string).trim().length < 1) return res.status(400).json({ error: "name", message: 'No role name ("name" parameter) provided.' });
   if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!permissions.find(otherNode => otherNode.id === node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
   if (Array.isArray(req.body.acls)) {
     const acls = await getAllACLs();
@@ -91,7 +91,9 @@ router.patch("/:roleID", async (req, res) => {
     }
     for (const id of req.body.acls) if (!acls.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
   }
-  const role = await editRole(parseInt(req.params.roleID), { name: req.body.name, permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined) });
+  const updateParams = { name: req.body.name, permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined) };
+  if (Object.keys(updateParams).length === 0) return res.json({ success: true, message: "Nothing to update." });
+  const role = await editRole(parseInt(req.params.roleID), updateParams);
   if ("error" in role) {
     switch (role.error) {
       case "server":
