@@ -6,4 +6,6 @@ This project was made for Hack Club [Flavortown](https://flavortown.hackclub.com
 Welcome to the FolderHarbor monorepo! (this is my first time making a monorepo, i hope it's good :3)
 Folder structure:
 - `server/`: The FolderHarbor server, written in TypeScript.
-- `web/`: Primary FolderHarbor web client for file management.
+- `web/`: Web client for file management, written in TypeScript with React.
+- `admin/`: Web panel for administration, written in TypeScript with React.
+- `cli/` *(Coming Soon)*: CLI for administration with some file management capabilities, written in Go.
