@@ -1,6 +1,6 @@
 import express, { Router } from "express";
-import { enforceAuth } from "./api.js";
-import { listDir } from "../core.js";
+import { enforceAuth } from "../api.js";
+import { listDir } from "../../core.js";
 import path from "path";
 const router: Router = express.Router();
 router.use(enforceAuth());
