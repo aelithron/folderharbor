@@ -21,6 +21,8 @@ router.patch("/", async (req, res) => {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "config:edit")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
+  if (Object.values(req.body).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
   const result = await editConfig(req.body);
   if ("error" in result) {
     switch (result.error) {

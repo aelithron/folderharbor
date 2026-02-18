@@ -53,7 +53,7 @@ export async function editConfig(newConfig: Partial<z.Infer<typeof Config>>, con
     config = Config.parse({ ...oldConfig, ...newConfig });
   } catch (e) { return { error: "malformed", message: `${e}` }; }
   if (!configPath) configPath = "/etc/folderharbor/config.json";
-  await fs.writeFile(configPath, JSON.stringify(config));
+  await fs.writeFile(configPath, JSON.stringify(config, null, 2));
   setConfig(config);
   return { success: true };
 }

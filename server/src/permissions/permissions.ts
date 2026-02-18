@@ -24,7 +24,7 @@ export const permissions: { id: `${"users" | "roles" | "acls" | "config"}:${stri
   { id: "acls:list", description: "Get a list of ACL names and IDs" },
 
   { id: "config:read", description: "Read config settings" },
-  { id: "config:write", description: "Change most config settings (not global exclusions)" }
+  { id: "config:edit", description: "Change most config settings (not global exclusions)" }
 ];
 export type Permission = (typeof permissions)[number]["id"];
 export async function checkPermission(userID: number, permission: Permission): Promise<boolean | { error: "server" | "not_found" }> {

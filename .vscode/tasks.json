@@ -16,6 +16,14 @@
 			"problemMatcher": [],
 			"label": "npm: dev - web",
 			"detail": "vite"
+		},
+		{
+			"type": "npm",
+			"script": "dev",
+			"path": "admin",
+			"problemMatcher": [],
+			"label": "npm: dev - admin",
+			"detail": "vite"
 		}
 	]
 }
