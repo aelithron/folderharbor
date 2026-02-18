@@ -5,7 +5,7 @@ import type { Dirent } from "fs";
 import micromatch from "micromatch";
 import { getConfig } from "./index.js";
 
-export async function listDir(userID: number, dirPath?: string): Promise<{ items: Dirent[] } | { error: "server" | "not_found" | "invalid_path" }> {
+export async function listDir(userID: number, dirPath?: string): Promise<{ items: Dirent[] } | { error: "server" | "not_found" }> {
   if (!dirPath) dirPath = "/";
   const paths = await getPaths(userID);
   if ("error" in paths) return { error: paths.error };
