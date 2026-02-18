@@ -7,6 +7,7 @@ import type { Server } from "http";
 import dotenv from "dotenv";
 
 let config: z.Infer<typeof Config>;
+let configPath: string | undefined;
 let api: Server;
 program
   .name("folderharbor").description("A powerful file server that supports many protocols")
@@ -21,8 +22,9 @@ async function startServer() {
   }
   console.log(`Starting FolderHarbor...`);
   dotenv.config({ quiet: true });
+  configPath = (program.opts().config as string | undefined) ? path.resolve(program.opts().config as string) : undefined;
   try {
-    config = await loadConfig(program.opts().allowPermissiveConfig, (program.opts().config as string | undefined) ? path.resolve(program.opts().config as string) : undefined);
+    config = await loadConfig(program.opts().allowPermissiveConfig, configPath);
   } catch (e) {
     console.error(`Config Error - ${e}`);
     process.exit(1);
@@ -42,3 +44,4 @@ export function getConfig(): z.Infer<typeof Config> | null {
   return config;
 }
 export function setConfig(newConfig: z.Infer<typeof Config>) { config = newConfig; }
+export function getConfigPath(): string | undefined { return configPath; }
