@@ -13,7 +13,7 @@ export default async function startAPI(port: number): Promise<Server> {
   app.use(express.json());
   app.use(cookieParser());
   app.use(auth);
-  app.get("/", (req, res) => res.sendFile(path.join(import.meta.dirname, "./welcome.html")));
+  app.use(express.static(path.join(import.meta.dirname, "./welcome"), { extensions: ["html", "css"] }));
   app.get("/clientconfig", (req, res) => {
     const config = getConfig();
     if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
