@@ -7,12 +7,13 @@ import { router as filesRouter } from "./files/files.js";
 import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
 import { getConfig } from "../index.js";
+import path from "path";
 export default async function startAPI(port: number): Promise<Server> {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
   app.use(auth);
-  app.get("/", (req, res) => res.send("FolderHarbor Server"));
+  app.get("/", (req, res) => res.sendFile(path.join(import.meta.dirname, "./welcome.html")));
   app.get("/clientconfig", (req, res) => {
     const config = getConfig();
     if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
