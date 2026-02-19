@@ -3,7 +3,7 @@ import type { Server } from "http";
 import { router as authRouter } from "./auth.js";
 import { router as meRouter } from "./me.js";
 import { router as adminRouter } from "./admin/admin.js";
-import { router as pathsRouter } from "./core/paths.js";
+import { router as filesRouter } from "./files/files.js";
 import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
 import { getConfig } from "../index.js";
@@ -21,7 +21,7 @@ export default async function startAPI(port: number): Promise<Server> {
   app.use("/auth", authRouter);
   app.use("/me", meRouter);
   app.use("/admin", adminRouter);
-  app.use("/paths", pathsRouter);
+  app.use("/files", filesRouter);
   const server = app.listen(port);
   server.on("listening", () => console.log(`API server running (port ${port})`));
   return server;
