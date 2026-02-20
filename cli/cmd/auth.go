@@ -4,6 +4,7 @@ import (
 	"FolderHarbor-CLI/routes"
 	"bufio"
 	"fmt"
+	"golang.org/x/term"
 	"os"
 	"github.com/spf13/cobra"
 )
@@ -22,8 +23,10 @@ var loginCMD = &cobra.Command{
 		fmt.Print("Enter your username: ")
 		username, _ := reader.ReadString('\n')
 		fmt.Print("Enter your password: ")
-		password, _ := reader.ReadString('\n')
-		fmt.Print(routes.Login(username, password))
+		password, err := term.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil { panic (err) }
+		fmt.Println()
+		fmt.Print(routes.Login(username, string(password)))
 	},
 }
 func init() {
