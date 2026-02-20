@@ -8,4 +8,4 @@ Folder structure:
 - `server/`: The FolderHarbor server, written in TypeScript.
 - `web/`: Web client for file management, written in TypeScript with React.
 - `admin/`: Web panel for administration, written in TypeScript with React.
-- `cli/` *(Coming Soon)*: CLI for administration with some file management capabilities, written in Go.
+- `cli/`: CLI for administration (with some file management capabilities), written in Go.
