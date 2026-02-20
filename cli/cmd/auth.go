@@ -12,9 +12,6 @@ var authCMD = &cobra.Command{
 	Use:   "auth",
 	Short: "authenticate with a folderharbor server",
 	Long:  "manage authentication with a folderharbor server",
-	Run: func(cmd *cobra.Command, args []string) {
-
-	},
 }
 var loginCMD = &cobra.Command{
 	Use:   "login",
@@ -24,7 +21,7 @@ var loginCMD = &cobra.Command{
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter your username: ")
 		username, _ := reader.ReadString('\n')
-		fmt.Print("Enter your username: ")
+		fmt.Print("Enter your password: ")
 		password, _ := reader.ReadString('\n')
 		fmt.Print(routes.Login(username, password))
 	},
