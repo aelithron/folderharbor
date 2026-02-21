@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"golang.org/x/term"
 	"os"
+	"strings"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +27,7 @@ var loginCMD = &cobra.Command{
 		password, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil { panic (err) }
 		fmt.Println()
-		fmt.Print(routes.Login(username, string(password)))
+		fmt.Print(routes.Login(strings.TrimSpace(username), string(password)))
 	},
 }
 var logoutCMD = &cobra.Command{

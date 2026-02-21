@@ -24,6 +24,8 @@ func Login(username, password string) (map[string]any) {
 }
 func Logout() (map[string]any) {
 	req, err := http.NewRequest(http.MethodDelete, "http://localhost:3000/auth", nil)
+	cookie := http.Cookie{ Name: "token", Value: "nBB3piJ0eqblaM5D96pXUe7xubhpoC7LzDpNa5ah2NM", Path: "/" }
+	req.AddCookie(&cookie)
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
@@ -31,6 +33,7 @@ func Logout() (map[string]any) {
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
+	if len(resBody) == 0 { return map[string]any{ "success": "yes" } }
 	var body map[string]any
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body
