@@ -28,3 +28,22 @@ export async function listDir(userID: number, dirPath?: string): Promise<{ items
   }
   return { items };
 }
+export async function readFile(userID: number, providedPath: string): Promise<{ contents: string } | { error: "server" | "not_found" | "not_allowed" | "invalid_path" | "is_folder" }> {
+  const itemPath = path.normalize(providedPath);
+  const paths = await getPaths(userID);
+  if ("error" in paths) return { error: paths.error };
+  let allowed = false;
+  if (micromatch.isMatch(itemPath, paths.allow, { dot: true })) allowed = true;
+  if (micromatch.isMatch(itemPath, paths.deny, { dot: true })) allowed = false;
+  if (allowed === false) return { error: "not_allowed" };
+  try {
+    if ((await fs.stat(itemPath)).isDirectory()) return { error: "is_folder" };
+  } catch (e) {
+    // @ts-expect-error - e is unknown but is an error actually
+    if (e.code as string === "ENOENT") return { error: "invalid_path" };
+    console.error(`Server Error - Couldn't access file at path "${itemPath}" for user ID ${userID} - Error: ${e}`);
+    return { error: "server" };
+  }
+  const file = await fs.readFile(itemPath);
+  return { contents: file.toString() };
+}

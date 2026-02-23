@@ -9,6 +9,7 @@ router.get("/", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
+  
   const files = await listDir(req.session.userID, (req.query.path ? path.resolve(req.query.path as string) : undefined));
   if ("error" in files) {
     switch (files.error) {
