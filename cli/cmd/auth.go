@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"FolderHarbor-CLI/routes"
+	"folderharbor-cli/routes"
 	"bufio"
 	"fmt"
 	"golang.org/x/term"
