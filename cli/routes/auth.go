@@ -37,9 +37,13 @@ func Login(address, username, password string) {
 	viper.Set("token", body.Token)
 	viper.WriteConfig()
 }
-func Logout() (map[string]any) {
-	req, err := http.NewRequest(http.MethodDelete, "http://localhost:3000/auth", nil)
-	cookie := http.Cookie{ Name: "token", Value: "nBB3piJ0eqblaM5D96pXUe7xubhpoC7LzDpNa5ah2NM", Path: "/" }
+func Logout() {
+	auth := getAuth()
+	addr, err := url.Parse(auth.Server)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/auth")
+	req, err := http.NewRequest(http.MethodDelete, addr.String(), nil)
+	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
 	if err != nil { panic (err) }
 	client := &http.Client{}
@@ -48,11 +52,13 @@ func Logout() (map[string]any) {
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
+	if len(resBody) == 0 {
+		viper.Set("server", nil)
+		viper.Set("token", nil)
+		viper.WriteConfig()
+		return
+	}
 	var errBody APIError
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
-	if len(resBody) == 0 { return map[string]any{ "success": "yes" } }
-	var body map[string]any
-	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
-	return body
 }

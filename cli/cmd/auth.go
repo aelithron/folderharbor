@@ -37,7 +37,8 @@ var logoutCMD = &cobra.Command{
 	Short: "log out of a folderharbor server",
 	Long:  "log out of a folderharbor server",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(routes.Logout())
+		routes.Logout()
+		fmt.Println("Logged out successfully.")
 	},
 }
 func init() {
