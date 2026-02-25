@@ -29,7 +29,7 @@ var loginCMD = &cobra.Command{
 		password, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil { panic (err) }
 		fmt.Println()
-		fmt.Print(routes.Login(strings.TrimSpace(url), strings.TrimSpace(username), string(password)))
+		routes.Login(strings.TrimSpace(url), strings.TrimSpace(username), string(password))
 	},
 }
 var logoutCMD = &cobra.Command{
