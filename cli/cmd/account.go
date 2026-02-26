@@ -7,8 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 )
-var meCMD = &cobra.Command{
-	Use:   "me",
+var accountCMD = &cobra.Command{
+	Use:   "account",
+	Aliases: []string{"me"},
 	Short: "manage your account info",
 	Long:  "manage your user account on a folderharbor server",
 }
@@ -44,6 +45,6 @@ var ownInfoCMD = &cobra.Command{
 	},
 }
 func init() {
-	rootCMD.AddCommand(meCMD)
-	meCMD.AddCommand(ownInfoCMD)
+	rootCMD.AddCommand(accountCMD)
+	accountCMD.AddCommand(ownInfoCMD)
 }
