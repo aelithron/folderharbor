@@ -35,7 +35,7 @@ export async function readFile(userID: number, providedPath: string): Promise<{ 
   let allowed = false;
   if (micromatch.isMatch(itemPath, paths.allow, { dot: true })) allowed = true;
   if (micromatch.isMatch(itemPath, paths.deny, { dot: true })) allowed = false;
-  if (allowed === false) return { error: "not_allowed" };
+  if (!allowed) return { error: "not_allowed" };
   try {
     if ((await fs.stat(itemPath)).isDirectory()) return { error: "is_folder" };
   } catch (e) {
@@ -46,4 +46,17 @@ export async function readFile(userID: number, providedPath: string): Promise<{ 
   }
   const file = await fs.readFile(itemPath);
   return { contents: file.toString() };
+}
+export async function getItemType(providedPath?: string): Promise<{ type: "folder" | "file" } | { error: "server" | "invalid_path" }> {
+  if (!providedPath) providedPath = "/";
+  try {
+    const stat = await fs.stat(path.normalize(providedPath));
+    if (stat.isDirectory()) return { type: "folder" };
+    return { type: "file" };
+  } catch (e) {
+    // @ts-expect-error - e is unknown but is an error actually
+    if (e.code as string === "ENOENT") return { error: "invalid_path" };
+    console.error(`Server Error - Couldn't access file at path "${path.normalize(providedPath)}" - Error: ${e}`);
+    return { error: "server" };
+  }
 }
