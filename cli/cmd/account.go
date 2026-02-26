@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"folderharbor-cli/routes"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -44,7 +47,27 @@ var ownInfoCMD = &cobra.Command{
 		fmt.Println("Current Session: " + fmt.Sprint(info.ActiveSession))
 	},
 }
+var changeUsernameCMD = &cobra.Command{
+	Use:   "username",
+	Short: "change your username",
+	Long:  "update your username on folderharbor",
+  Run: func(cmd *cobra.Command, args []string) {
+		clientConfig := routes.GetClientConfig()
+		if clientConfig.SelfUsernameChanges == false {
+			fmt.Fprintln(os.Stderr, "This server doesn't allow you to change your username.\nPlease contact your administrator and ask them to change it for you.")
+			os.Exit(1)
+		}
+		info := routes.GetOwnInfo()
+		fmt.Println("Your current username is " + info.Username + ".")
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter your new username: ")
+		username, _ := reader.ReadString('\n')
+		routes.UpdateOwnInfo(routes.SelfInfoWrite{ Username: strings.TrimSpace(username) })
+		fmt.Println("Successfully updated your username!")
+	},
+}
 func init() {
 	rootCMD.AddCommand(accountCMD)
 	accountCMD.AddCommand(ownInfoCMD)
+	accountCMD.AddCommand(changeUsernameCMD)
 }

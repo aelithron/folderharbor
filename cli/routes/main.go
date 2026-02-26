@@ -1,9 +1,13 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
+	"path"
 
 	"github.com/spf13/viper"
 )
@@ -16,6 +20,10 @@ type AuthInfo struct {
 	Token string
 	Server string
 }
+type ClientConfig struct {
+  SelfUsernameChanges bool `json:"selfUsernameChanges"`
+}
+
 func getAuth() (AuthInfo) {
 	token := viper.GetString("token")
 	server, err := url.Parse(viper.GetString("server"))
@@ -29,4 +37,21 @@ func getAuth() (AuthInfo) {
 func handleAPIError(error APIError) {
 	fmt.Fprintf(os.Stderr, "Error (%s): %s\n", error.Error, error.Message)
 	os.Exit(1)
+}
+func GetClientConfig() (ClientConfig) {
+	auth := getAuth()
+	addr, err := url.Parse(auth.Server)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/clientconfig")
+	res, err := http.Get(addr.String())
+	if err != nil { panic (err) }
+	defer res.Body.Close()
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil { panic (err) }
+	var errBody APIError
+	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
+	if errBody.Error != "" { handleAPIError(errBody) }
+	var body ClientConfig
+	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
+	return body
 }

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -18,6 +19,11 @@ type SelfInfo struct {
 	Username string `json:"username"`
 	Sessions []Session `json:"sessions"`
 	ActiveSession int `json:"activeSession"`
+}
+type SelfInfoWrite struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	ClearLoginAttempts bool `json:"clearLoginAttempts,omitempty"`
 }
 
 func GetOwnInfo() (SelfInfo) {
@@ -41,4 +47,25 @@ func GetOwnInfo() (SelfInfo) {
 	var body SelfInfo
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body
+}
+func UpdateOwnInfo(info SelfInfoWrite) {
+	auth := getAuth()
+	reqBody, _ := json.Marshal(info)
+	addr, err := url.Parse(auth.Server)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/me")
+	req, err := http.NewRequest(http.MethodPatch, addr.String(), bytes.NewBuffer(reqBody))
+	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
+	req.AddCookie(&cookie)
+	req.Header.Add("Content-Type", "application/json")
+	if err != nil { panic (err) }
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil { panic (err) }
+	defer res.Body.Close()
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil { panic (err) }
+	var errBody APIError
+	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
+	if errBody.Error != "" { handleAPIError(errBody) }
 }
