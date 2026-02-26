@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"folderharbor-cli/routes"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -19,12 +20,27 @@ var ownInfoCMD = &cobra.Command{
 		info := routes.GetOwnInfo()
 		fmt.Println("Information for " + info.Username + " (ID " + fmt.Sprint(info.ID) + ")")
 		fmt.Println("----------------------------")
-		fmt.Println("Sessions:")
+		fmt.Println("Active Sessions:")
 		if len(info.Sessions) == 0 { fmt.Println("No sessions found!") }
 		for session := range info.Sessions {
-			fmt.Println("Session " + fmt.Sprint(info.Sessions[session].ID) + " (Created at " + info.Sessions[session].CreatedAt + " - Expires at " + info.Sessions[session].Expiry + ")")
+			createdAtRaw, err := time.Parse(time.RFC3339, info.Sessions[session].CreatedAt)
+			var createdAt string
+			if err == nil {
+			  createdAt = createdAtRaw.Format(time.RFC1123)
+			} else {
+				createdAt = info.Sessions[session].CreatedAt
+			}
+			expiryRaw, err := time.Parse(time.RFC3339, info.Sessions[session].Expiry)
+			var expiry string
+			if err == nil {
+			  expiry = expiryRaw.Format(time.RFC1123)
+			} else {
+				expiry = info.Sessions[session].Expiry
+			}
+			fmt.Println("Session " + fmt.Sprint(info.Sessions[session].ID) + " (Created at " + createdAt + " • Expires at " + expiry + ")")
 		}
-		fmt.Println("Active Session: " + fmt.Sprint(info.ActiveSession))
+		fmt.Println()
+		fmt.Println("Current Session: " + fmt.Sprint(info.ActiveSession))
 	},
 }
 func init() {
