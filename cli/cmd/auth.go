@@ -30,6 +30,7 @@ var loginCMD = &cobra.Command{
 		if err != nil { panic (err) }
 		fmt.Println()
 		routes.Login(strings.TrimSpace(url), strings.TrimSpace(username), string(password))
+		fmt.Println("Successfully logged in!")
 	},
 }
 var logoutCMD = &cobra.Command{

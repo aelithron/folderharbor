@@ -33,7 +33,7 @@ func Login(address, username, password string) {
 	if errBody.Error != "" { handleAPIError(errBody) }
 	var body authRes
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
-	viper.Set("server", addr.Scheme + addr.Host)
+	viper.Set("server", addr.Scheme + "://" + addr.Host)
 	viper.Set("token", body.Token)
 	viper.WriteConfig()
 }
@@ -53,8 +53,8 @@ func Logout() {
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
 	if len(resBody) == 0 {
-		viper.Set("server", nil)
-		viper.Set("token", nil)
+		viper.Set("server", "")
+		viper.Set("token", "")
 		viper.WriteConfig()
 		return
 	}
