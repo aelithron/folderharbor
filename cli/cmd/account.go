@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 var accountCMD = &cobra.Command{
 	Use:   "account",
@@ -47,7 +48,7 @@ var ownInfoCMD = &cobra.Command{
 		fmt.Println("Current Session: " + fmt.Sprint(info.ActiveSession))
 	},
 }
-var changeUsernameCMD = &cobra.Command{
+var changeOwnUsernameCMD = &cobra.Command{
 	Use:   "username",
 	Short: "change your username",
 	Long:  "update your username on folderharbor",
@@ -66,8 +67,32 @@ var changeUsernameCMD = &cobra.Command{
 		fmt.Println("Successfully updated your username!")
 	},
 }
+var changeOwnPasswordCMD = &cobra.Command{
+	Use:   "password",
+	Short: "change your password",
+	Long:  "update your password on folderharbor",
+  Run: func(cmd *cobra.Command, args []string) {
+		fmt.Print("Enter your new password: ")
+		password, err := term.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil { panic (err) }
+		fmt.Println()
+		routes.UpdateOwnInfo(routes.SelfInfoWrite{ Password: string(password) })
+		fmt.Println("Successfully updated your password!")
+	},
+}
+var clearOwnFailedLoginsCMD = &cobra.Command{
+	Use:   "failedlogins",
+	Short: "reset the failed login counter for your account",
+	Long:  "reset your account's failed password attempts",
+  Run: func(cmd *cobra.Command, args []string) {
+		routes.UpdateOwnInfo(routes.SelfInfoWrite{ ClearLoginAttempts: true })
+		fmt.Println("Successfully reset your failed login attempts!")
+	},
+}
 func init() {
 	rootCMD.AddCommand(accountCMD)
 	accountCMD.AddCommand(ownInfoCMD)
-	accountCMD.AddCommand(changeUsernameCMD)
+	accountCMD.AddCommand(changeOwnUsernameCMD)
+	accountCMD.AddCommand(changeOwnPasswordCMD)
+	accountCMD.AddCommand(clearOwnFailedLoginsCMD)
 }
