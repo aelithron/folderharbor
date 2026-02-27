@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"folderharbor-cli/routes"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/term"
 )
 var accountCMD = &cobra.Command{
@@ -46,6 +48,11 @@ var ownInfoCMD = &cobra.Command{
 		}
 		fmt.Println()
 		fmt.Println("Current Session: " + fmt.Sprint(info.ActiveSession))
+		if info.FailedLoginLockout == true {
+			fmt.Println("Failed Login Lockout: Yes")
+		} else {
+			fmt.Println("Failed Login Lockout: No")
+		}
 	},
 }
 var changeOwnUsernameCMD = &cobra.Command{
@@ -72,12 +79,16 @@ var changeOwnPasswordCMD = &cobra.Command{
 	Short: "change your password",
 	Long:  "update your password on folderharbor",
   Run: func(cmd *cobra.Command, args []string) {
+		info := routes.GetOwnInfo()
+		server, err := url.Parse(viper.GetString("server"))
+		if err != nil { panic (err) }
 		fmt.Print("Enter your new password: ")
 		password, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil { panic (err) }
 		fmt.Println()
 		routes.UpdateOwnInfo(routes.SelfInfoWrite{ Password: string(password) })
-		fmt.Println("Successfully updated your password!")
+		fmt.Println("Successfully updated your password!\nNote: You have been automatically logged out everywhere except here.")
+		routes.Login(server.String(), info.Username, string(password))
 	},
 }
 var clearOwnFailedLoginsCMD = &cobra.Command{
