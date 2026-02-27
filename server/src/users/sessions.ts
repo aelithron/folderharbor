@@ -127,3 +127,12 @@ export async function getUserSessions(userID: number): Promise<{ id: number, cre
     return { error: "server" };
   }
 }
+export async function revokeAllSessions(userID: number): Promise<{ success: boolean } | { error: "server" }> {
+  try {
+    await db.delete(sessionsTable).where(eq(sessionsTable.userid, userID));
+    return { success: true };
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    return { error: "server" };
+  }
+}
