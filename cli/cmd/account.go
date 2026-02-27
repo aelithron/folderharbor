@@ -6,6 +6,7 @@ import (
 	"folderharbor-cli/routes"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -100,10 +101,23 @@ var clearOwnFailedLoginsCMD = &cobra.Command{
 		fmt.Println("Successfully reset your failed login attempts!")
 	},
 }
+var revokeOwnSessionCMD = &cobra.Command{
+	Use: "revoke-session [id]",
+	Short: "revoke another session by its ID",
+	Long: "revoke (sign out of) a session on another device by providing its ID",
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		sessionID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		routes.RevokeOwnSession(sessionID)
+    fmt.Printf("Successfully revoked session %s.\n", fmt.Sprint(sessionID))
+	},
+}
 func init() {
 	rootCMD.AddCommand(accountCMD)
 	accountCMD.AddCommand(ownInfoCMD)
 	accountCMD.AddCommand(changeOwnUsernameCMD)
 	accountCMD.AddCommand(changeOwnPasswordCMD)
 	accountCMD.AddCommand(clearOwnFailedLoginsCMD)
+	accountCMD.AddCommand(revokeOwnSessionCMD)
 }
