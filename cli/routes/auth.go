@@ -16,7 +16,7 @@ type login struct {
 	Username string `json:"username"`
 	Password string `json:"password"` 
 }
-type authRes struct { Token string `json:"token"`}
+type authRes struct { Token string `json:"token"` }
 func Login(address, username, password string) {
 	reqBody, _ := json.Marshal(&login{ Username: username, Password: password })
 	if !strings.Contains(address, "://") { address = "https://" + address }
