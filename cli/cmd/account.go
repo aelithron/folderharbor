@@ -45,7 +45,7 @@ var ownInfoCMD = &cobra.Command{
 			} else {
 				expiry = info.Sessions[session].Expiry
 			}
-			fmt.Println("Session " + fmt.Sprint(info.Sessions[session].ID) + " (Created at " + createdAt + " • Expires at " + expiry + ")")
+			fmt.Println("• Session " + fmt.Sprint(info.Sessions[session].ID) + " (Created at " + createdAt + " • Expires at " + expiry + ")")
 		}
 		fmt.Println()
 		fmt.Println("Current Session: " + fmt.Sprint(info.ActiveSession))
