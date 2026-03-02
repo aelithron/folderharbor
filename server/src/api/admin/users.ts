@@ -78,8 +78,8 @@ router.get("/:userID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  if (accessLevel === "full") return res.json({ username: otherUser.username, roles: otherUser.roles, permissions: otherUser.permissions, acls: otherUser.acls, failedLogins: otherUser.failedLogins, locked: otherUser.locked, sessions: (sessions.length > 0 ? sessions : undefined) });
-  if (accessLevel === "limited") return res.json({ username: otherUser.username, failedLogins: otherUser.failedLogins, locked: otherUser.locked });
+  if (accessLevel === "full") return res.json({ access: "full", username: otherUser.username, roles: otherUser.roles, permissions: otherUser.permissions, acls: otherUser.acls, failedLogins: otherUser.failedLogins, locked: otherUser.locked, sessions: (sessions.length > 0 ? sessions : undefined) });
+  if (accessLevel === "limited") return res.json({ access: "limited", username: otherUser.username, failedLogins: otherUser.failedLogins, locked: otherUser.locked });
 });
 router.patch("/:userID", async (req, res) => {
   if (!req.session) {
