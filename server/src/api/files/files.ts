@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
           return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
       }
     }
-    return res.json(file);
+    return res.json({ contents: file.contents.toString() });
   } else if (type.type === "folder") {
     const files = await listDir(req.session.userID, (req.query.path ? path.resolve(req.query.path as string) : undefined));
     if ("error" in files) {
