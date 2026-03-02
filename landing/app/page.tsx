@@ -1,0 +1,13 @@
+import Image from "next/image";
+import logo from "@/public/logo.webp";
+
+export default function Home() {
+  return (
+    <main className="flex flex-col min-h-screen p-8 md:px-16">
+      <div className="flex flex-col gap-2 items-center justify-center text-center">
+        <Image src={logo} alt="The FolderHarbor logo" width={300} height={300} />
+        <h1 className="text-3xl font-semibold">FolderHarbor</h1>
+      </div>
+    </main>
+  );
+}

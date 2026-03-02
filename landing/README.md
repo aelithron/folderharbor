@@ -1,0 +1,2 @@
+# FolderHarbor Landing
+A simple landing page to describe what FolderHarbor is! You shouldn't need to run/use this if you aren't making a contribution, this isn't a component of the standard FolderHarbor stack (server, CLI, and web panel).
