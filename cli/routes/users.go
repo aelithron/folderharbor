@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,6 +15,7 @@ type UserList struct {
 	Username string `json:"username"`
 }
 type User struct {
+	AccessLevel string `json:"access"`
 	Username string `json:"username"`
 	Locked bool `json:"locked"`
 	FailedLogins int `json:"failedLogins"`
@@ -69,4 +71,54 @@ func GetUser(userID int) (User) {
 	var body User
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body
+}
+type createUserReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+type createUserRes struct { ID int `json:"id"` }
+func CreateUser(username, password string) (int) {
+	auth := getAuth()
+	reqBody, _ := json.Marshal(&createUserReq{ Username: username, Password: password })
+	addr, err := url.Parse(auth.Server)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/admin/users")
+	req, err := http.NewRequest(http.MethodPost, addr.String(), bytes.NewBuffer(reqBody))
+	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
+	req.AddCookie(&cookie)
+	req.Header.Add("Content-Type", "application/json")
+	if err != nil { panic (err) }
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil { panic (err) }
+	defer res.Body.Close()
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil { panic (err) }
+	if res.StatusCode != 200 {
+		var errBody APIError
+		if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
+		if errBody.Error != "" { handleAPIError(errBody) }
+	}
+	var body createUserRes
+	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
+	return body.ID
+}
+func DeleteUser(userID int) {
+	auth := getAuth()
+	addr, err := url.Parse(auth.Server)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/admin/users/" + fmt.Sprint(userID))
+	req, err := http.NewRequest(http.MethodDelete, addr.String(), nil)
+	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
+	req.AddCookie(&cookie)
+	if err != nil { panic (err) }
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil { panic (err) }
+	defer res.Body.Close()
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil { panic (err) }
+	var errBody APIError
+	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
+	if errBody.Error != "" { handleAPIError(errBody) }
 }
