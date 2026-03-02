@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import { enforceAuth } from "../api.js";
-import { getItemType, listDir, readFile } from "../../core.js";
+import { getItemType, listDir, readFile, writeFile } from "../../core.js";
 import path from "path";
 const router: Router = express.Router();
 router.use(enforceAuth());
@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
           return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
       }
     }
-    return res.json({ contents: file.contents.toString() });
+    return res.json({ type: type.type, contents: file.contents.toString() });
   } else if (type.type === "folder") {
     const files = await listDir(req.session.userID, (req.query.path ? path.resolve(req.query.path as string) : undefined));
     if ("error" in files) {
@@ -49,9 +49,41 @@ router.get("/", async (req, res) => {
           return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
       }
     }
-    return res.json(files);
+    return res.json({ type: type.type, ...files });
   } else {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
+});
+router.post("/", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!req.query.path) return res.status(400).json({ error: "path", message: 'Your request is missing a "path" parameter.' });
+  const type = await getItemType(path.resolve(req.query.path as string));
+  if ("error" in type) {
+    switch (type.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "invalid_path":
+        break;
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  } else return res.status(400).json({ error: "exists", message: "An item at this path already exists." });
+  const result = await writeFile(req.session.userID, path.resolve(req.query.path as string), "");
+  if ("error" in result) {
+    switch (result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(401).json({ error: "session", message: "There was an error with looking up your user, please sign in again." });
+      case "not_allowed":
+        return res.status(403).json({ error: "access", message: "You don't have permission to access that path!" });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ success: true });
 });
 export { router };

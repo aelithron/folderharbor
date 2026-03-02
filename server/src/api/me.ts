@@ -41,6 +41,7 @@ router.patch("/", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (Object.keys(req.body).length === 0) return res.json({ success: true, message: "No data provided to change." });
   if (req.body.username && !getConfig()?.selfUsernameChanges) return res.status(400).json({ error: "username_change", message: "Changing your own username is disabled, please ask your administrator to change it instead." });
   if (req.body.password) {
@@ -76,6 +77,7 @@ router.delete("/session", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (!req.body.sessionID || isNaN(Number.parseInt(req.body.sessionID))) return res.status(400).json({ error: "session_id", message: "Your request doesn't contain a valid 'sessionID'." });
   if (Number.parseInt(req.body.sessionID) === req.session.sessionID) return res.status(400).json({ error: "active_session", message: "You can't remove your active session this way, please sign out instead!" });
   const result = await revokeSession(Number.parseInt(req.body.sessionID));
