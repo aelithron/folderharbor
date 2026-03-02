@@ -60,3 +60,22 @@ export async function getItemType(providedPath?: string): Promise<{ type: "folde
     return { error: "server" };
   }
 }
+export async function writeFile(userID: number, providedPath: string, contents: string): Promise<{ success: true } | { error: "server" | "not_found" | "not_allowed" | "invalid_path" | "is_folder" }> {
+  const itemPath = path.normalize(providedPath);
+  const paths = await getPaths(userID);
+  if ("error" in paths) return { error: paths.error };
+  let allowed = false;
+  if (micromatch.isMatch(itemPath, paths.allow, { dot: true })) allowed = true;
+  if (micromatch.isMatch(itemPath, paths.deny, { dot: true })) allowed = false;
+  if (!allowed) return { error: "not_allowed" };
+  try {
+    if ((await fs.stat(itemPath)).isDirectory()) return { error: "is_folder" };
+  } catch (e) {
+    // @ts-expect-error - e is unknown but is an error actually
+    if (e.code as string === "ENOENT") return { error: "invalid_path" };
+    console.error(`Server Error - Couldn't access file at path "${path.normalize(providedPath)}" - Error: ${e}`);
+    return { error: "server" };
+  }
+  await fs.writeFile(itemPath, contents);
+  return { success: true };
+}
