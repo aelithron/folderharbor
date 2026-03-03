@@ -7,7 +7,9 @@ export default function Home() {
       <div className="flex flex-col gap-2 items-center justify-center text-center">
         <Image src={logo} alt="The FolderHarbor logo" width={300} height={300} />
         <h1 className="text-3xl font-semibold">FolderHarbor</h1>
+        <p>A powerful, multi-protocol file server with RBAC.</p>
       </div>
+      
     </main>
   );
 }
