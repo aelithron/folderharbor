@@ -20,6 +20,7 @@ type SelfInfo struct {
 	Sessions []Session `json:"sessions"`
 	ActiveSession int `json:"activeSession"`
 	FailedLoginLockout bool `json:"failedLoginLockout"`
+	Permissions []string `json:"permissions"`
 }
 type SelfInfoWrite struct {
 	Username string `json:"username,omitempty"`

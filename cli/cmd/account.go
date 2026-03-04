@@ -6,6 +6,7 @@ import (
 	"folderharbor-cli/routes"
 	"net/url"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -53,6 +54,14 @@ var ownInfoCMD = &cobra.Command{
 			fmt.Println("Failed Login Lockout: Yes")
 		} else {
 			fmt.Println("Failed Login Lockout: No")
+		}
+		fmt.Printf("Permissions (Effective): ")
+		if len(info.Permissions) == 0 { 
+			fmt.Println("None") 
+		} else {
+			fmt.Println()
+			slices.Sort(info.Permissions)
+			for permission := range info.Permissions { fmt.Println("• " + info.Permissions[permission]) }
 		}
 	},
 }
@@ -102,7 +111,7 @@ var clearOwnFailedLoginsCMD = &cobra.Command{
 	},
 }
 var revokeOwnSessionCMD = &cobra.Command{
-	Use: "revoke-session [id]",
+	Use: "revoke-session <id>",
 	Short: "revoke another session by its ID",
 	Long: "revoke (sign out of) a session on another device by providing its ID",
 	Args: cobra.ExactArgs(1),

@@ -32,7 +32,7 @@ var listUsersCMD = &cobra.Command{
 	},
 }
 var getUserCMD = &cobra.Command{
-	Use: "get [id]",
+	Use: "get <id>",
 	Short: "get info on a user",
 	Long: "get information about a specific user",
 	Args: cobra.ExactArgs(1),
@@ -115,8 +115,36 @@ var createUserCMD = &cobra.Command{
 		fmt.Println("New user created! (ID: #" + fmt.Sprint(userID) + ")")
 	},
 }
+var lockUserCMD = &cobra.Command{
+	Use: "lock <id> [yes|no]",
+	Short: "lock/unlock a user",
+	Long: "lock or unlock a user",
+	Args: cobra.RangeArgs(1, 2),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		var locked = true;
+		if len(args) == 2 {
+			switch args[1] {
+			case "no", "false":
+				locked = false;
+			case "yes", "true":
+				break;
+			default:
+					fmt.Println(`Error: Action "` + args[1] + `" isn't "yes" or "no"!`);
+					os.Exit(1)
+			}
+		}
+		routes.LockUser(userID, locked)
+		if !locked {
+			fmt.Println("Successfully unlocked the user (ID: #" + fmt.Sprint(userID) + ").")
+		} else {
+			fmt.Println("Successfully locked the user (ID: #" + fmt.Sprint(userID) + ").")
+		}
+	},
+}
 var deleteUserCMD = &cobra.Command{
-	Use: "delete [id]",
+	Use: "delete <id>",
 	Short: "delete a user",
 	Long: "permanently delete a specific user",
 	Args: cobra.ExactArgs(1),
@@ -124,7 +152,7 @@ var deleteUserCMD = &cobra.Command{
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
 		routes.DeleteUser(userID)
-		fmt.Println("Successfully deleted the user (ID: #" + fmt.Sprint(userID) + ")")
+		fmt.Println("Successfully deleted the user (ID: #" + fmt.Sprint(userID) + ").")
 	},
 }
 func init() {
@@ -132,5 +160,6 @@ func init() {
 	usersCMD.AddCommand(listUsersCMD)
 	usersCMD.AddCommand(getUserCMD)
 	usersCMD.AddCommand(createUserCMD)
+	usersCMD.AddCommand(lockUserCMD)
 	usersCMD.AddCommand(deleteUserCMD)
 }
