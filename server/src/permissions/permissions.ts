@@ -36,3 +36,13 @@ export async function checkPermission(userID: number, permission: Permission): P
   for (const role of roles) if (role.permissions.find((userPerm) => userPerm === permission)) return true;
   return false;
 }
+export async function getEffectivePermissions(userID: number): Promise<Permission[] | { error: "server" | "not_found" }> {
+  const permissions = new Set<Permission>();
+  const user = await getUser(userID);
+  if ("error" in user) return { error: user.error };
+  for (const item of user.permissions) permissions.add(item);
+  const roles = await getUserRoles(userID);
+  if ("error" in roles) return { error: roles.error };
+  for (const role of roles) for (const item of role.permissions) permissions.add(item);
+  return [...permissions];
+}

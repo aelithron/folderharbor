@@ -4,6 +4,7 @@ import { editUser, getUser } from "../users/users.js";
 import { getUserSessions, revokeAllSessions, revokeSession } from "../users/sessions.js";
 import { getConfig } from "../index.js";
 import { DateTime } from "luxon";
+import { getEffectivePermissions } from "../permissions/permissions.js";
 const router: Router = express.Router();
 router.use(enforceAuth());
 router.get("/", async (req, res) => {
@@ -34,7 +35,18 @@ router.get("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  return res.json({ id: req.session.userID, username: user.username, sessions: (sessions.length > 0 ? sessions : undefined), activeSession: req.session.sessionID, failedLoginLockout: (user.failedLogins >= (getConfig()?.failedLoginLimit || 5)), permissions: user.permissions });
+  const permissions = await getEffectivePermissions(req.session.userID);
+  if ("error" in permissions) {
+    switch (permissions.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "Error looking up your session, please sign in again." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  return res.json({ id: req.session.userID, username: user.username, sessions: (sessions.length > 0 ? sessions : undefined), activeSession: req.session.sessionID, failedLoginLockout: (user.failedLogins >= (getConfig()?.failedLoginLimit || 5)), permissions: permissions });
 });
 router.patch("/", async (req, res) => {
   if (!req.session) {
