@@ -115,6 +115,23 @@ var createUserCMD = &cobra.Command{
 		fmt.Println("New user created! (ID: #" + fmt.Sprint(userID) + ")")
 	},
 }
+var deleteUserCMD = &cobra.Command{
+	Use: "delete <id>",
+	Short: "delete a user",
+	Long: "permanently delete a specific user",
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		routes.DeleteUser(userID)
+		fmt.Println("Successfully deleted the user (ID: #" + fmt.Sprint(userID) + ").")
+	},
+}
+var updateUserCMD = &cobra.Command{
+	Use: "update",
+	Short: "update a user's info/settings",
+	Long: "update information and settings for a user",
+}
 var lockUserCMD = &cobra.Command{
 	Use: "lock <id> [yes|no]",
 	Short: "lock/unlock a user",
@@ -143,16 +160,42 @@ var lockUserCMD = &cobra.Command{
 		}
 	},
 }
-var deleteUserCMD = &cobra.Command{
-	Use: "delete <id>",
-	Short: "delete a user",
-	Long: "permanently delete a specific user",
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+var changeUsernameCMD = &cobra.Command{
+	Use: "username <id>",
+	Short: "change a user's username",
+	Long: "change the username of a user",
+  Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
-		routes.DeleteUser(userID)
-		fmt.Println("Successfully deleted the user (ID: #" + fmt.Sprint(userID) + ").")
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter the user's new username: ")
+		username, _ := reader.ReadString('\n')
+		routes.UpdateUser(userID, routes.SelfInfoWrite{ Username: strings.TrimSpace(username) })
+		fmt.Println("Successfully changed user #" + fmt.Sprint(userID) + "'s username to " + strings.TrimSpace(username) + ".")
+	},
+}
+var changePasswordCMD = &cobra.Command{
+	Use: "password <id>",
+	Short: "change a user's password",
+	Long: "change the password for a user",
+  Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		fmt.Print("Enter the user's new password: ")
+		password, err := term.ReadPassword(int(os.Stdin.Fd()))
+		routes.UpdateUser(userID, routes.SelfInfoWrite{ Password: string(password) })
+		fmt.Println("Successfully changed user #" + fmt.Sprint(userID) + "'s password.\nNote: they have been signed out on all devices.")
+	},
+}
+var clearFailedLoginsCMD = &cobra.Command{
+	Use: "failedlogins <id>",
+	Short: "reset a user's failed login counter",
+	Long: "reset the failed login counter for a user",
+  Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		routes.UpdateUser(userID, routes.SelfInfoWrite{ ClearLoginAttempts: true })
+		fmt.Println("Successfully reset user #" + fmt.Sprint(userID) + "'s failed login attempts.")
 	},
 }
 func init() {
@@ -160,6 +203,10 @@ func init() {
 	usersCMD.AddCommand(listUsersCMD)
 	usersCMD.AddCommand(getUserCMD)
 	usersCMD.AddCommand(createUserCMD)
-	usersCMD.AddCommand(lockUserCMD)
 	usersCMD.AddCommand(deleteUserCMD)
+	usersCMD.AddCommand(updateUserCMD)
+	updateUserCMD.AddCommand(lockUserCMD)
+	updateUserCMD.AddCommand(changeUsernameCMD)
+	updateUserCMD.AddCommand(changePasswordCMD)
+	updateUserCMD.AddCommand(clearFailedLoginsCMD)
 }

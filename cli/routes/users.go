@@ -25,6 +25,15 @@ type User struct {
 	ACLs []int `json:"acls"`
 	Permissions []string `json:"permissions"`
 }
+type UserInfoWrite struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	ClearFailedLogins bool `json:"clearFailedLogins,omitempty"`
+
+	Roles []int `json:"roles,omitempty"`
+	ACLs []int `json:"acls,omitempty"`
+	Permissions []string `json:"permissions,omitempty"`
+}
 
 func ListUsers() ([]UserList) {
 	auth := getAuth()
@@ -102,6 +111,27 @@ func CreateUser(username, password string) (int) {
 	var body createUserRes
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body.ID
+}
+func UpdateUser(userID int, info SelfInfoWrite) {
+	auth := getAuth()
+	reqBody, _ := json.Marshal(info)
+	addr, err := url.Parse(auth.Server)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/admin/users/" + fmt.Sprint(userID))
+	req, err := http.NewRequest(http.MethodPatch, addr.String(), bytes.NewBuffer(reqBody))
+	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
+	req.AddCookie(&cookie)
+	req.Header.Add("Content-Type", "application/json")
+	if err != nil { panic (err) }
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil { panic (err) }
+	defer res.Body.Close()
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil { panic (err) }
+	var errBody APIError
+	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
+	if errBody.Error != "" { handleAPIError(errBody) }
 }
 type lockUserReq struct { Locked bool `json:"locked"` }
 func LockUser(userID int, locked bool) {
