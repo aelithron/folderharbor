@@ -28,7 +28,7 @@ type User struct {
 type UserInfoWrite struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
-	ClearFailedLogins bool `json:"clearFailedLogins,omitempty"`
+	ClearLoginAttempts bool `json:"clearLoginAttempts,omitempty"`
 
 	Roles []int `json:"roles,omitempty"`
 	ACLs []int `json:"acls,omitempty"`
@@ -112,7 +112,7 @@ func CreateUser(username, password string) (int) {
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body.ID
 }
-func UpdateUser(userID int, info SelfInfoWrite) {
+func UpdateUser(userID int, info UserInfoWrite) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(info)
 	addr, err := url.Parse(auth.Server)

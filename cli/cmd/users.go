@@ -170,7 +170,7 @@ var changeUsernameCMD = &cobra.Command{
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter the user's new username: ")
 		username, _ := reader.ReadString('\n')
-		routes.UpdateUser(userID, routes.SelfInfoWrite{ Username: strings.TrimSpace(username) })
+		routes.UpdateUser(userID, routes.UserInfoWrite{ Username: strings.TrimSpace(username) })
 		fmt.Println("Successfully changed user #" + fmt.Sprint(userID) + "'s username to " + strings.TrimSpace(username) + ".")
 	},
 }
@@ -183,7 +183,7 @@ var changePasswordCMD = &cobra.Command{
 		if err != nil { panic (err) }
 		fmt.Print("Enter the user's new password: ")
 		password, err := term.ReadPassword(int(os.Stdin.Fd()))
-		routes.UpdateUser(userID, routes.SelfInfoWrite{ Password: string(password) })
+		routes.UpdateUser(userID, routes.UserInfoWrite{ Password: string(password) })
 		fmt.Println("Successfully changed user #" + fmt.Sprint(userID) + "'s password.\nNote: they have been signed out on all devices.")
 	},
 }
@@ -194,7 +194,7 @@ var clearFailedLoginsCMD = &cobra.Command{
   Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
-		routes.UpdateUser(userID, routes.SelfInfoWrite{ ClearLoginAttempts: true })
+		routes.UpdateUser(userID, routes.UserInfoWrite{ ClearLoginAttempts: true })
 		fmt.Println("Successfully reset user #" + fmt.Sprint(userID) + "'s failed login attempts.")
 	},
 }
