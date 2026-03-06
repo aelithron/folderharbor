@@ -17,7 +17,7 @@ import (
 
 var usersCMD = &cobra.Command{
 	Use:   "users",
-	Short: "(admin) manage users in folderharbor",
+	Short: "(admin) manage users",
 	Long:  "(admin) manage users and sessions on a folderharbor server",
 }
 var listUsersCMD = &cobra.Command{
