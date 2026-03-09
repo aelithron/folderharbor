@@ -1,5 +1,6 @@
 import { boolean, integer, json, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import type { Permission } from "../permissions/permissions.js";
+import type { AuditBody, AuditAction } from "../utils/auditlog.js";
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -30,4 +31,11 @@ export const aclsTable = pgTable("acls", {
   name: text().notNull(),
   allow: json().$type<string[]>().notNull().default([]),
   deny: json().$type<string[]>().notNull().default([])
+});
+export const logsTable = pgTable("logs", {
+  userid: integer().notNull(),
+  action: text().notNull().$type<AuditAction>(),
+  success: boolean().notNull(),
+  body: json().default({}).$type<AuditBody>(),
+  createdAt: timestamp({ mode: "date", withTimezone: true }).notNull().defaultNow()
 });
