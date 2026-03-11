@@ -9,15 +9,14 @@ export type AuditAction = (
   `auth-${"login" | "logout" | "edit"}` |
   `config-${"read" | "edit"}`
 );
-export type AuditBody = Partial<{ filePath: string, oldPath: string } | { id: number, newContents: unknown } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
+export type AuditBody = Partial<{ filePath: string, oldPath: string } | { id: number, accessLevel: "full" | "limited", newContents: unknown } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
 
-export async function writeLog(userID: number, action: AuditAction, success: boolean, body: AuditBody | null): Promise<{ success: true } | { error: "server" }> {
+export async function writeLog(userID: number, username: string | null, action: AuditAction, body: AuditBody | null, blurb?: string) {
   try {
-    await db.insert(logsTable).values({ userid: userID, action, success, body });
-    return { success: true };
+    await db.insert(logsTable).values({ userid: userID, username, action, blurb, body });
   } catch (e) {
-    console.error(`Database Error - ${e}`);
-    return { error: "server" };
+    console.error(`Logging - Database Error - ${e}`);
+    return;
   }
 }
 export async function readLogs(): Promise<{ userID: number, action: AuditAction, body: AuditBody | null, createdAt: Date }[] | { error: "server" }> {

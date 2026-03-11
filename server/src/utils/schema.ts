@@ -34,8 +34,9 @@ export const aclsTable = pgTable("acls", {
 });
 export const logsTable = pgTable("logs", {
   userid: integer().notNull(),
+  username: text(),
   action: text().notNull().$type<AuditAction>(),
-  success: boolean().notNull(),
+  blurb: text().notNull().default("took an action"),
   body: json().default({}).$type<AuditBody>(),
   createdAt: timestamp({ mode: "date", withTimezone: true }).notNull().defaultNow()
 });
