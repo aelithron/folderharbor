@@ -146,7 +146,7 @@ router.patch("/:userID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  updateParams.password = "[redacted]";
+  if (updateParams.password) updateParams.password = "[redacted]";
   await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), accessLevel, newContents: updateParams }, "edited a user");
   return res.json({ success: true });
 });
