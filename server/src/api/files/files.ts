@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { enforceAuth } from "../api.js";
 import { getItemType, listDir, readFile, writeFile } from "../../core.js";
 import path from "path";
+import { writeLog } from "../../utils/auditlog.js";
 const router: Router = express.Router();
 router.use(enforceAuth());
 router.get("/", async (req, res) => {
@@ -27,15 +28,15 @@ router.get("/", async (req, res) => {
         case "server":
           return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
         case "invalid_path":
-          return res.status(400).json({ error: "path", message: "The item at the specified path doesn't exist." });
+        case "not_allowed":
+          return res.status(400).json({ error: "path", message: "The item at the specified path doesn't exist, or you don't have permission to access it." });
         case "not_found":
           return res.status(401).json({ error: "session", message: "There was an error with looking up your user, please sign in again." });
-        case "not_allowed":
-          return res.status(403).json({ error: "access", message: "You don't have permission to access that path!" });
         default:
           return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
       }
     }
+    await writeLog(req.session.userID, req.session.username, "files-read", { filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "file" }, "read a file");
     return res.json({ type: type.type, contents: file.contents.toString() });
   } else if (type.type === "folder") {
     const files = await listDir(req.session.userID, (req.query.path ? path.resolve(req.query.path as string) : undefined));
@@ -49,6 +50,7 @@ router.get("/", async (req, res) => {
           return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
       }
     }
+    await writeLog(req.session.userID, req.session.username, "files-read", { filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "folder" }, "listed a folder");
     return res.json({ type: type.type, ...files });
   } else {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
@@ -84,6 +86,7 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "files-create", { filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "file" }, "created a file");
   return res.json({ success: true });
 });
 export { router };
