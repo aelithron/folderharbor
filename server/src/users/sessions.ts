@@ -7,7 +7,7 @@ import { DateTime } from "luxon";
 import { getConfig } from "../index.js";
 import type { Session } from "../types/folderharbor.js";
 
-export async function createSession(username: string, password: string): Promise<{ token: string } | { error: "server" | "not_found" | "wrong_password" | "locked" | "rate_limited" }> {
+export async function createSession(username: string, password: string): Promise<{ token: string, userID: number } | { error: "server" | "not_found" | "locked" | "rate_limited" } | { error: "wrong_password", userID: number }> {
   const config = getConfig();
   let user;
   try {
@@ -38,7 +38,7 @@ export async function createSession(username: string, password: string): Promise
       } else {
         await db.update(usersTable).set({ failedLogins: user[0].failedLogins + 1 }).where(eq(usersTable.id, user[0].id));
       }
-      return { error: "wrong_password" };
+      return { error: "wrong_password", userID: user[0].id };
     }
   } catch (e) {
     console.error(`Server Error - ${e}`);
@@ -53,7 +53,7 @@ export async function createSession(username: string, password: string): Promise
     console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
-  return { token };
+  return { token, userID: user[0].id };
 }
 export async function getSession(token: string): Promise<Session | { error: "server" | "invalid" | "expired" | "locked" }> {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");

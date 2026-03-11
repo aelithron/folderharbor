@@ -33,7 +33,6 @@ router.post("/", async (req, res) => {
   if (!req.body.username || (req.body.username as string).length < 1) return res.status(400).json({ error: "username", message: 'No username ("username" parameter) provided.' });
   if (!req.body.password || (req.body.password as string).length < 1) return res.status(400).json({ error: "password", message: 'No password ("password" parameter) provided.' });
   const newUser = await createUser(req.body.username, req.body.password, {  });
-  await writeLog(req.session.userID, req.session.username, "users-create", { id: newUser.id, newContents: { username: req.body.username, password: "[redacted]" } }, "created a user");
   if ("error" in newUser) {
     switch (newUser.error) {
       case "server":
@@ -44,6 +43,7 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "users-create", { id: newUser.id, newContents: { username: req.body.username, password: "[redacted]" } }, "created a user");
   return res.json({ id: newUser.id });
 });
 router.get("/:userID", async (req, res) => {
@@ -97,6 +97,7 @@ router.patch("/:userID", async (req, res) => {
   } else return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   let result;
+  let updateParams: Partial<{ username: string, password: string, clearLoginAttempts: boolean, roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}`)[] }> = {};
   if (accessLevel === "full") {
     if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!permissions.find(otherNode => otherNode.id === node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
     if (Array.isArray(req.body.acls)) {
@@ -123,18 +124,14 @@ router.patch("/:userID", async (req, res) => {
       }
       for (const id of req.body.roles) if (!roles.find(role => role.id === id)) return res.status(400).json({ error: "roles", message: `Role "${id}" doesn't exist, please correct this and try again.` });
     }
-    const updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: (Array.isArray(req.body.roles) ? req.body.roles : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined), permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined) };
+    updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts, roles: (Array.isArray(req.body.roles) ? req.body.roles : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined), permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined) };
     if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
     result = await editUser(parseInt(req.params.userID), updateParams);
-    updateParams.password = "[redacted]";
-    await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), accessLevel, newContents: updateParams }, "edited a user");
   }
   if (accessLevel === "limited") {
-    const updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
+    updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
     if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
     result = await editUser(parseInt(req.params.userID), updateParams);
-    updateParams.password = "[redacted]";
-    await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), accessLevel, newContents: updateParams }, "edited a user");
   }
   if (result === undefined) return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
   if ("error" in result) {
@@ -149,6 +146,8 @@ router.patch("/:userID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  updateParams.password = "[redacted]";
+  await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), accessLevel, newContents: updateParams }, "edited a user");
   return res.json({ success: true });
 });
 router.patch("/:userID/lock", async (req, res) => {
@@ -161,7 +160,6 @@ router.patch("/:userID/lock", async (req, res) => {
   if (req.body.locked !== true && req.body.locked !== false) return res.status(400).json({ error: "request_body", message: "Your request's body is missing a valid 'locked' attribute (not a boolean)." });
   if (Number.parseInt(req.params.userID) === req.session.userID) return res.status(400).json({ error: "editing_self", message: "You can't lock/unlock yourself." });
   const result = await editUser(parseInt(req.params.userID), { locked: req.body.locked });
-  await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), newContents: { locked: req.body.locked } }, "edited a user");
   if ("error" in result) {
     switch (result.error) {
       case "server":
@@ -172,6 +170,7 @@ router.patch("/:userID/lock", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), newContents: { locked: req.body.locked } }, "edited a user");
   return res.json({ success: true });
 });
 router.delete("/:userID", async (req, res) => {
@@ -181,7 +180,6 @@ router.delete("/:userID", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "users:delete")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   const result = await deleteUser(parseInt(req.params.userID));
-  await writeLog(req.session.userID, req.session.username, "users-delete", { id: parseInt(req.params.userID) }, "deleted a user");
   if ("error" in result) {
     switch (result.error) {
       case "server":
@@ -192,6 +190,7 @@ router.delete("/:userID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "users-delete", { id: parseInt(req.params.userID) }, "deleted a user");
   return res.json({ success: true });
 });
 export { router };

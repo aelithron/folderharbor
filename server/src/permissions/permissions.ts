@@ -1,7 +1,7 @@
 import { getUser } from "../users/users.js";
 import { getUserRoles } from "./roles.js";
 
-export const permissions: { id: `${"users" | "roles" | "acls" | "config"}:${string}`, description: string }[] = [
+export const permissions: { id: `${"users" | "roles" | "acls" | "config" | "logs"}:${string}`, description: string }[] = [
   { id: "users:create", description: "Create new users" },
   { id: "users:read", description: "Read users' information (to a limited degree)" },
   { id: "users:read.full", description: "Read users' full information" },
@@ -24,7 +24,9 @@ export const permissions: { id: `${"users" | "roles" | "acls" | "config"}:${stri
   { id: "acls:list", description: "Get a list of ACL names and IDs" },
 
   { id: "config:read", description: "Read config settings" },
-  { id: "config:edit", description: "Change most config settings (not global exclusions)" }
+  { id: "config:edit", description: "Change most config settings (not global exclusions)" },
+
+  { id: "logs:read", description: "Read the audit log" }
 ];
 export type Permission = (typeof permissions)[number]["id"];
 export async function checkPermission(userID: number, permission: Permission): Promise<boolean | { error: "server" | "not_found" }> {

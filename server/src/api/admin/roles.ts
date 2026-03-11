@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { checkPermission, permissions } from "../../permissions/permissions.js";
 import { createRole, deleteRole, editRole, getAllRoles, getRole } from "../../permissions/roles.js";
 import { getAllACLs } from "../../permissions/acls.js";
+import { writeLog } from "../../utils/auditlog.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {
@@ -50,6 +51,7 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "roles-create", { id: role.id, newContents: { name: req.body.name, permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : []), acls: (Array.isArray(req.body.acls) ? req.body.acls : []) } }, "created a role");
   return res.json({ id: role.id });
 });
 router.get("/:roleID", async (req, res) => {
@@ -69,6 +71,7 @@ router.get("/:roleID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "roles-read", { id: parseInt(req.params.roleID) }, "read a role");
   return res.json(role);
 });
 router.patch("/:roleID", async (req, res) => {
@@ -104,6 +107,7 @@ router.patch("/:roleID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "roles-edit", { id: parseInt(req.params.roleID), newContents: updateParams }, "edited a role");
   return res.json({ success: true });
 });
 router.delete("/:roleID", async (req, res) => {
@@ -123,6 +127,7 @@ router.delete("/:roleID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "roles-delete", { id: parseInt(req.params.roleID) }, "deleted a role");
   return res.json({ success: true });
 });
 export { router };

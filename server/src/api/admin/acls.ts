@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import { checkPermission } from "../../permissions/permissions.js";
 import { createACL, deleteACL, editACL, getACL, getAllACLs } from "../../permissions/acls.js";
+import { writeLog } from "../../utils/auditlog.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {
@@ -36,6 +37,7 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "acls-create", { id: newACL.id, newContents: { name: req.body.name, allow: (Array.isArray(req.body.allow) ? req.body.allow : undefined), deny: (Array.isArray(req.body.deny) ? req.body.deny : undefined) }  }, "created an ACL");
   return res.json({ id: newACL.id });
 });
 router.get("/:aclID", async (req, res) => {
@@ -55,6 +57,7 @@ router.get("/:aclID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "acls-read", { id: parseInt(req.params.aclID) }, "read an ACL");
   return res.json(acl);
 });
 router.patch("/:aclID", async (req, res) => {
@@ -77,6 +80,7 @@ router.patch("/:aclID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "acls-edit", { id: parseInt(req.params.aclID), newContents: updateParams }, "edited an ACL");
   return res.json({ success: true });
 });
 router.delete("/:aclID", async (req, res) => {
@@ -96,6 +100,7 @@ router.delete("/:aclID", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "acls-delete", { id: parseInt(req.params.aclID) }, "deleted an ACL");
   return res.json({ success: true });
 });
 export { router };

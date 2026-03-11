@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import { createSession, revokeSession } from "../users/sessions.js";
 import { enforceAuth } from "./api.js";
+import { writeLog } from "../utils/auditlog.js";
 const router: Router = express.Router();
 router.post("/", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
@@ -14,6 +15,7 @@ router.post("/", async (req, res) => {
       case "not_found":
         return res.status(400).json({ error: "username", message: "That username doesn't exist." });
       case "wrong_password":
+        await writeLog(session.userID, req.body.username, "auth-login", { authSuccess: false }, "attempted to log in");
         return res.status(403).json({ error: "password", message: "Incorrect password." });
       case "locked":
         return res.status(403).json({ error: "locked", message: "Your account is locked, please contact your administrator." });
@@ -23,6 +25,7 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  await writeLog(session.userID, req.body.username, "auth-login", { authSuccess: true }, "logged in");
   return res.cookie("token", session.token).json(session);
 });
 

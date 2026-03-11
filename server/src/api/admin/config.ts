@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { checkPermission } from "../../permissions/permissions.js";
 import { getConfig } from "../../index.js";
 import { editConfig } from "../../utils/config.js";
+import { writeLog } from "../../utils/auditlog.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {
   if (!req.session) {
@@ -13,6 +14,7 @@ router.get("/", async (req, res) => {
     console.error("Server Error - Config not loaded, but requested on the API.");
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
+  await writeLog(req.session.userID, req.session.username, "config-read", null, "read the config");
   return res.json(getConfig());
 });
 router.patch("/", async (req, res) => {
@@ -37,6 +39,7 @@ router.patch("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
     }
   }
+  await writeLog(req.session.userID, req.session.username, "config-edit", { newConfigItems: req.body }, "edited the config");
   return res.json({ success: true });
 });
 export { router };
