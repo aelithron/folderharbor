@@ -20,7 +20,7 @@ router.get("/logs", async (req, res) => {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "logs:read")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
-  const logs = await readLogs();
+  const logs = await readLogs(req.query.page ? parseInt(req.query.page as string) : undefined);
   if ("error" in logs && logs.error === "server") return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   return res.json(logs);
 });
