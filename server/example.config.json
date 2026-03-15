@@ -1,5 +1,6 @@
 {
   "apiPort": 3000,
+  "webdavPort": 1900,
   "failedLoginLimit": 5,
   "selfUsernameChanges": true,
   "globalExclusions": [

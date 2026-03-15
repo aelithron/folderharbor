@@ -4,11 +4,14 @@ import path from "path";
 import loadConfig, { Config } from "./utils/config.js";
 import startAPI from "./api/api.js";
 import type { Server } from "http";
+import type { WebDAVServer } from "webdav-server/lib/index.v2.js";
 import dotenv from "dotenv";
+import startWebDAV from "./protocols/webdav/webdav.js";
 
 let config: z.Infer<typeof Config>;
 let configPath: string | undefined;
 let api: Server;
+let webdav: WebDAVServer;
 program
   .name("folderharbor").description("A powerful file server that supports many protocols")
   .option("-c, --config <path>", "path to server config")
@@ -30,10 +33,12 @@ async function startServer() {
     process.exit(1);
   }
   api = await startAPI(config.apiPort);
+  webdav = await startWebDAV(config.webdavPort);
 }
 async function stopServer() {
   console.log("Stopping FolderHarbor...");
   api.close(() => console.log("Stopped API server."));
+  webdav.stop(() => console.log("Stopped WebDAV server."));
 }
 await startServer();
 process.on("SIGTERM", async () => await stopServer());

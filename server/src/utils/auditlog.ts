@@ -9,7 +9,7 @@ export type AuditAction = (
   "auth-login" |
   `config-${"read" | "edit"}`
 );
-export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileType: "file" | "folder" } | { id: number, accessLevel: "full" | "limited", newContents: unknown } | { authSuccess: boolean } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
+export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileType: "file" | "folder" } | { id: number, accessLevel: "full" | "limited", newContents: unknown } | { authSuccess: boolean, authProtocol: "api" | "webdav" } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
 
 export async function writeLog(userID: number, username: string | null, action: AuditAction, body: AuditBody | null, blurb?: string) {
   try {
