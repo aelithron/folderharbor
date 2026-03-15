@@ -7,7 +7,7 @@ import { DateTime } from "luxon";
 import { getConfig } from "../index.js";
 import type { Session } from "../types/folderharbor.js";
 
-export async function createSession(username: string, password: string): Promise<{ token: string, userID: number } | { error: "server" | "not_found" | "locked" | "rate_limited" } | { error: "wrong_password", userID: number }> {
+export async function prepareSession(username: string, password: string): Promise<{ userID: number } | { error: "server" | "not_found" | "rate_limited" | "locked" }| { error: "wrong_password", userID: number }> {
   const config = getConfig();
   let user;
   try {
@@ -44,16 +44,24 @@ export async function createSession(username: string, password: string): Promise
     console.error(`Server Error - ${e}`);
     return { error: "server" };
   }
+  return { userID: user[0].id };
+}
+export async function createSession(username: string, password: string): Promise<{ token: string, userID: number } | { error: "server" | "not_found" | "locked" | "rate_limited" } | { error: "wrong_password", userID: number }> {
+  const userData = await prepareSession(username, password);
+  if ("error" in userData) {
+    if (userData.error === "wrong_password") return { error: userData.error, userID: userData.userID };
+    return { error: userData.error };
+  }
   const token = crypto.randomBytes(32).toString("base64url");
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   try {
-    await db.update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.id, user[0].id));
-    await db.insert(sessionsTable).values({ token: tokenHash, userid: user[0].id, expiry: DateTime.now().plus({ weeks: 1 }).toJSDate() });
+    await db.update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.id, userData.userID));
+    await db.insert(sessionsTable).values({ token: tokenHash, userid: userData.userID, expiry: DateTime.now().plus({ weeks: 1 }).toJSDate() });
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
-  return { token, userID: user[0].id };
+  return { token, userID: userData.userID };
 }
 export async function getSession(token: string): Promise<Session | { error: "server" | "invalid" | "expired" | "locked" }> {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
