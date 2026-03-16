@@ -5,6 +5,8 @@ import path from "path";
 import { getUser } from "../users/users.js";
 import { getUserRoles } from "./roles.js";
 import micromatch from "micromatch";
+import { getConfig } from "../index.js";
+import { getItemType } from "../core.js";
 
 export async function getPaths(userID: number): Promise<{ allow: string[], deny: string[] } | { error: "server" | "not_found" }> {
   const user = await getUser(userID);
@@ -33,9 +35,20 @@ export async function getPaths(userID: number): Promise<{ allow: string[], deny:
 export async function checkPath(userID: number, checkedPath: string): Promise<boolean> {
   const paths = await getPaths(userID);
   if ("error" in paths) return false;
-  let allowed: boolean = false;
-  if (micromatch.isMatch(path.normalize(checkedPath), paths.allow, { dot: true })) allowed = true;
-  if (micromatch.isMatch(path.normalize(checkedPath), paths.deny, { dot: true })) allowed = false;
+  let allowed = false;
+  const itemPath = path.normalize(checkedPath);
+  if (micromatch.isMatch(itemPath, getConfig()!.globalExclusions)) return false;
+  if (micromatch.isMatch(itemPath, paths.allow, { dot: true })) allowed = true;
+  if (micromatch.isMatch(itemPath, paths.deny, { dot: true })) allowed = false;
+  const itemType = await getItemType(itemPath);
+  if (!allowed && !("error" in itemType) && itemType.type === "folder") {
+    for (const prefix of paths.allow.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) {
+      if (prefix === itemPath || prefix.startsWith(itemPath + "/")) {
+        allowed = true;
+        break;
+      }
+    }
+  }
   return allowed;
 }
 export async function createACL(name: string, { allow, deny }: { allow?: string[], deny?: string[] }): Promise<{ id: number } | { error: "server" }> {

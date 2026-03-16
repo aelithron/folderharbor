@@ -23,14 +23,20 @@ export default async function startWebDAV(port: number): Promise<webdav.WebDAVSe
     if (fileName && (fileName.startsWith("._") || fileName === ".DS_Store" || fileName === "desktop.ini" || fileName === "thumbs.db")) return next();
     if (arg.response.statusCode >= 400) return next();
     switch (arg.request.method?.toUpperCase()) {
-      case "PROPFIND":
-        if (arg.request.headers["depth"] === "0") break;
-        action = "files-list";
-        blurb = "read a folder";
-        break;
       case "GET":
-        action = "files-read";
-        blurb = "read a file";
+        server.getResource(arg, decodeURIComponent(new URL(arg.fullUri()).pathname), (err, res) => {
+          if (err || !res) {
+            action = "files-read";
+            blurb = "read a file";
+          } else {
+            res.type((err, type) => {
+              if (err || !type || !type.isDirectory) {
+                action = "files-read";
+                blurb = "read a file";
+              }
+            });
+          }
+        });
         break;
       case "PUT":
         action = `files-${arg.response.statusCode === 201 ? "create" : "edit"}`;
@@ -49,7 +55,7 @@ export default async function startWebDAV(port: number): Promise<webdav.WebDAVSe
         blurb = "moved a file";
         break;
     }
-    if (action) writeLog(parseInt(arg.user.uid), arg.user.username, action, { protocol: "webdav", filePath: arg.fullUri(), oldFilePath: (arg.request.headers["destination"] ? new URL(arg.request.headers["destination"].toString(), arg.prefixUri()).pathname : undefined) }, blurb);
+    if (action) writeLog(parseInt(arg.user.uid), arg.user.username, action, { protocol: "webdav", filePath: decodeURIComponent(new URL(arg.fullUri()).pathname), oldFilePath: (arg.request.headers["destination"] ? decodeURIComponent(new URL(arg.request.headers["destination"].toString(), arg.prefixUri()).pathname) : undefined) }, blurb);
     return next();
   });
   return server;

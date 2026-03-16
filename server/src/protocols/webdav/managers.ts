@@ -56,9 +56,11 @@ export class FolderHarborUserManager implements ITestableUserManager {
   }
 }
 export class FolderHarborPrivilegeManager extends PrivilegeManager {
-  async _can(fullPath: Path, user: IUser, resource: Resource, privilege: BasicPrivilege | string, callback: PrivilegeManagerCallback) {
+  _can(fullPath: Path, user: IUser, resource: Resource, privilege: BasicPrivilege | string, callback: PrivilegeManagerCallback) {
     if (!user) return callback(Errors.None, false);
-    const access = await checkPath(parseInt(user.uid), fullPath.toString());
-    return callback(Errors.None, access);
+    checkPath(parseInt(user.uid), fullPath.toString()).then((access) => {
+      console.log(fullPath.toString(), access);
+      return callback(Errors.None, access);
+    });
   }
 }
