@@ -10,8 +10,15 @@
           e.preventDefault();
           const res = await fetch("/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: document.getElementById("username").value, password: document.getElementById("password").value }) });
           const body = await res.json();
-          if ("error" in body) alert(`Error signing in: ${body.message} (${body.error})`);
-          document.getElementById("response").className = "flex flex-col items-center mt-2";
+          if ("error" in body) {
+            document.getElementById("response").className = "flex flex-col items-center mt-4 p-3 rounded-lg bg-red-200";
+            document.getElementById("resTitle").innerText = `Error signing in! (${body.error})`;
+            document.getElementById("errorMsg").innerText = `${body.message}`;
+            document.getElementById("token").className = "hidden";
+            document.getElementById("copyWebDAV").className = "hidden";
+            return;
+          }
+          document.getElementById("response").className = "flex flex-col items-center mt-4 p-3 rounded-lg bg-violet-200";
           document.getElementById("resTitle").innerText = "Signed in!";
           document.getElementById("token").innerText = `Your token: ${body.token}`;
           document.getElementById("token").addEventListener("click", () => {
@@ -44,6 +51,7 @@
         <h1 id="resTitle" class="text-lg font-semibold"></h1>
         <pre id="token" class="bg-slate-200 p-4 rounded-lg hover:text-sky-500"></pre>
         <button id="copyWebDAV" type="button" class="bg-violet-500 p-1 px-2 rounded-lg text-white mt-2 hover:text-sky-500">Copy for WebDAV</button>
+        <p id="errorMsg"></p>
       </div>
     </div>
   </body>
