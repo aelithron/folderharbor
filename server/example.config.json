@@ -3,6 +3,7 @@
   "webdavPort": 1900,
   "failedLoginLimit": 5,
   "selfUsernameChanges": true,
+  "filterMetadata": true,
   "globalExclusions": [
     "/bin/**",
     "/boot/**",

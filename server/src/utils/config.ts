@@ -9,6 +9,7 @@ export const Config = z.object({
   webdavPort: z.int().positive(),
   failedLoginLimit: z.int().positive().default(5),
   selfUsernameChanges: z.boolean().default(true),
+  filterMetadata: z.boolean().default(true),
   globalExclusions: z.array(z.string()).readonly()
 });
 export default async function loadConfig(allowPermissive: boolean, configPath?: string): Promise<z.Infer<typeof Config>> {

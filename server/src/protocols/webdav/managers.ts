@@ -36,7 +36,7 @@ export class FolderHarborUserManager implements ITestableUserManager {
               callback(new Error("That username doesn't exist."));
               return;
             case "wrong_password":
-              writeLog(data.userID, name, "auth-login", { authSuccess: false, authProtocol: "webdav" }, "attempted to log in");
+              writeLog(data.userID, name, "auth-login", { authSuccess: false, protocol: "webdav" }, "attempted to log in");
               callback(new Error("Incorrect password."));
               return;
             case "locked":

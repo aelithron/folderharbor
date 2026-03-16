@@ -4,12 +4,12 @@ import { logsTable } from "./schema.js";
 import type { Config } from "./config.js";
 
 export type AuditAction = (
-  `files-${"create" | "read" | "edit" | "delete" | "move"}` |
+  `files-${"create" | "read" | "edit" | "delete" | "move" | "list"}` |
   `${"users" | "roles" | "acls"}-${"create" | "read" | "edit" | "delete"}` |
   "auth-login" |
   `config-${"read" | "edit"}`
 );
-export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileType: "file" | "folder" } | { id: number, accessLevel: "full" | "limited", newContents: unknown } | { authSuccess: boolean, authProtocol: "api" | "webdav" } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
+export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileType: "file" | "folder", protocol: "api" | "webdav" } | { id: number, accessLevel: "full" | "limited", newContents: unknown } | { authSuccess: boolean, protocol: "api" | "webdav" } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
 
 export async function writeLog(userID: number, username: string | null, action: AuditAction, body: AuditBody | null, blurb?: string) {
   try {

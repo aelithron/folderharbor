@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
           return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
       }
     }
-    await writeLog(req.session.userID, req.session.username, "files-read", { filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "file" }, "read a file");
+    await writeLog(req.session.userID, req.session.username, "files-read", { protocol: "webdav", filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "file" }, "read a file");
     return res.json({ type: type.type, contents: file.contents.toString() });
   } else if (type.type === "folder") {
     const files = await listDir(req.session.userID, (req.query.path ? path.resolve(req.query.path as string) : undefined));
@@ -50,7 +50,7 @@ router.get("/", async (req, res) => {
           return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
       }
     }
-    await writeLog(req.session.userID, req.session.username, "files-read", { filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "folder" }, "listed a folder");
+    await writeLog(req.session.userID, req.session.username, "files-read", { protocol: "webdav", filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "folder" }, "listed a folder");
     return res.json({ type: type.type, ...files });
   } else {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
@@ -86,7 +86,7 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  await writeLog(req.session.userID, req.session.username, "files-create", { filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "file" }, "created a file");
+  await writeLog(req.session.userID, req.session.username, "files-create", { protocol: "webdav", filePath: (req.query.path ? path.resolve(req.query.path as string) : "/"), fileType: "file" }, "created a file");
   return res.json({ success: true });
 });
 export { router };
