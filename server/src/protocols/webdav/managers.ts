@@ -1,8 +1,13 @@
-import type { BasicPrivilege, PrivilegeManagerCallback } from "webdav-server";
-import { Errors, Path, PrivilegeManager, Resource, type ITestableUserManager, type IUser } from "webdav-server/lib/index.v2.js";
+import type { BasicPrivilege, PrivilegeManagerCallback, ReturnCallback } from "webdav-server";
+import { Errors, Path, PhysicalFileSystem, PrivilegeManager, Resource, type ITestableUserManager, type IUser, type ReadDirInfo } from "webdav-server/lib/index.v2.js";
 import { getSession, prepareSession } from "../../users/sessions.js";
-import { checkPath } from "../../permissions/acls.js";
+import { checkPath, getPaths } from "../../permissions/acls.js";
 import { writeLog } from "../../utils/auditlog.js";
+import fs from "fs";
+import micromatch from "micromatch";
+import { getConfig } from "../../index.js";
+import path from "path";
+import { getItemType } from "../../core.js";
 
 export class FolderHarborUserManager implements ITestableUserManager {
   getDefaultUser(callback: (user: IUser) => void) { callback({ uid: "-1", isDefaultUser: true, isAdministrator: false, username: "default", password: "" }); }
@@ -58,9 +63,36 @@ export class FolderHarborUserManager implements ITestableUserManager {
 export class FolderHarborPrivilegeManager extends PrivilegeManager {
   _can(fullPath: Path, user: IUser, resource: Resource, privilege: BasicPrivilege | string, callback: PrivilegeManagerCallback) {
     if (!user) return callback(Errors.None, false);
-    checkPath(parseInt(user.uid), fullPath.toString()).then((access) => {
-      console.log(fullPath.toString(), access);
-      return callback(Errors.None, access);
+    checkPath(parseInt(user.uid), fullPath.toString()).then((access) => { return callback(Errors.None, access); });
+  }
+}
+export class FolderHarborFileSystem extends PhysicalFileSystem {
+  _readDir(itemPath: Path, ctx: ReadDirInfo, callback: ReturnCallback<string[] | Path[]>) {
+    const { realPath } = this.getRealPath(itemPath);
+    fs.readdir(realPath, async (e, files) => {
+      const allowedFiles: string[] = [];
+      const paths = await getPaths(parseInt(ctx.context.user.uid));
+      if ("error" in paths) return callback(new Error("Something went wrong on the server's end, please contact your administrator."), []);
+      for (const item of files) {
+        let allowed = false;
+        const checkPath = path.normalize(path.join(itemPath.toString(), item));
+        if (micromatch.isMatch(checkPath, getConfig()!.globalExclusions)) continue;
+        if (micromatch.isMatch(checkPath, paths.allow, { dot: true })) allowed = true;
+        if (micromatch.isMatch(checkPath, paths.deny, { dot: true })) allowed = false;
+        if (!allowed) {
+          const type = await getItemType(checkPath);
+          if (!("error" in type) && type.type === "folder") {
+            for (const prefix of paths.allow.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) {
+              if (prefix === checkPath|| prefix.startsWith(checkPath + "/")) {
+                allowed = true;
+                break;
+              }
+            }
+          }
+        }
+        if (allowed) allowedFiles.push(item);
+      }
+      callback(e ? Errors.ResourceNotFound : Errors.None, allowedFiles);
     });
   }
 }
