@@ -37,9 +37,8 @@ export async function checkPath(userID: number, checkedPath: string): Promise<bo
   if ("error" in paths) return false;
   let allowed = false;
   const itemPath = path.normalize(checkedPath);
-  if (micromatch.isMatch(itemPath, getConfig()!.globalExclusions)) return false;
   if (micromatch.isMatch(itemPath, paths.allow, { dot: true })) allowed = true;
-  if (micromatch.isMatch(itemPath, paths.deny, { dot: true })) allowed = false;
+  if (micromatch.isMatch(itemPath, paths.deny, { dot: true }) || micromatch.isMatch(itemPath, getConfig()!.globalExclusions)) allowed = false;
   const itemType = await getItemType(itemPath);
   if (!allowed && !("error" in itemType) && itemType.type === "folder") {
     for (const prefix of paths.allow.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) {
