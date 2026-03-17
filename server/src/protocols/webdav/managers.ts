@@ -28,7 +28,7 @@ export class FolderHarborUserManager implements ITestableUserManager {
               return callback(new Error("An unknown error occured."));
           }
         }
-        return callback(Errors.None, { uid: session.userID.toString(), username: session.username, password: password.split("token:")[1]!, isAdministrator: false, isDefaultUser: false });
+        return callback(Errors.None, { uid: session.userID.toString(), username: session.username, password: password.split("token_")[1]!, isAdministrator: false, isDefaultUser: false });
       });
     } else {
       prepareSession(name, password).then((data) => {
