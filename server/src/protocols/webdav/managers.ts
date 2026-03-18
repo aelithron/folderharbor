@@ -76,14 +76,18 @@ export class FolderHarborFileSystem extends PhysicalFileSystem {
       for (const item of files) {
         let allowed = false;
         const checkPath = path.normalize(path.join(itemPath.toString(), item));
-        if (micromatch.isMatch(checkPath, getConfig()!.globalExclusions)) continue;
+        const type = await getItemType(checkPath);
+        if (micromatch.isMatch(checkPath, getConfig()!.globalExclusions, { dot: true }) && !micromatch.isMatch(checkPath, getConfig()!.globalExclusionBypasses, { dot: true })) {
+          let bypassExclusions = false;
+          if (!("error" in type) && type.type === "folder") for (const prefix of getConfig()!.globalExclusionBypasses.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) if (prefix === checkPath || prefix.startsWith(checkPath + "/")) bypassExclusions = true;
+          if (!bypassExclusions) continue;
+        }
         if (micromatch.isMatch(checkPath, paths.allow, { dot: true })) allowed = true;
         if (micromatch.isMatch(checkPath, paths.deny, { dot: true })) allowed = false;
         if (!allowed) {
-          const type = await getItemType(checkPath);
           if (!("error" in type) && type.type === "folder") {
             for (const prefix of paths.allow.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) {
-              if (prefix === checkPath|| prefix.startsWith(checkPath + "/")) {
+              if (prefix === checkPath || prefix.startsWith(checkPath + "/")) {
                 allowed = true;
                 break;
               }
