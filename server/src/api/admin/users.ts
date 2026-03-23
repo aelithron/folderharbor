@@ -168,7 +168,7 @@ router.patch("/:userID/grant/:type", async (req, res) => {
         }
       }
       for (const item of (req.body.roles as number[])) {
-        for (const id of req.body.acls) if (!allRoles.find(acl => acl.id === id)) return res.status(400).json({ error: "roles", message: `Role "${id}" doesn't exist, please correct this and try again.` });
+        if (!allRoles.find(acl => acl.id === item)) return res.status(400).json({ error: "roles", message: `Role "${item}" doesn't exist, please correct this and try again.` });
         roles.add(item);
       }
       updateParams.roles = [...roles];
@@ -187,7 +187,7 @@ router.patch("/:userID/grant/:type", async (req, res) => {
         }
       }
       for (const item of (req.body.acls as number[])) {
-        for (const id of req.body.acls) if (!allACLs.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
+        if (!allACLs.find(acl => acl.id === item)) return res.status(400).json({ error: "acls", message: `ACL "${item}" doesn't exist, please correct this and try again.` });
         acls.add(item);
       }
       updateParams.acls = [...acls];
