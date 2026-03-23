@@ -2,8 +2,13 @@ import { v2 as webdav } from "webdav-server";
 import { FolderHarborFileSystem, FolderHarborPrivilegeManager, FolderHarborUserManager } from "./managers.js";
 import { writeLog, type AuditAction } from "../../utils/auditlog.js";
 import { getConfig } from "../../index.js";
-export default async function startWebDAV(port: number): Promise<webdav.WebDAVServer> {
-  const server = new webdav.WebDAVServer({ port, requireAuthentification: true, httpAuthentication: new webdav.HTTPBasicAuthentication(new FolderHarborUserManager(), "FolderHarbor"), privilegeManager: new FolderHarborPrivilegeManager(), serverName: "FolderHarbor WebDAV" });
+export default async function startWebDAV(port: number, sslKey?: string, sslCert?: string): Promise<webdav.WebDAVServer> {
+  let server;
+  if (sslCert && sslKey) {
+    server = new webdav.WebDAVServer({ port, requireAuthentification: true, httpAuthentication: new webdav.HTTPBasicAuthentication(new FolderHarborUserManager(), "FolderHarbor"), privilegeManager: new FolderHarborPrivilegeManager(), serverName: "FolderHarbor WebDAV", https: { key: sslKey, cert: sslCert } });
+  } else {
+    server = new webdav.WebDAVServer({ port, requireAuthentification: true, httpAuthentication: new webdav.HTTPBasicAuthentication(new FolderHarborUserManager(), "FolderHarbor"), privilegeManager: new FolderHarborPrivilegeManager(), serverName: "FolderHarbor WebDAV" });
+  }
   await server.setFileSystemAsync("/", new FolderHarborFileSystem("/"));
   server.start(() => console.log(`WebDAV server running (port ${port})`));
   let action: AuditAction | undefined;

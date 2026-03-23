@@ -42,7 +42,7 @@ async function startServer() {
       process.exit(1);
     }
     api = await startAPI(config.apiPort, ssl.key, ssl.cert);
-    webdav = await startWebDAV(config.webdavPort);
+    webdav = await startWebDAV(config.webdavPort, ssl.key, ssl.cert);
   } else {
     api = await startAPI(config.apiPort);
     webdav = await startWebDAV(config.webdavPort);

@@ -10,14 +10,10 @@ export default async function loadCert(configPath?: string): Promise<{ key: stri
   const canLoad = { key: true, cert: true };
   try {
     await fs.access(keyPath, fs.constants.F_OK);
-  } catch {
-    canLoad.key = false;
-  }
+  } catch { canLoad.key = false; }
   try {
     await fs.access(certPath, fs.constants.F_OK);
-  } catch {
-    canLoad.cert = false;
-  }
+  } catch { canLoad.cert = false; }
   if (!canLoad.cert && !canLoad.key) {
     console.warn("SSL cert and key are missing, generating self-signed ones...");
     const signKey = forge.pki.rsa.generateKeyPair(2048);
