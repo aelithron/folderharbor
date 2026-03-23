@@ -5,6 +5,7 @@ import { getUserSessions, revokeAllSessions, revokeSession } from "../users/sess
 import { getConfig } from "../index.js";
 import { DateTime } from "luxon";
 import { getEffectivePermissions } from "../permissions/permissions.js";
+import { writeLog } from "../utils/auditlog.js";
 const router: Router = express.Router();
 router.use(enforceAuth());
 router.get("/", async (req, res) => {
@@ -70,7 +71,8 @@ router.patch("/", async (req, res) => {
     }
     if (DateTime.now().minus({ hours: 1 }) > DateTime.fromJSDate(sessions.find((item) => item.id === req.session!.sessionID)!.createdAt)) return res.status(403).json({ error: "stale_session", message: "Your session wasn't created within the past hour, please log in again to change your password." });
   }
-  const result = await editUser(req.session.userID, { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts });
+  const updateBody = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
+  const result = await editUser(req.session.userID, updateBody);
   if ("error" in result) {
     switch (result.error) {
       case "server":
@@ -81,7 +83,11 @@ router.patch("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  if (req.body.password) await revokeAllSessions(req.session.userID);
+  if (updateBody.password) {
+    await revokeAllSessions(req.session.userID);
+    updateBody.password = "[redacted]";
+  }
+  await writeLog(req.session.userID, req.session.username, "users-edit", { id: req.session.userID, newContents: updateBody }, "edited their own user");
   return res.json({ success: true });
 });
 router.delete("/session", async (req, res) => {
