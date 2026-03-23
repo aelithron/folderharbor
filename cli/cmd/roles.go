@@ -90,6 +90,7 @@ var changeRoleNameCMD = &cobra.Command{
 	Use: "name <id>",
 	Short: "change a role's name",
 	Long: "change the name of a role",
+	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		roleID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }

@@ -91,6 +91,7 @@ var changeACLNameCMD = &cobra.Command{
 	Use: "name <id>",
 	Short: "change an ACL's name",
 	Long: "change the name of an ACL",
+	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		aclID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }

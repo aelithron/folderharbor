@@ -164,6 +164,7 @@ var changeUsernameCMD = &cobra.Command{
 	Use: "username <id>",
 	Short: "change a user's username",
 	Long: "change the username of a user",
+	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
@@ -178,6 +179,7 @@ var changePasswordCMD = &cobra.Command{
 	Use: "password <id>",
 	Short: "change a user's password",
 	Long: "change the password for a user",
+	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
@@ -191,6 +193,7 @@ var clearFailedLoginsCMD = &cobra.Command{
 	Use: "failedlogins <id>",
 	Short: "reset a user's failed login counter",
 	Long: "reset the failed login counter for a user",
+	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
