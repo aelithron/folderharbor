@@ -85,7 +85,6 @@ type createUserReq struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
-type createUserRes struct { ID int `json:"id"` }
 func CreateUser(username, password string) (int) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(&createUserReq{ Username: username, Password: password })
@@ -108,7 +107,7 @@ func CreateUser(username, password string) (int) {
 		if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 		if errBody.Error != "" { handleAPIError(errBody) }
 	}
-	var body createUserRes
+	var body createRes
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body.ID
 }

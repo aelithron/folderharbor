@@ -23,6 +23,7 @@ type AuthInfo struct {
 type ClientConfig struct {
   SelfUsernameChanges bool `json:"selfUsernameChanges"`
 }
+type createRes struct { ID int `json:"id"` }
 
 func getAuth() (AuthInfo) {
 	token := viper.GetString("token")

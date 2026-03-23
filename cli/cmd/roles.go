@@ -86,6 +86,20 @@ var updateRoleCMD = &cobra.Command{
 	Short: "update a role's info",
 	Long: "update information for a role",
 }
+var changeRoleNameCMD = &cobra.Command{
+	Use: "name <id>",
+	Short: "change a role's name",
+	Long: "change the name of a role",
+  Run: func(cmd *cobra.Command, args []string) {
+		roleID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter the role's new name: ")
+		name, _ := reader.ReadString('\n')
+		routes.UpdateRole(roleID, routes.RoleInfoWrite{ Name: strings.TrimSpace(name) })
+		fmt.Println("Successfully changed role #" + fmt.Sprint(roleID) + "'s name to " + strings.TrimSpace(name) + ".")
+	},
+}
 func init() {
   rootCMD.AddCommand(rolesCMD)
 	rolesCMD.AddCommand(listRolesCMD)
@@ -93,4 +107,5 @@ func init() {
 	rolesCMD.AddCommand(createRoleCMD)
 	rolesCMD.AddCommand(deleteRoleCMD)
 	rolesCMD.AddCommand(updateRoleCMD)
+	updateRoleCMD.AddCommand(changeRoleNameCMD)
 }

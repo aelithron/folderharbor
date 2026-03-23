@@ -10,21 +10,21 @@ import (
 	"path"
 )
 
-type RoleList struct { 
-	RoleID int `json:"id"`
+type ACLList struct { 
+	ACLID int `json:"id"`
 	Name string `json:"name"`
 }
-type Role struct {
+type ACL struct {
 	Name string `json:"name"`
-	Permissions []string `json:"permissions"`
-	ACLs []int `json:"acls"`
+	Allow []string `json:"allow"`
+	Deny []string `json:"deny"`
 }
 
-func ListRoles() ([]RoleList) {
+func ListACLs() ([]ACLList) {
 	auth := getAuth()
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/roles")
+	addr.Path = path.Join(addr.Path, "/admin/acls")
 	req, err := http.NewRequest(http.MethodGet, addr.String(), nil)
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
@@ -40,17 +40,17 @@ func ListRoles() ([]RoleList) {
 		if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 		if errBody.Error != "" { handleAPIError(errBody) }
 	}
-	var body []RoleList
+	var body []ACLList
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body	
 }
-type createRoleReq struct { Name string `json:"string"` }
-func CreateRole(name string) (int) {
+type createACLReq struct { Name string `json:"string"` }
+func CreateACL(name string) (int) {
 	auth := getAuth()
-	reqBody, _ := json.Marshal(&createRoleReq{ Name: name })
+	reqBody, _ := json.Marshal(&createACLReq{ Name: name })
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/roles")
+	addr.Path = path.Join(addr.Path, "/admin/acls")
 	req, err := http.NewRequest(http.MethodPost, addr.String(), bytes.NewBuffer(reqBody))
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
@@ -71,11 +71,11 @@ func CreateRole(name string) (int) {
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body.ID
 }
-func GetRole(roleID int) (Role) {
+func GetACL(aclID int) (ACL) {
 	auth := getAuth()
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/roles/" + fmt.Sprint(roleID))
+	addr.Path = path.Join(addr.Path, "/admin/acls/" + fmt.Sprint(aclID))
 	req, err := http.NewRequest(http.MethodGet, addr.String(), nil)
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
@@ -89,21 +89,21 @@ func GetRole(roleID int) (Role) {
 	var errBody APIError
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
-	var body Role
+	var body ACL
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body
 }
-type RoleInfoWrite struct {
+type ACLInfoWrite struct {
 	Name string `json:"name,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
-	ACLs []int `json:"acls,omitempty"`
+	Allow []string `json:"allow,omitempty"`
+	Deny []string `json:"deny,omitempty"`
 }
-func UpdateRole(roleID int, info RoleInfoWrite) {
+func UpdateACL(aclID int, info ACLInfoWrite) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(info)
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/roles/" + fmt.Sprint(roleID))
+	addr.Path = path.Join(addr.Path, "/admin/acls/" + fmt.Sprint(aclID))
 	req, err := http.NewRequest(http.MethodPatch, addr.String(), bytes.NewBuffer(reqBody))
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
@@ -119,11 +119,11 @@ func UpdateRole(roleID int, info RoleInfoWrite) {
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
 }
-func DeleteRole(roleID int) {
+func DeleteACL(aclID int) {
 	auth := getAuth()
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/roles/" + fmt.Sprint(roleID))
+	addr.Path = path.Join(addr.Path, "/admin/acls/" + fmt.Sprint(aclID))
 	req, err := http.NewRequest(http.MethodDelete, addr.String(), nil)
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
