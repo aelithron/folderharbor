@@ -8,7 +8,7 @@ import type { WebDAVServer } from "webdav-server/lib/index.v2.js";
 import dotenv from "dotenv";
 import startWebDAV from "./protocols/webdav/webdav.js";
 import loadCert from "./utils/ssl.js";
-import { setUpServer } from "./utils/setup.js";
+import { recoverServer, setUpServer } from "./utils/scripts.js";
 
 let config: z.Infer<typeof Config>;
 let configPath: string | undefined;
@@ -19,11 +19,13 @@ program
   .option("-c, --config <path>", "path to server config")
   .option("--allow-root-user", "allow the server to run as root (this can cause security risks!)")
   .option("--allow-permissive-config", "allow the server to load a configuration that is overly permissive")
-  .option("--setup", "run folderharbor in setup mode, don't start the full server");
+  .option("--setup", "run folderharbor in setup mode, don't start the full server")
+  .option("--recovery", "run folderharbor in recovery mode, don't start the full server");
 async function startServer() {
   await program.parseAsync();
   dotenv.config({ quiet: true });
   if (program.opts().setup) await setUpServer();
+  if (program.opts().recovery) await recoverServer();
   if ((process.getuid && process.getgid) && (process.getuid() === 0 || process.getgid() === 0) && !program.opts().allowRootUser) {
     console.error('You started FolderHarbor as root! This is a security risk.\nIf you understand the risks, you can override this check with the "--allow-root-user" argument.');
     process.exit(1);
