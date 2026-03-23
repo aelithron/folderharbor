@@ -2,6 +2,7 @@ import type z from "zod";
 import db from "./db.js";
 import { logsTable } from "./schema.js";
 import type { Config } from "./config.js";
+import { desc } from "drizzle-orm";
 
 export type AuditAction = (
   `files-${"create" | "read" | "edit" | "delete" | "move" | "list"}` |
@@ -24,7 +25,7 @@ export async function readLogs(page?: number): Promise<{ pageCount: number, logs
   let logs;
   let pageCount;
   try {
-    logs = await db.select({ userID: logsTable.userid, username: logsTable.username, action: logsTable.action, body: logsTable.body, blurb: logsTable.blurb, createdAt: logsTable.createdAt }).from(logsTable).orderBy(logsTable.createdAt).limit(20).offset((page-1)*20);
+    logs = await db.select({ userID: logsTable.userid, username: logsTable.username, action: logsTable.action, body: logsTable.body, blurb: logsTable.blurb, createdAt: logsTable.createdAt }).from(logsTable).orderBy(desc(logsTable.createdAt)).limit(20).offset((page-1)*20);
     pageCount = Math.ceil((await db.$count(logsTable)) / 20);
   } catch (e) {
     console.error(`Database Error - ${e}`);
