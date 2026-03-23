@@ -7,6 +7,7 @@ import { getConfig, getConfigPath, setConfig } from "../index.js";
 export const Config = z.object({
   apiPort: z.int().positive(),
   webdavPort: z.int().positive(),
+  useSSL: z.boolean(),
   serverDirectory: z.string().default("/"),
   failedLoginLimit: z.int().positive().default(5),
   selfUsernameChanges: z.boolean().default(true),

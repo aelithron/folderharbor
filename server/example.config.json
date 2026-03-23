@@ -1,6 +1,7 @@
 {
   "apiPort": 3000,
   "webdavPort": 1900,
+  "useSSL": false,
   "serverDirectory": "/",
   "failedLoginLimit": 5,
   "selfUsernameChanges": true,

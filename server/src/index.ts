@@ -7,6 +7,7 @@ import type { Server } from "http";
 import type { WebDAVServer } from "webdav-server/lib/index.v2.js";
 import dotenv from "dotenv";
 import startWebDAV from "./protocols/webdav/webdav.js";
+import loadCert from "./utils/ssl.js";
 
 let config: z.Infer<typeof Config>;
 let configPath: string | undefined;
@@ -32,8 +33,14 @@ async function startServer() {
     console.error(`Config Error - ${e}`);
     process.exit(1);
   }
-  api = await startAPI(config.apiPort);
-  webdav = await startWebDAV(config.webdavPort);
+  if (config.useSSL) {
+    const ssl = await loadCert();
+    api = await startAPI(config.apiPort, ssl.key, ssl.cert);
+    webdav = await startWebDAV(config.webdavPort);
+  } else {
+    api = await startAPI(config.apiPort);
+    webdav = await startWebDAV(config.webdavPort);
+  }
 }
 async function stopServer() {
   console.log("Stopping FolderHarbor...");

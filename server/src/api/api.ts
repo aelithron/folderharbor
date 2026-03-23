@@ -8,7 +8,8 @@ import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
 import { getConfig } from "../index.js";
 import path from "path";
-export default async function startAPI(port: number): Promise<Server> {
+import https from "https";
+export default async function startAPI(port: number, sslKey?: string, sslCert?: string): Promise<Server> {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
@@ -23,7 +24,12 @@ export default async function startAPI(port: number): Promise<Server> {
   app.use("/me", meRouter);
   app.use("/admin", adminRouter);
   app.use("/files", filesRouter);
-  const server = app.listen(port);
+  let server: Server;
+  if (sslKey && sslCert) {
+    server = https.createServer({ key: sslKey, cert: sslCert }, app).listen(port);
+  } else {
+    server = app.listen(port);
+  }
   server.on("listening", () => console.log(`API server running (port ${port})`));
   return server;
 }
