@@ -89,7 +89,7 @@ router.patch("/:userID", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
-  if (!await checkPermission(req.session.userID, "users:edit") && !await checkPermission(req.session.userID, "users:edit.full")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!await checkPermission(req.session.userID, "users:edit")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   let updateParams: Partial<{ username: string, password: string, clearLoginAttempts: boolean }> = {};
   updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
@@ -140,7 +140,7 @@ router.patch("/:userID/grant/:type", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
-  if (!await checkPermission(req.session.userID, "users:edit.full")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!await checkPermission(req.session.userID, "users:grant")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   const updateParams: Partial<{ roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
   const user = await getUser(req.session.userID);

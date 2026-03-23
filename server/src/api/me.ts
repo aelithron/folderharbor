@@ -98,13 +98,25 @@ router.delete("/session", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (!req.body.sessionID || isNaN(Number.parseInt(req.body.sessionID))) return res.status(400).json({ error: "session_id", message: "Your request doesn't contain a valid 'sessionID'." });
   if (Number.parseInt(req.body.sessionID) === req.session.sessionID) return res.status(400).json({ error: "active_session", message: "You can't remove your active session this way, please sign out instead!" });
+  const userSessions = await getUserSessions(req.session.userID);
+  if ("error" in userSessions) {
+    switch (userSessions.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "no_sessions":
+        return res.status(404).json({ error: "not_found", message: "This session doesn't exist!" });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  if (!userSessions.find((session) => session.id === Number.parseInt(req.body.sessionID))) return res.status(404).json({ error: "not_found", message: "This session doesn't exist!" });
   const result = await revokeSession(Number.parseInt(req.body.sessionID));
   if ("error" in result) {
     switch (result.error) {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
       case "not_found":
-        return res.status(400).json({ error: "not_found", message: "This session doesn't exist!" });
+        return res.status(404).json({ error: "not_found", message: "This session doesn't exist!" });
       default:
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }

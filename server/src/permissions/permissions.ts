@@ -5,10 +5,10 @@ export const permissions: { id: `${"users" | "roles" | "acls" | "config" | "logs
   { id: "users:create", description: "Create new users" },
   { id: "users:read", description: "Read users' information (to a limited degree)" },
   { id: "users:read.full", description: "Read users' full information" },
-  { id: "users:edit", description: "Modify limited information of other users" },
-  { id: "users:edit.full", description: "Modify the full information of other users" },
+  { id: "users:edit", description: "Modify information of other users" },
   { id: "users:delete", description: "Delete users" },
   { id: "users:list", description: "Get a list of users" },
+  { id: "users:grant", description: "Grant roles/ACLs/permissions to users" },
   { id: "users:lock", description: "Block/unblock a user from logging in" },
   
   { id: "roles:create", description: "Create new roles" },
