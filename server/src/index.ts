@@ -34,7 +34,13 @@ async function startServer() {
     process.exit(1);
   }
   if (config.useSSL) {
-    const ssl = await loadCert();
+    let ssl;
+    try {
+      ssl = await loadCert(configPath);
+    } catch (e) {
+      console.error(`SSL Error - ${e}`);
+      process.exit(1);
+    }
     api = await startAPI(config.apiPort, ssl.key, ssl.cert);
     webdav = await startWebDAV(config.webdavPort);
   } else {
