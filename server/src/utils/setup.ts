@@ -21,7 +21,7 @@ export async function setUpServer() {
   console.log("This will help you set up your new FolderHarbor server.");
   const adminUser = prompt({ sigint: true })("What do you want the admin username to be? ");
   const adminPass = prompt({ sigint: true })("What do you want the admin password to be? ", { echo: "*" });
-  if (!adminUser || !adminPass || adminUser.length > 1 || adminPass.length > 1) {
+  if (!adminUser || !adminPass || adminUser.length < 1 || adminPass.length < 1) {
     console.error("You must supply an admin username and password, please try again!");
     process.exit(1);
   }
