@@ -220,6 +220,91 @@ router.patch("/:userID/grant/:type", async (req, res) => {
   await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), newContents: updateParams }, "edited a user");
   return res.json({ success: true });
 });
+router.patch("/:userID/revoke/:type", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!await checkPermission(req.session.userID, "users:edit.full")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
+  const updateParams: Partial<{ roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
+  const user = await getUser(req.session.userID);
+  if ("error" in user) {
+    switch (user.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "Error looking up your session, please sign in again." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  switch (req.params.type) {
+    case "roles": {
+      const roles = new Set<number>(user.roles);
+      if (!req.body.roles || !Array.isArray(req.body.roles)) return res.status(400).json({ error: "roles", message: `Your "roles" array is missing/malformed!` });
+      const allRoles = await getAllRoles();
+      if ("error" in allRoles) {
+        switch (allRoles.error) {
+          case "server":
+            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+          default:
+            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+        }
+      }
+      for (const item of (req.body.roles as number[])) {
+        for (const id of req.body.acls) if (!allRoles.find(acl => acl.id === id)) return res.status(400).json({ error: "roles", message: `Role "${id}" doesn't exist, please correct this and try again.` });
+        roles.delete(item);
+      }
+      updateParams.roles = [...roles];
+      break;
+    }
+    case "acls": {
+      const acls = new Set<number>(user.acls);
+      if (!req.body.acls || !Array.isArray(req.body.acls)) return res.status(400).json({ error: "acls", message: `Your "acls" array is missing/malformed!` });
+      const allACLs = await getAllACLs();
+      if ("error" in allACLs) {
+        switch (allACLs.error) {
+          case "server":
+            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+          default:
+            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+        }
+      }
+      for (const item of (req.body.acls as number[])) {
+        for (const id of req.body.acls) if (!allACLs.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
+        acls.delete(item);
+      }
+      updateParams.acls = [...acls];
+      break;
+    }
+    case "permissions": {
+      const permissions = new Set<`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`>(user.permissions);
+      if (!req.body.permissions || !Array.isArray(req.body.permissions)) return res.status(400).json({ error: "permissions", message: `Your "permissions" array is missing/malformed!` });
+      for (const item of (req.body.permissions as (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[])) {
+        if (!getPermissionIDs().includes(item)) return res.status(400).json({ error: "permissions", message: `Permission "${item}" doesn't exist, please correct this and try again.` });
+        permissions.delete(item);
+      }
+      updateParams.permissions = [...permissions];
+      break;
+    }
+    default:
+      return res.status(400).json({ error: "type", message: "That item type doesn't exist, or isn't grantable!" });
+  }
+  const result = await editUser(parseInt(req.params.userID), updateParams);
+  if ("error" in result) {
+    switch (result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided user doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), newContents: updateParams }, "edited a user");
+  return res.json({ success: true });
+});
 router.delete("/:userID", async (req, res) => {
   if (!req.session) {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
