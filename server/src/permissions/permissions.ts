@@ -48,3 +48,8 @@ export async function getEffectivePermissions(userID: number): Promise<Permissio
   for (const role of roles) for (const item of role.permissions) permissions.add(item);
   return [...permissions];
 }
+export function getPermissionIDs(): `${"users" | "roles" | "acls" | "config" | "logs"}:${string}`[] {
+  const permissionIDs = new Set<`${"users" | "roles" | "acls" | "config" | "logs"}:${string}`>();
+  for (const permission of permissions) permissionIDs.add(permission.id);
+  return [...permissionIDs];
+}
