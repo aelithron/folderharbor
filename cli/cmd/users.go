@@ -217,7 +217,7 @@ var grantUserCMD = &cobra.Command{
 				itemType = "roles"	
 				fmt.Print("Enter the granted role's ID: ")
 				role, _ := reader.ReadString('\n')
-				roleID, err := strconv.Atoi(role)
+				roleID, err := strconv.Atoi(strings.TrimSpace(role))
 				if err != nil { panic (err) }
 				body = routes.UserGrantRevoke{ Roles: []int{roleID} }
 				break
@@ -226,7 +226,7 @@ var grantUserCMD = &cobra.Command{
 				itemType = "acls"
 				fmt.Print("Enter the granted ACL's ID: ")
 				acl, _ := reader.ReadString('\n')
-				aclID, err := strconv.Atoi(acl)
+				aclID, err := strconv.Atoi(strings.TrimSpace(acl))
 				if err != nil { panic (err) }
 				body = routes.UserGrantRevoke{ ACLs: []int{aclID} }
 				break
@@ -235,7 +235,7 @@ var grantUserCMD = &cobra.Command{
 				itemType = "permissions"
 				fmt.Print("Enter the granted permission: ")
 				permission, _ := reader.ReadString('\n')
-				body = routes.UserGrantRevoke{ Permissions: []string{permission} }
+				body = routes.UserGrantRevoke{ Permissions: []string{strings.TrimSpace(permission)} }
 				break
 			}
 			default: {

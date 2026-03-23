@@ -44,7 +44,7 @@ func ListRoles() ([]RoleList) {
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body	
 }
-type createRoleReq struct { Name string `json:"string"` }
+type createRoleReq struct { Name string `json:"name"` }
 func CreateRole(name string) (int) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(&createRoleReq{ Name: name })
