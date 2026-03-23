@@ -28,7 +28,12 @@ var readLogsCMD = &cobra.Command{
 			if err != nil { panic (err) }
 			page = pageArg
 		}
-		logs := routes.ReadLogs(page)
+		var logs routes.AuditLog
+		logs = routes.ReadLogs(page)
+		if page > logs.PageCount { 
+			page = logs.PageCount
+			logs = routes.ReadLogs(page)
+		}
 		fmt.Println("Audit Logs (Page " + fmt.Sprint(page) + "/" + fmt.Sprint(logs.PageCount) + ")")
 		fmt.Println("----------------------------")
     if len(logs.Logs) == 0 { fmt.Println("No logs on this page!") }
