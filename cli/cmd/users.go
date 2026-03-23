@@ -143,11 +143,11 @@ var lockUserCMD = &cobra.Command{
 		var locked = true;
 		if len(args) == 2 {
 			switch args[1] {
-			case "no", "false":
-				locked = false;
-			case "yes", "true":
-				break;
-			default:
+				case "no", "false":
+					locked = false;
+				case "yes", "true":
+					break;
+				default:
 					fmt.Println(`Error: Action "` + args[1] + `" isn't "yes" or "no"!`);
 					os.Exit(1)
 			}
@@ -201,6 +201,52 @@ var clearFailedLoginsCMD = &cobra.Command{
 		fmt.Println("Successfully reset user #" + fmt.Sprint(userID) + "'s failed login attempts.")
 	},
 }
+var grantUserCMD = &cobra.Command{
+	Use: "grant <id> <type>",
+	Short: "grant roles/permissions/ACLs",
+	Long: "grant roles/permissions/ACLs to a user",
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		var itemType string
+		var body routes.UserGrantRevoke
+		reader := bufio.NewReader(os.Stdin)
+		switch args[1] {
+			case "roles", "role": {
+				itemType = "roles"	
+				fmt.Print("Enter the granted role's ID: ")
+				role, _ := reader.ReadString('\n')
+				roleID, err := strconv.Atoi(role)
+				if err != nil { panic (err) }
+				body = routes.UserGrantRevoke{ Roles: []int{roleID} }
+				break
+			}
+			case "acls", "acl", "ACL", "ACLs": {
+				itemType = "acls"
+				fmt.Print("Enter the granted ACL's ID: ")
+				acl, _ := reader.ReadString('\n')
+				aclID, err := strconv.Atoi(acl)
+				if err != nil { panic (err) }
+				body = routes.UserGrantRevoke{ ACLs: []int{aclID} }
+				break
+			}
+			case "permissions", "permission": {
+				itemType = "permissions"
+				fmt.Print("Enter the granted permission: ")
+				permission, _ := reader.ReadString('\n')
+				body = routes.UserGrantRevoke{ Permissions: []string{permission} }
+				break
+			}
+			default: {
+				fmt.Println(`Error: Type "` + args[1] + `" isn't a valid item type! Try "roles", "acls", or "permissions".`);
+				os.Exit(1)
+			}
+		}
+		routes.GrantUser(userID, itemType, body)
+		fmt.Println("Successfully granted the " + itemType + " to the user!")
+	},
+}
 func init() {
 	rootCMD.AddCommand(usersCMD)
 	usersCMD.AddCommand(listUsersCMD)
@@ -212,4 +258,5 @@ func init() {
 	updateUserCMD.AddCommand(changeUsernameCMD)
 	updateUserCMD.AddCommand(changePasswordCMD)
 	updateUserCMD.AddCommand(clearFailedLoginsCMD)
+	updateUserCMD.AddCommand(grantUserCMD)
 }
