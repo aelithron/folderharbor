@@ -202,17 +202,17 @@ var clearFailedLoginsCMD = &cobra.Command{
 	},
 }
 var grantUserCMD = &cobra.Command{
-	Use: "grant <id> <type>",
+	Use: "grant <type> <id>",
 	Short: "grant roles/permissions/ACLs",
 	Long: "grant roles/permissions/ACLs to a user",
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		userID, err := strconv.Atoi(args[0])
+		userID, err := strconv.Atoi(args[1])
 		if err != nil { panic (err) }
 		var itemType string
 		var body routes.UserGrantRevoke
 		reader := bufio.NewReader(os.Stdin)
-		switch args[1] {
+		switch args[0] {
 			case "roles", "role": {
 				itemType = "roles"	
 				fmt.Print("Enter the granted role's ID: ")
@@ -239,12 +239,58 @@ var grantUserCMD = &cobra.Command{
 				break
 			}
 			default: {
-				fmt.Println(`Error: Type "` + args[1] + `" isn't a valid item type! Try "roles", "acls", or "permissions".`);
+				fmt.Println(`Error: Type "` + args[0] + `" isn't a valid item type! Try "roles", "acls", or "permissions".`);
 				os.Exit(1)
 			}
 		}
 		routes.GrantUser(userID, itemType, body)
 		fmt.Println("Successfully granted the " + itemType + " to the user!")
+	},
+}
+var revokeUserCMD = &cobra.Command{
+	Use: "revoke <type> <id>",
+	Short: "revoke roles/permissions/ACLs",
+	Long: "revoke roles/permissions/ACLs from a user",
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[1])
+		if err != nil { panic (err) }
+		var itemType string
+		var body routes.UserGrantRevoke
+		reader := bufio.NewReader(os.Stdin)
+		switch args[0] {
+			case "roles", "role": {
+				itemType = "roles"	
+				fmt.Print("Enter the revoked role's ID: ")
+				role, _ := reader.ReadString('\n')
+				roleID, err := strconv.Atoi(strings.TrimSpace(role))
+				if err != nil { panic (err) }
+				body = routes.UserGrantRevoke{ Roles: []int{roleID} }
+				break
+			}
+			case "acls", "acl", "ACL", "ACLs": {
+				itemType = "acls"
+				fmt.Print("Enter the revoked ACL's ID: ")
+				acl, _ := reader.ReadString('\n')
+				aclID, err := strconv.Atoi(strings.TrimSpace(acl))
+				if err != nil { panic (err) }
+				body = routes.UserGrantRevoke{ ACLs: []int{aclID} }
+				break
+			}
+			case "permissions", "permission": {
+				itemType = "permissions"
+				fmt.Print("Enter the revoked permission: ")
+				permission, _ := reader.ReadString('\n')
+				body = routes.UserGrantRevoke{ Permissions: []string{strings.TrimSpace(permission)} }
+				break
+			}
+			default: {
+				fmt.Println(`Error: Type "` + args[0] + `" isn't a valid item type! Try "roles", "acls", or "permissions".`);
+				os.Exit(1)
+			}
+		}
+		routes.RevokeUser(userID, itemType, body)
+		fmt.Println("Successfully revoked the " + itemType + " from the user!")
 	},
 }
 func init() {
@@ -258,5 +304,6 @@ func init() {
 	updateUserCMD.AddCommand(changeUsernameCMD)
 	updateUserCMD.AddCommand(changePasswordCMD)
 	updateUserCMD.AddCommand(clearFailedLoginsCMD)
-	updateUserCMD.AddCommand(grantUserCMD)
+	usersCMD.AddCommand(grantUserCMD)
+	usersCMD.AddCommand(revokeUserCMD)
 }

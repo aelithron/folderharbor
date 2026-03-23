@@ -181,7 +181,7 @@ func RevokeUser(userID int, itemType string, items UserGrantRevoke) {
 	reqBody, _ := json.Marshal(items)
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/users/" + fmt.Sprint(userID) + "/reboke/" + itemType)
+	addr.Path = path.Join(addr.Path, "/admin/users/" + fmt.Sprint(userID) + "/revoke/" + itemType)
 	req, err := http.NewRequest(http.MethodPatch, addr.String(), bytes.NewBuffer(reqBody))
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
