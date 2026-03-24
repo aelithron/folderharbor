@@ -83,6 +83,40 @@ router.patch("/:aclID", async (req, res) => {
   await writeLog(req.session.userID, req.session.username, "acls-edit", { id: parseInt(req.params.aclID), newContents: updateParams }, "edited an ACL");
   return res.json({ success: true });
 });
+router.patch("/:aclID/paths", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!await checkPermission(req.session.userID, "users:grant")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
+  const updateParams: Partial<{ allow: string[], deny: string[] }> = {};
+  const acl = await getACL(parseInt(req.params.aclID));
+  if ("error" in acl) {
+    switch (acl.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided ACL doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  
+  const result = await editACL(parseInt(req.params.aclID), updateParams);
+  if ("error" in result) {
+    switch (result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided ACL doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  await writeLog(req.session.userID, req.session.username, "acls-edit", { id: parseInt(req.params.aclID), newContents: updateParams }, "edited an ACL");
+  return res.json({ success: true });
+});
 router.delete("/:aclID", async (req, res) => {
   if (!req.session) {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);

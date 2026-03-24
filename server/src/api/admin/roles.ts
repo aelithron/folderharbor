@@ -81,20 +81,7 @@ router.patch("/:roleID", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "roles:edit")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!permissions.find(otherNode => otherNode.id === node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
-  if (Array.isArray(req.body.acls)) {
-    const acls = await getAllACLs();
-    if ("error" in acls) {
-      switch (acls.error) {
-        case "server":
-          return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-        default:
-          return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-      }
-    }
-    for (const id of req.body.acls) if (!acls.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
-  }
-  const updateParams = { name: req.body.name, permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined) };
+  const updateParams = { name: req.body.name };
   if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
   const role = await editRole(parseInt(req.params.roleID), updateParams);
   if ("error" in role) {
@@ -115,7 +102,7 @@ router.patch("/:roleID/revoke/:type", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
-  if (!await checkPermission(req.session.userID, "users:grant")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!await checkPermission(req.session.userID, "roles:edit")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   const updateParams: Partial<{ acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
   const role = await getRole(parseInt(req.params.roleID));
@@ -124,7 +111,7 @@ router.patch("/:roleID/revoke/:type", async (req, res) => {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
       case "not_found":
-        return res.status(400).json({ error: "not_found", message: "Error looking up your session, please sign in again." });
+        return res.status(400).json({ error: "not_found", message: "The provided role doesn't exist." });
       default:
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
@@ -144,7 +131,7 @@ router.patch("/:roleID/revoke/:type", async (req, res) => {
       }
       for (const item of (req.body.acls as number[])) {
         if (!allACLs.find(acl => acl.id === item)) return res.status(400).json({ error: "acls", message: `ACL "${item}" doesn't exist, please correct this and try again.` });
-        acls.add(item);
+        acls.delete(item);
       }
       updateParams.acls = [...acls];
       break;
