@@ -143,7 +143,7 @@ router.patch("/:userID/grant/:type", async (req, res) => {
   if (!await checkPermission(req.session.userID, "users:grant")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   const updateParams: Partial<{ roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
-  const user = await getUser(req.session.userID);
+  const user = await getUser(parseInt(req.params.userID));
   if ("error" in user) {
     switch (user.error) {
       case "server":
@@ -228,7 +228,7 @@ router.patch("/:userID/revoke/:type", async (req, res) => {
   if (!await checkPermission(req.session.userID, "users:edit.full")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   const updateParams: Partial<{ roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
-  const user = await getUser(req.session.userID);
+  const user = await getUser(parseInt(req.params.userID));
   if ("error" in user) {
     switch (user.error) {
       case "server":
