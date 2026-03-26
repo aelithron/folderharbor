@@ -49,7 +49,7 @@ func ListACLs() ([]ACLList) {
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body	
 }
-type createACLReq struct { Name string `json:"string"` }
+type createACLReq struct { Name string `json:"name"` }
 func CreateACL(name string) (int) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(&createACLReq{ Name: name })
