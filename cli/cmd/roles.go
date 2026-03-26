@@ -101,6 +101,76 @@ var changeRoleNameCMD = &cobra.Command{
 		fmt.Println("Successfully changed role #" + fmt.Sprint(roleID) + "'s name to " + strings.TrimSpace(name) + ".")
 	},
 }
+var grantRoleCMD = &cobra.Command{
+	Use: "grant <id> <type>",
+	Short: "grant ACLs/permissions",
+	Long: "grant ACLs/permissions to a role",
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		var itemInfo string
+		var body []routes.Grant
+		reader := bufio.NewReader(os.Stdin)
+		switch args[1] {
+			case "acls", "acl", "ACL", "ACLs": {
+				fmt.Print("Enter the granted ACL's ID: ")
+				acl, _ := reader.ReadString('\n')
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(acl), Type: "acl", Revoke: false })
+				itemInfo = "ACL #" + strings.TrimSpace(acl)
+				break
+			}
+			case "permissions", "permission": {
+				fmt.Print("Enter the granted permission: ")
+				permission, _ := reader.ReadString('\n')
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(permission), Type: "permission", Revoke: false })
+				itemInfo = `the permission "` + strings.TrimSpace(permission) + `"`
+				break
+			}
+			default: {
+				fmt.Println(`Error: Type "` + args[1] + `" isn't a valid item type! Try "acls" or "permissions".`);
+				os.Exit(1)
+			}
+		}
+		routes.GrantRole(userID, body)
+		fmt.Println("Successfully granted " + itemInfo + " to the role!")
+	},
+}
+var revokeRoleCMD = &cobra.Command{
+	Use: "revoke <id> <type>",
+	Short: "revoke ACLs/permissions",
+	Long: "revoke ACLs/permissions from a role",
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		var itemInfo string
+		var body []routes.Grant
+		reader := bufio.NewReader(os.Stdin)
+		switch args[1] {
+			case "acls", "acl", "ACL", "ACLs": {
+				fmt.Print("Enter the revoked ACL's ID: ")
+				acl, _ := reader.ReadString('\n')
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(acl), Type: "acl", Revoke: true })
+				itemInfo = "ACL #" + strings.TrimSpace(acl)
+				break
+			}
+			case "permissions", "permission": {
+				fmt.Print("Enter the revoked permission: ")
+				permission, _ := reader.ReadString('\n')
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(permission), Type: "permission", Revoke: true })
+				itemInfo = `the permission "` + strings.TrimSpace(permission) + `"`
+				break
+			}
+			default: {
+				fmt.Println(`Error: Type "` + args[1] + `" isn't a valid item type! Try "acls" or "permissions".`);
+				os.Exit(1)
+			}
+		}
+		routes.GrantRole(userID, body)
+		fmt.Println("Successfully revoked " + itemInfo + " from the role!")
+	},
+}
 func init() {
   rootCMD.AddCommand(rolesCMD)
 	rolesCMD.AddCommand(listRolesCMD)
@@ -109,4 +179,6 @@ func init() {
 	rolesCMD.AddCommand(deleteRoleCMD)
 	rolesCMD.AddCommand(updateRoleCMD)
 	updateRoleCMD.AddCommand(changeRoleNameCMD)
+	rolesCMD.AddCommand(grantRoleCMD)
+	rolesCMD.AddCommand(revokeRoleCMD)
 }

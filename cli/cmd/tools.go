@@ -40,9 +40,22 @@ var readLogsCMD = &cobra.Command{
 	  for log := range logs.Logs { fmt.Println(logFormatter(logs.Logs[log])) }
 	},
 }
+var getPermissionsCMD = &cobra.Command{
+	Use: "permissions",
+	Short: "get a list of permissions",
+	Long: "get a list of the server's permission nodes",
+	Run: func(cmd *cobra.Command, args []string) {
+		permissions := routes.GetPermissions()
+		fmt.Println("Server Permissions")
+		fmt.Println("------------------")
+    if len(permissions) == 0 { fmt.Println("No permissions were sent, this is likely a server bug!") }
+	  for node := range permissions { fmt.Println("• " + permissions[node].ID + ": " + permissions[node].Description) }
+	},
+}
 func init() {
 	rootCMD.AddCommand(toolsCMD)
 	toolsCMD.AddCommand(readLogsCMD)
+	toolsCMD.AddCommand(getPermissionsCMD)
 }
 func logFormatter(log routes.LogEntry) (string) {
 	if log.Username == "" { log.Username = "Unknown User" }
