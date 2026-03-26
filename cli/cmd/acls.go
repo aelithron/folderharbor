@@ -102,6 +102,76 @@ var changeACLNameCMD = &cobra.Command{
 		fmt.Println("Successfully changed ACL #" + fmt.Sprint(aclID) + "'s name to " + strings.TrimSpace(name) + ".")
 	},
 }
+var addPathCMD = &cobra.Command{
+	Use: "addpath <id> <type>",
+	Short: "add a path to an ACL",
+	Long: "add a glob pattern to an ACL",
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		var itemInfo string
+		var body []routes.ACLPath
+		reader := bufio.NewReader(os.Stdin)
+		switch args[1] {
+			case "allow": {
+				fmt.Print("Enter the allowed Glob pattern to add: ")
+				glob, _ := reader.ReadString('\n')
+				body = append(body, routes.ACLPath{ Path: strings.TrimSpace(glob), Type: "allow", Delete: false })
+				itemInfo = `allowed Glob pattern "` + strings.TrimSpace(glob) + `"`
+				break
+			}
+			case "deny": {
+				fmt.Print("Enter the denied Glob pattern to add: ")
+				glob, _ := reader.ReadString('\n')
+				body = append(body, routes.ACLPath{ Path: strings.TrimSpace(glob), Type: "deny", Delete: false })
+				itemInfo = `denied Glob pattern "` + strings.TrimSpace(glob) + `"`
+				break
+			}
+			default: {
+				fmt.Println(`Error: Type "` + args[1] + `" isn't a valid item type! Try "allow" or "deny".`);
+				os.Exit(1)
+			}
+		}
+		routes.UpdateACLPath(userID, body)
+		fmt.Println("Successfully added the " + itemInfo + " to the ACL!")
+	},
+}
+var removePathCMD = &cobra.Command{
+	Use: "removepath <id> <type>",
+	Short: "remove a path from an ACL",
+	Long: "remove a glob pattern from an ACL",
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		userID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		var itemInfo string
+		var body []routes.ACLPath
+		reader := bufio.NewReader(os.Stdin)
+		switch args[1] {
+			case "allow": {
+				fmt.Print("Enter the allowed Glob pattern to remove: ")
+				glob, _ := reader.ReadString('\n')
+				body = append(body, routes.ACLPath{ Path: strings.TrimSpace(glob), Type: "allow", Delete: true })
+				itemInfo = `allowed Glob pattern "` + strings.TrimSpace(glob) + `"`
+				break
+			}
+			case "deny": {
+				fmt.Print("Enter the denied Glob pattern to remove: ")
+				glob, _ := reader.ReadString('\n')
+				body = append(body, routes.ACLPath{ Path: strings.TrimSpace(glob), Type: "deny", Delete: true })
+				itemInfo = `denied Glob pattern "` + strings.TrimSpace(glob) + `"`
+				break
+			}
+			default: {
+				fmt.Println(`Error: Type "` + args[1] + `" isn't a valid item type! Try "allow" or "deny".`);
+				os.Exit(1)
+			}
+		}
+		routes.UpdateACLPath(userID, body)
+		fmt.Println("Successfully removed the " + itemInfo + " from the ACL!")
+	},
+}
 func init() {
   rootCMD.AddCommand(aclsCMD)
 	aclsCMD.AddCommand(listACLsCMD)
@@ -110,4 +180,6 @@ func init() {
 	aclsCMD.AddCommand(deleteACLCMD)
 	aclsCMD.AddCommand(updateACLCMD)
 	updateACLCMD.AddCommand(changeACLNameCMD)
+	updateACLCMD.AddCommand(addPathCMD)
+	updateACLCMD.AddCommand(removePathCMD)
 }
