@@ -9,11 +9,14 @@ import dotenv from "dotenv";
 import startWebDAV from "./protocols/webdav/webdav.js";
 import loadCert from "./utils/ssl.js";
 import { recoverServer, setUpServer } from "./utils/scripts.js";
+import type { FtpSrv } from "ftp-srv";
+import startFTP from "./protocols/ftp/ftp.js";
 
 let config: z.Infer<typeof Config>;
 let configPath: string | undefined;
 let api: Server;
 let webdav: WebDAVServer;
+let ftp: FtpSrv;
 program
   .name("folderharbor").description("A powerful file server that supports many protocols")
   .option("-c, --config <path>", "path to server config")
@@ -48,15 +51,18 @@ async function startServer() {
     }
     api = await startAPI(config.apiPort, ssl.key, ssl.cert);
     webdav = await startWebDAV(config.webdavPort, ssl.key, ssl.cert);
+    ftp = await startFTP(config.ftpPort, ssl.key, ssl.cert);
   } else {
     api = await startAPI(config.apiPort);
     webdav = await startWebDAV(config.webdavPort);
+    ftp = await startFTP(config.ftpPort);
   }
 }
 async function stopServer() {
   console.log("Stopping FolderHarbor...");
   api.close(() => console.log("Stopped API server."));
   webdav.stop(() => console.log("Stopped WebDAV server."));
+  ftp.close().then(() => console.log("Stopped FTP server."));
 }
 await startServer();
 process.on("SIGTERM", async () => await stopServer());

@@ -1,6 +1,7 @@
 {
   "apiPort": 3000,
   "webdavPort": 1900,
+  "ftpPort": 2100,
   "useSSL": false,
   "serverDirectory": "/",
   "failedLoginLimit": 5,
