@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { checkPermission, getPermissionIDs } from "../../permissions/permissions.js";
+import { checkPermission, getPermissionIDs, type Permission } from "../../permissions/permissions.js";
 import { createUser, deleteUser, editUser, getAllUsers, getUser } from "../../users/users.js";
 import { getUserSessions } from "../../users/sessions.js";
 import { getAllACLs } from "../../permissions/acls.js";
@@ -135,14 +135,13 @@ router.patch("/:userID/lock", async (req, res) => {
   await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), newContents: { locked: req.body.locked } }, "edited a user");
   return res.json({ success: true });
 });
-router.patch("/:userID/grant/:type", async (req, res) => {
+router.patch("/:userID/grant", async (req, res) => {
   if (!req.session) {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "users:grant")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
-  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  const updateParams: Partial<{ roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
+  if (!req.body || !Array.isArray(req.body)) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   const user = await getUser(parseInt(req.params.userID));
   if ("error" in user) {
     switch (user.error) {
@@ -154,143 +153,67 @@ router.patch("/:userID/grant/:type", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  switch (req.params.type) {
-    case "roles": {
-      const roles = new Set<number>(user.roles);
-      if (!req.body.roles || !Array.isArray(req.body.roles)) return res.status(400).json({ error: "roles", message: `Your "roles" array is missing/malformed!` });
-      const allRoles = await getAllRoles();
-      if ("error" in allRoles) {
-        switch (allRoles.error) {
-          case "server":
-            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-          default:
-            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-        }
-      }
-      for (const item of (req.body.roles as number[])) {
-        if (!allRoles.find(acl => acl.id === item)) return res.status(400).json({ error: "roles", message: `Role "${item}" doesn't exist, please correct this and try again.` });
-        roles.add(item);
-      }
-      updateParams.roles = [...roles];
-      break;
-    }
-    case "acls": {
-      const acls = new Set<number>(user.acls);
-      if (!req.body.acls || !Array.isArray(req.body.acls)) return res.status(400).json({ error: "acls", message: `Your "acls" array is missing/malformed!` });
-      const allACLs = await getAllACLs();
-      if ("error" in allACLs) {
-        switch (allACLs.error) {
-          case "server":
-            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-          default:
-            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-        }
-      }
-      for (const item of (req.body.acls as number[])) {
-        if (!allACLs.find(acl => acl.id === item)) return res.status(400).json({ error: "acls", message: `ACL "${item}" doesn't exist, please correct this and try again.` });
-        acls.add(item);
-      }
-      updateParams.acls = [...acls];
-      break;
-    }
-    case "permissions": {
-      const permissions = new Set<`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`>(user.permissions);
-      if (!req.body.permissions || !Array.isArray(req.body.permissions)) return res.status(400).json({ error: "permissions", message: `Your "permissions" array is missing/malformed!` });
-      for (const item of (req.body.permissions as (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[])) {
-        if (!getPermissionIDs().includes(item)) return res.status(400).json({ error: "permissions", message: `Permission "${item}" doesn't exist, please correct this and try again.` });
-        permissions.add(item);
-      }
-      updateParams.permissions = [...permissions];
-      break;
-    }
-    default:
-      return res.status(400).json({ error: "type", message: "That item type doesn't exist, or isn't grantable!" });
-  }
-  const result = await editUser(parseInt(req.params.userID), updateParams);
-  if ("error" in result) {
-    switch (result.error) {
+  const allRoles = await getAllRoles();
+  if ("error" in allRoles) {
+    switch (allRoles.error) {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-      case "not_found":
-        return res.status(400).json({ error: "not_found", message: "The provided user doesn't exist." });
       default:
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), newContents: updateParams }, "edited a user");
-  return res.json({ success: true });
-});
-router.patch("/:userID/revoke/:type", async (req, res) => {
-  if (!req.session) {
-    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
-    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  const allACLs = await getAllACLs();
+  if ("error" in allACLs) {
+    switch (allACLs.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
   }
-  if (!await checkPermission(req.session.userID, "users:edit.full")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
-  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
+  const changed = { roles: false, acls: false, permissions: false };
+  const roles = new Set<number>(user.roles);
+  const acls = new Set<number>(user.acls);
+  const permissions = new Set<Permission>(user.permissions);
+  for (const item of (req.body as { id: number | Permission, type: "role" | "acl" | "permission", revoke: boolean }[])) {
+    if (!("id" in item) || !("type" in item) || !("revoke" in item) || (item.revoke !== true && item.revoke !== false)) return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
+    switch (item.type) {
+      case "role":
+        if (!allRoles.find(role => role.id === item.id)) return res.status(400).json({ error: "role", message: `Role #${item.id} doesn't exist, please correct this and try again.` });
+        changed.roles = true;
+        if (item.revoke) {
+          roles.delete(item.id as number);
+        } else {
+          roles.add(item.id as number);
+        }
+        break;
+      case "acl":
+        if (!allACLs.find(acl => acl.id === item.id)) return res.status(400).json({ error: "acl", message: `ACL #${item.id} doesn't exist, please correct this and try again.` });
+        changed.acls = true;
+        if (item.revoke) {
+          acls.delete(item.id as number);
+        } else {
+          acls.add(item.id as number);
+        }
+        break;
+      case "permission":
+        if (!getPermissionIDs().includes(item.id as Permission)) return res.status(400).json({ error: "permission", message: `Permission "${item.id}" doesn't exist, please correct this and try again.` });
+        changed.permissions = true;
+        if (item.revoke) {
+          permissions.delete(item.id as Permission);
+        } else {
+          permissions.add(item.id as Permission);
+        }
+        break;
+      default:
+        return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
+    }
+  }
+  if (!changed.roles && !changed.acls && !changed.permissions) return res.json({ success: true, message: "Nothing to update." });
   const updateParams: Partial<{ roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
-  const user = await getUser(parseInt(req.params.userID));
-  if ("error" in user) {
-    switch (user.error) {
-      case "server":
-        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-      case "not_found":
-        return res.status(400).json({ error: "not_found", message: "Error looking up your session, please sign in again." });
-      default:
-        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-    }
-  }
-  switch (req.params.type) {
-    case "roles": {
-      const roles = new Set<number>(user.roles);
-      if (!req.body.roles || !Array.isArray(req.body.roles)) return res.status(400).json({ error: "roles", message: `Your "roles" array is missing/malformed!` });
-      const allRoles = await getAllRoles();
-      if ("error" in allRoles) {
-        switch (allRoles.error) {
-          case "server":
-            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-          default:
-            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-        }
-      }
-      for (const item of (req.body.roles as number[])) {
-        if (!allRoles.find(acl => acl.id === item)) return res.status(400).json({ error: "roles", message: `Role "${item}" doesn't exist, please correct this and try again.` });
-        roles.delete(item);
-      }
-      updateParams.roles = [...roles];
-      break;
-    }
-    case "acls": {
-      const acls = new Set<number>(user.acls);
-      if (!req.body.acls || !Array.isArray(req.body.acls)) return res.status(400).json({ error: "acls", message: `Your "acls" array is missing/malformed!` });
-      const allACLs = await getAllACLs();
-      if ("error" in allACLs) {
-        switch (allACLs.error) {
-          case "server":
-            return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
-          default:
-            return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
-        }
-      }
-      for (const item of (req.body.acls as number[])) {
-        if (!allACLs.find(acl => acl.id === item)) return res.status(400).json({ error: "acls", message: `ACL "${item}" doesn't exist, please correct this and try again.` });
-        acls.delete(item);
-      }
-      updateParams.acls = [...acls];
-      break;
-    }
-    case "permissions": {
-      const permissions = new Set<`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`>(user.permissions);
-      if (!req.body.permissions || !Array.isArray(req.body.permissions)) return res.status(400).json({ error: "permissions", message: `Your "permissions" array is missing/malformed!` });
-      for (const item of (req.body.permissions as (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[])) {
-        if (!getPermissionIDs().includes(item)) return res.status(400).json({ error: "permissions", message: `Permission "${item}" doesn't exist, please correct this and try again.` });
-        permissions.delete(item);
-      }
-      updateParams.permissions = [...permissions];
-      break;
-    }
-    default:
-      return res.status(400).json({ error: "type", message: "That item type doesn't exist, or isn't grantable!" });
-  }
+  if (changed.roles) updateParams.roles = [...roles];
+  if (changed.acls) updateParams.acls = [...acls];
+  if (changed.permissions) updateParams.permissions = [...permissions];
   const result = await editUser(parseInt(req.params.userID), updateParams);
   if ("error" in result) {
     switch (result.error) {
