@@ -93,11 +93,7 @@ func GetACL(aclID int) (ACL) {
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body
 }
-type ACLInfoWrite struct {
-	Name string `json:"name,omitempty"`
-	Allow []string `json:"allow,omitempty"`
-	Deny []string `json:"deny,omitempty"`
-}
+type ACLInfoWrite struct { Name string `json:"name,omitempty"` }
 func UpdateACL(aclID int, info ACLInfoWrite) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(info)

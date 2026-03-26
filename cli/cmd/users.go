@@ -209,29 +209,29 @@ var grantUserCMD = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
-		var itemType string
-		var body []routes.UserGrant
+		var itemInfo string
+		var body []routes.Grant
 		reader := bufio.NewReader(os.Stdin)
 		switch args[1] {
 			case "roles", "role": {
-				itemType = "role"	
 				fmt.Print("Enter the granted role's ID: ")
 				role, _ := reader.ReadString('\n')
-				body = append(body, routes.UserGrant{ ID: strings.TrimSpace(role), Type: "role", Revoke: false })
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(role), Type: "role", Revoke: false })
+				itemInfo = "role #"	+ strings.TrimSpace(role)
 				break
 			}
 			case "acls", "acl", "ACL", "ACLs": {
-				itemType = "ACL"
 				fmt.Print("Enter the granted ACL's ID: ")
 				acl, _ := reader.ReadString('\n')
-				body = append(body, routes.UserGrant{ ID: strings.TrimSpace(acl), Type: "acl", Revoke: false })
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(acl), Type: "acl", Revoke: false })
+				itemInfo = "ACL #"	+ strings.TrimSpace(acl)
 				break
 			}
 			case "permissions", "permission": {
-				itemType = "permission"
 				fmt.Print("Enter the granted permission: ")
 				permission, _ := reader.ReadString('\n')
-				body = append(body, routes.UserGrant{ ID: strings.TrimSpace(permission), Type: "permission", Revoke: false })
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(permission), Type: "permission", Revoke: false })
+				itemInfo = `the permission "` + strings.TrimSpace(permission) + `"`
 				break
 			}
 			default: {
@@ -240,7 +240,7 @@ var grantUserCMD = &cobra.Command{
 			}
 		}
 		routes.GrantUser(userID, body)
-		fmt.Println("Successfully granted the " + itemType + " to the user!")
+		fmt.Println("Successfully granted " + itemInfo + " to the user!")
 	},
 }
 var revokeUserCMD = &cobra.Command{
@@ -251,29 +251,29 @@ var revokeUserCMD = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
-		var itemType string
-		var body []routes.UserGrant
+		var itemInfo string
+		var body []routes.Grant
 		reader := bufio.NewReader(os.Stdin)
 		switch args[1] {
 			case "roles", "role": {
-				itemType = "role"	
 				fmt.Print("Enter the revoked role's ID: ")
 				role, _ := reader.ReadString('\n')
-				body = append(body, routes.UserGrant{ ID: strings.TrimSpace(role), Type: "role", Revoke: true })
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(role), Type: "role", Revoke: true })
+				itemInfo = "role #"	+ strings.TrimSpace(role)
 				break
 			}
 			case "acls", "acl", "ACL", "ACLs": {
-				itemType = "ACL"
 				fmt.Print("Enter the revoked ACL's ID: ")
 				acl, _ := reader.ReadString('\n')
-				body = append(body, routes.UserGrant{ ID: strings.TrimSpace(acl), Type: "acl", Revoke: true })
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(acl), Type: "acl", Revoke: true })
+				itemInfo = "ACL #" + strings.TrimSpace(acl)
 				break
 			}
 			case "permissions", "permission": {
-				itemType = "permission"
 				fmt.Print("Enter the revoked permission: ")
 				permission, _ := reader.ReadString('\n')
-				body = append(body, routes.UserGrant{ ID: strings.TrimSpace(permission), Type: "permission", Revoke: true })
+				body = append(body, routes.Grant{ ID: strings.TrimSpace(permission), Type: "permission", Revoke: true })
+				itemInfo = `the permission "` + strings.TrimSpace(permission) + `"`
 				break
 			}
 			default: {
@@ -282,7 +282,7 @@ var revokeUserCMD = &cobra.Command{
 			}
 		}
 		routes.GrantUser(userID, body)
-		fmt.Println("Successfully revoked the " + itemType + " from the user!")
+		fmt.Println("Successfully revoked " + itemInfo + " from the user!")
 	},
 }
 func init() {

@@ -93,11 +93,7 @@ func GetRole(roleID int) (Role) {
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body
 }
-type RoleInfoWrite struct {
-	Name string `json:"name,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
-	ACLs []int `json:"acls,omitempty"`
-}
+type RoleInfoWrite struct { Name string `json:"name,omitempty"` }
 func UpdateRole(roleID int, info RoleInfoWrite) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(info)

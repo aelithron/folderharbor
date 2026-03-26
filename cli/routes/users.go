@@ -30,11 +30,6 @@ type UserInfoWrite struct {
 	Password string `json:"password,omitempty"`
 	ClearLoginAttempts bool `json:"clearLoginAttempts,omitempty"`
 }
-type UserGrant struct {
-	ID string `json:"id"`
-	Type string `json:"type"`
-	Revoke bool `json:"revoke"`
-}
 
 func ListUsers() ([]UserList) {
 	auth := getAuth()
@@ -155,7 +150,7 @@ func LockUser(userID int, locked bool) {
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
 }
-func GrantUser(userID int, items []UserGrant) {
+func GrantUser(userID int, items []Grant) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(items)
 	addr, err := url.Parse(auth.Server)

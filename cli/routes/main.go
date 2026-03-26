@@ -20,6 +20,11 @@ type AuthInfo struct {
 	Token string
 	Server string
 }
+type Grant struct {
+	ID string `json:"id"`
+	Type string `json:"type"`
+	Revoke bool `json:"revoke"`
+}
 type ClientConfig struct {
   SelfUsernameChanges bool `json:"selfUsernameChanges"`
 }
