@@ -30,6 +30,11 @@ type UserInfoWrite struct {
 	Password string `json:"password,omitempty"`
 	ClearLoginAttempts bool `json:"clearLoginAttempts,omitempty"`
 }
+type UserGrant struct {
+	ID string `json:"id"`
+	Type string `json:"type"`
+	Revoke bool `json:"revoke"`
+}
 
 func ListUsers() ([]UserList) {
 	auth := getAuth()
@@ -150,38 +155,12 @@ func LockUser(userID int, locked bool) {
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
 }
-type UserGrantRevoke struct {
-	Roles []int `json:"roles,omitempty"`
-	ACLs []int `json:"acls,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
-}
-func GrantUser(userID int, itemType string, items UserGrantRevoke) {
+func GrantUser(userID int, items []UserGrant) {
 	auth := getAuth()
 	reqBody, _ := json.Marshal(items)
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/users/" + fmt.Sprint(userID) + "/grant/" + itemType)
-	req, err := http.NewRequest(http.MethodPatch, addr.String(), bytes.NewBuffer(reqBody))
-	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
-	req.AddCookie(&cookie)
-	req.Header.Add("Content-Type", "application/json")
-	if err != nil { panic (err) }
-	client := &http.Client{}
-	res, err := client.Do(req)
-	if err != nil { panic (err) }
-	defer res.Body.Close()
-	resBody, err := io.ReadAll(res.Body)
-	if err != nil { panic (err) }
-	var errBody APIError
-	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
-	if errBody.Error != "" { handleAPIError(errBody) }
-}
-func RevokeUser(userID int, itemType string, items UserGrantRevoke) {
-	auth := getAuth()
-	reqBody, _ := json.Marshal(items)
-	addr, err := url.Parse(auth.Server)
-	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/admin/users/" + fmt.Sprint(userID) + "/revoke/" + itemType)
+	addr.Path = path.Join(addr.Path, "/admin/users/" + fmt.Sprint(userID) + "/grant")
 	req, err := http.NewRequest(http.MethodPatch, addr.String(), bytes.NewBuffer(reqBody))
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)
