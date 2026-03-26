@@ -210,7 +210,7 @@ router.patch("/:userID/grant", async (req, res) => {
     }
   }
   if (!changed.roles && !changed.acls && !changed.permissions) return res.json({ success: true, message: "Nothing to update." });
-  const updateParams: Partial<{ roles: number[], acls: number[], permissions: (`users:${string}` | `roles:${string}` | `acls:${string}` | `config:${string}` | `logs:${string}`)[] }> = {};
+  const updateParams: Partial<{ roles: number[], acls: number[], permissions: Permission[] }> = {};
   if (changed.roles) updateParams.roles = [...roles];
   if (changed.acls) updateParams.acls = [...acls];
   if (changed.permissions) updateParams.permissions = [...permissions];
