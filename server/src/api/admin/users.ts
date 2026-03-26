@@ -179,6 +179,7 @@ router.patch("/:userID/grant", async (req, res) => {
     if (!("id" in item) || !("type" in item) || !("revoke" in item) || (item.revoke !== true && item.revoke !== false)) return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
     switch (item.type) {
       case "role":
+        if (!Number.isInteger(item.id)) item.id = parseInt(item.id as string);
         if (!allRoles.find(role => role.id === item.id)) return res.status(400).json({ error: "role", message: `Role #${item.id} doesn't exist, please correct this and try again.` });
         changed.roles = true;
         if (item.revoke) {
@@ -188,6 +189,7 @@ router.patch("/:userID/grant", async (req, res) => {
         }
         break;
       case "acl":
+        if (!Number.isInteger(item.id)) item.id = parseInt(item.id as string);
         if (!allACLs.find(acl => acl.id === item.id)) return res.status(400).json({ error: "acl", message: `ACL #${item.id} doesn't exist, please correct this and try again.` });
         changed.acls = true;
         if (item.revoke) {

@@ -81,7 +81,20 @@ router.patch("/:roleID", async (req, res) => {
   }
   if (!await checkPermission(req.session.userID, "roles:edit")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  const updateParams = { name: req.body.name };
+  if (Array.isArray(req.body.acls)) {
+    const acls = await getAllACLs();
+    if ("error" in acls) {
+      switch (acls.error) {
+        case "server":
+          return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+        default:
+          return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+      }
+    }
+    for (const id of req.body.acls) if (!acls.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
+  }
+  if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!permissions.find(otherNode => otherNode.id === node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
+  const updateParams = { name: req.body.name, permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined) };
   if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
   const role = await editRole(parseInt(req.params.roleID), updateParams);
   if ("error" in role) {
@@ -131,6 +144,7 @@ router.patch("/:roleID/grant", async (req, res) => {
     if (!("id" in item) || !("type" in item) || !("revoke" in item) || (item.revoke !== true && item.revoke !== false)) return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
     switch (item.type) {
       case "acl":
+        if (!Number.isInteger(item.id)) item.id = parseInt(item.id as string);
         if (!allACLs.find(acl => acl.id === item.id)) return res.status(400).json({ error: "acl", message: `ACL #${item.id} doesn't exist, please correct this and try again.` });
         changed.acls = true;
         if (item.revoke) {

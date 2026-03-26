@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  await writeLog(req.session.userID, req.session.username, "acls-create", { id: newACL.id, newContents: { name: req.body.name, allow: (Array.isArray(req.body.allow) ? req.body.allow : undefined), deny: (Array.isArray(req.body.deny) ? req.body.deny : undefined) }  }, "created an ACL");
+  await writeLog(req.session.userID, req.session.username, "acls-create", { id: newACL.id, newContents: { name: req.body.name, allow: (Array.isArray(req.body.allow) ? req.body.allow : undefined), deny: (Array.isArray(req.body.deny) ? req.body.deny : undefined) } }, "created an ACL");
   return res.json({ id: newACL.id });
 });
 router.get("/:aclID", async (req, res) => {
@@ -70,7 +70,7 @@ router.patch("/:aclID", async (req, res) => {
   const updateParams = { name: req.body.name, allow: (Array.isArray(req.body.allow) ? req.body.allow : undefined), deny: (Array.isArray(req.body.deny) ? req.body.deny : undefined) };
   if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
   const result = await editACL(parseInt(req.params.aclID), updateParams);
-  if ("error" in result) { 
+  if ("error" in result) {
     switch (result.error) {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
@@ -88,9 +88,8 @@ router.patch("/:aclID/paths", async (req, res) => {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
-  if (!await checkPermission(req.session.userID, "users:grant")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
-  if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
-  const updateParams: Partial<{ allow: string[], deny: string[] }> = {};
+  if (!await checkPermission(req.session.userID, "acls:edit")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  if (!req.body || !Array.isArray(req.body)) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   const acl = await getACL(parseInt(req.params.aclID));
   if ("error" in acl) {
     switch (acl.error) {
@@ -102,7 +101,36 @@ router.patch("/:aclID/paths", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  
+  const changed = { allow: false, deny: false };
+  const allow = new Set<string>(acl.allow);
+  const deny = new Set<string>(acl.deny);
+  for (const item of (req.body as { path: string, type: "allow" | "deny", revoke: boolean }[])) {
+    if (!("path" in item) || !("type" in item) || !("revoke" in item) || (item.revoke !== true && item.revoke !== false)) return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
+    switch (item.type) {
+      case "allow":
+        changed.allow = true;
+        if (item.revoke) {
+          allow.delete(item.path);
+        } else {
+          allow.add(item.path);
+        }
+        break;
+      case "deny":
+        changed.deny = true;
+        if (item.revoke) {
+          deny.delete(item.path);
+        } else {
+          deny.add(item.path);
+        }
+        break;
+      default:
+        return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
+    }
+  }
+  if (!changed.allow && !changed.deny) return res.json({ success: true, message: "Nothing to update." });
+  const updateParams: Partial<{ allow: string[], deny: string[] }> = {};
+  if (changed.allow) updateParams.allow = [...allow];
+  if (changed.deny) updateParams.deny = [...deny];
   const result = await editACL(parseInt(req.params.aclID), updateParams);
   if ("error" in result) {
     switch (result.error) {
@@ -123,8 +151,8 @@ router.delete("/:aclID", async (req, res) => {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "acls:delete")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
-    const result = await deleteACL(parseInt(req.params.aclID));
-  if ("error" in result) { 
+  const result = await deleteACL(parseInt(req.params.aclID));
+  if ("error" in result) {
     switch (result.error) {
       case "server":
         return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
