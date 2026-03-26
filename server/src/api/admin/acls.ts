@@ -104,12 +104,12 @@ router.patch("/:aclID/paths", async (req, res) => {
   const changed = { allow: false, deny: false };
   const allow = new Set<string>(acl.allow);
   const deny = new Set<string>(acl.deny);
-  for (const item of (req.body as { path: string, type: "allow" | "deny", revoke: boolean }[])) {
-    if (!("path" in item) || !("type" in item) || !("revoke" in item) || (item.revoke !== true && item.revoke !== false)) return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
+  for (const item of (req.body as { path: string, type: "allow" | "deny", delete: boolean }[])) {
+    if (!("path" in item) || !("type" in item) || !("delete" in item) || (item.delete !== true && item.delete !== false)) return res.status(400).json({ error: "item", message: "An item in your request was malformed or invalid." });
     switch (item.type) {
       case "allow":
         changed.allow = true;
-        if (item.revoke) {
+        if (item.delete) {
           allow.delete(item.path);
         } else {
           allow.add(item.path);
@@ -117,7 +117,7 @@ router.patch("/:aclID/paths", async (req, res) => {
         break;
       case "deny":
         changed.deny = true;
-        if (item.revoke) {
+        if (item.delete) {
           deny.delete(item.path);
         } else {
           deny.add(item.path);
