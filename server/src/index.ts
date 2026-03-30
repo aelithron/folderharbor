@@ -50,19 +50,19 @@ async function startServer() {
       process.exit(1);
     }
     api = await startAPI(config.api.port, ssl.key, ssl.cert);
-    webdav = await startWebDAV(config.webdavPort, ssl.key, ssl.cert);
-    ftp = await startFTP(config.ftpPort, ssl.key, ssl.cert);
+    if (config.webdav.enabled) webdav = await startWebDAV(config.webdav.port, ssl.key, ssl.cert);
+    if (config.ftp.enabled) ftp = await startFTP(config.ftp.port, ssl.key, ssl.cert);
   } else {
     api = await startAPI(config.api.port);
-    webdav = await startWebDAV(config.webdavPort);
-    ftp = await startFTP(config.ftpPort);
+    if (config.webdav.enabled) webdav = await startWebDAV(config.webdav.port);
+    if (config.ftp.enabled) ftp = await startFTP(config.ftp.port);
   }
 }
 async function stopServer() {
   console.log("Stopping FolderHarbor...");
   api.close(() => console.log("Stopped API server."));
-  webdav.stop(() => console.log("Stopped WebDAV server."));
-  ftp.close().then(() => console.log("Stopped FTP server."));
+  if (webdav) webdav.stop(() => console.log("Stopped WebDAV server."));
+  if (ftp) ftp.close().then(() => console.log("Stopped FTP server."));
 }
 await startServer();
 process.on("SIGTERM", async () => await stopServer());

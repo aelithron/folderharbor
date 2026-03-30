@@ -3,8 +3,14 @@
     "port": 3000,
     "allowedOrigins": ["http://localhost:3001"]
   },
-  "webdavPort": 1900,
-  "ftpPort": 2100,
+  "webdav": {
+    "enabled": true,
+    "port": 1900
+  },
+  "ftp": {
+    "enabled": false,
+    "port": 2100
+  },
   "useSSL": false,
   "serverDirectory": "/",
   "failedLoginLimit": 5,

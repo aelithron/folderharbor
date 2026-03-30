@@ -17,9 +17,6 @@ importers:
       argon2:
         specifier: ^0.44.0
         version: 0.44.0
-      bunyan:
-        specifier: ^1.8.15
-        version: 1.8.15
       commander:
         specifier: ^14.0.2
         version: 14.0.2
@@ -66,9 +63,6 @@ importers:
       '@eslint/js':
         specifier: ^9.39.2
         version: 9.39.2
-      '@types/bunyan':
-        specifier: ^1.8.11
-        version: 1.8.11
       '@types/cookie-parser':
         specifier: ^1.4.10
         version: 1.4.10(@types/express@5.0.6)
@@ -635,9 +629,6 @@ packages:
 
   '@types/braces@3.0.5':
     resolution: {integrity: sha512-SQFof9H+LXeWNz8wDe7oN5zu7ket0qwMu5vZubW4GCJ8Kkeh6nBWUz87+KTz/G3Kqsrp0j/W253XJb3KMEeg3w==}
-
-  '@types/bunyan@1.8.11':
-    resolution: {integrity: sha512-758fRH7umIMk5qt5ELmRMff4mLDlN+xyYzC+dkPTdKwbSkJFvz6xwyScrytPU0QIBbRRwbiE8/BIg8bpajerNQ==}
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
@@ -2153,10 +2144,6 @@ snapshots:
       '@types/node': 25.0.8
 
   '@types/braces@3.0.5': {}
-
-  '@types/bunyan@1.8.11':
-    dependencies:
-      '@types/node': 25.0.8
 
   '@types/connect@3.4.38':
     dependencies:

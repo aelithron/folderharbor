@@ -1,6 +1,9 @@
-import type { FileSystem, FtpConnection } from "ftp-srv";
+import { FileSystem, type FtpConnection } from "ftp-srv";
 import { getSession, prepareSession } from "../../users/sessions.js";
 import { writeLog } from "../../utils/auditlog.js";
+import fs from "fs";
+import path from "path";
+import { getPaths } from "../../permissions/acls.js";
 
 export function ftpAuth({ username, password }: { connection: FtpConnection, username: string, password: string }, resolve: (config: { fs?: FileSystem, root?: string, cwd?: string, blacklist?: Array<string>, whitelist?: Array<string> }) => void, reject: (err?: Error) => void) {
   if (password.startsWith("token_")) {
@@ -41,6 +44,40 @@ export function ftpAuth({ username, password }: { connection: FtpConnection, use
         }
       }
       return resolve({ root: "/" });
+    });
+  }
+}
+class FolderHarborFileSystem extends FileSystem {
+  get(fileName: string): Promise<any> {
+    const realPath = path.normalize(fileName);
+    fs.readdir(realPath, async (e, files) => {
+      const allowedFiles: string[] = [];
+      const paths = await getPaths(parseInt(this.connection.id));
+      if ("error" in paths) throw new Error("Something went wrong on the server's end, please contact your administrator.");
+      for (const item of files) {
+        let allowed = false;
+        const checkPath = path.normalize(path.join(itemPath.toString(), item));
+        const type = await getItemType(checkPath);
+        if (micromatch.isMatch(checkPath, getConfig()!.globalExclusions, { dot: true }) && !micromatch.isMatch(checkPath, getConfig()!.globalExclusionBypasses, { dot: true })) {
+          let bypassExclusions = false;
+          if (!("error" in type) && type.type === "folder") for (const prefix of getConfig()!.globalExclusionBypasses.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) if (prefix === checkPath || prefix.startsWith(checkPath + "/")) bypassExclusions = true;
+          if (!bypassExclusions) continue;
+        }
+        if (micromatch.isMatch(checkPath, paths.allow, { dot: true })) allowed = true;
+        if (micromatch.isMatch(checkPath, paths.deny, { dot: true })) allowed = false;
+        if (!allowed) {
+          if (!("error" in type) && type.type === "folder") {
+            for (const prefix of paths.allow.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) {
+              if (prefix === checkPath || prefix.startsWith(checkPath + "/")) {
+                allowed = true;
+                break;
+              }
+            }
+          }
+        }
+        if (allowed) allowedFiles.push(item);
+      }
+      callback(e ? Errors.ResourceNotFound : Errors.None, allowedFiles);
     });
   }
 }

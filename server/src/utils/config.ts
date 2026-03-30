@@ -9,8 +9,14 @@ export const Config = z.object({
     port: z.int().positive(),
     allowedOrigins: z.array(z.string())
   }),
-  webdavPort: z.int().positive(),
-  ftpPort: z.int().positive(),
+  webdav: z.object({
+    enabled: z.boolean(),
+    port: z.int().positive()
+  }),
+  ftp: z.object({
+    enabled: z.boolean(),
+    port: z.int().positive()
+  }),
   useSSL: z.boolean(),
   serverDirectory: z.string().default("/"),
   failedLoginLimit: z.int().positive().default(5),

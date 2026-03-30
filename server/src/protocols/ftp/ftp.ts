@@ -1,10 +1,17 @@
 import { FtpSrv } from "ftp-srv";
 import { ftpAuth } from "./helpers.js";
-import bunyan from "bunyan";
 
 export default async function startFTP(port: number, sslKey?: string, sslCert?: string): Promise<FtpSrv> {
   let server;
-  const logger = bunyan.createLogger({ name: "FolderHarbor FTP", level: 40 });
+  const logger = {
+    warn: (msg: string) => console.warn(`FTP Warning - ${msg}`),
+    error: (msg: string) => console.error(`FTP Error - ${msg}`),
+    fatal: (msg: string) => console.error(`FTP Error - ${msg}`),
+    info: () => {},
+    debug: () => {},
+    trace: () => {},
+    child: () => logger
+  };
   if (sslKey && sslCert) {
     server = new FtpSrv({ url: "ftps://0.0.0.0:" + port, anonymous: false, tls: { key: sslKey, cert: sslCert }, log: logger });
   } else {
