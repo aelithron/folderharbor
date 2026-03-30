@@ -10,7 +10,7 @@ export type AuditAction = (
   "auth-login" |
   `config-${"read" | "edit"}`
 );
-export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileType: "file" | "folder", protocol: "api" | "webdav" } | { id: number, accessLevel: "full" | "limited", newContents: unknown, protocol: "api" | "internal" } | { authSuccess: boolean, protocol: "api" | "webdav" } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
+export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileType: "file" | "folder", protocol: "api" | "webdav" | "ftp" } | { id: number, accessLevel: "full" | "limited", newContents: unknown, protocol: "api" | "internal" } | { authSuccess: boolean, protocol: "api" | "webdav" | "ftp" } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
 
 export async function writeLog(userID: number, username: string | null, action: AuditAction, body: AuditBody | null, blurb?: string) {
   try {

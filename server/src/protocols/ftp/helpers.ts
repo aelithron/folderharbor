@@ -32,7 +32,7 @@ export function ftpAuth({ username, password }: { connection: FtpConnection, use
             reject(new Error("That username doesn't exist."));
             return;
           case "wrong_password":
-            writeLog(data.userID, username, "auth-login", { authSuccess: false, protocol: "webdav" }, "attempted to log in");
+            writeLog(data.userID, username, "auth-login", { authSuccess: false, protocol: "ftp" }, "attempted to log in");
             reject(new Error("Incorrect password."));
             return;
           case "locked":
