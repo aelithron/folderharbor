@@ -29,6 +29,7 @@ export function ftpAuth({ username, password, connection }: { connection: FtpCon
         }
       }
       connection.userID = session.userID;
+      connection.username = session.username;
       return resolve({ root: "/", fs: new FolderHarborFileSystem(connection, { root: "/", cwd: "/" }) });
     });
   } else {
@@ -51,13 +52,16 @@ export function ftpAuth({ username, password, connection }: { connection: FtpCon
         }
       }
       connection.userID = data.userID;
+      connection.username = username;
       return resolve({ root: "/", fs: new FolderHarborFileSystem(connection, { root: "/", cwd: "/" }) });
     });
   }
 }
 class FolderHarborFileSystem extends FileSystem {
   async get(fileName: string): Promise<unknown> {
-    const canAccess = await checkPath(this.connection.userID, path.resolve(path.join(this.currentDirectory(), fileName)));
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(fileName);
+    const canAccess = await checkPath(this.connection.userID, fsPath);
     if (canAccess) return super.get(fileName);
     throw new Error("You don't have access to that file, or it doesn't exist.");
   }
@@ -99,5 +103,74 @@ class FolderHarborFileSystem extends FileSystem {
       if (allowed) allowedFiles.push(stat);
     }
     return allowedFiles;
+  }
+  async read(fileName: string, { start }: { start?: unknown; }): Promise<unknown> {
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(fileName);
+    const canAccess = await checkPath(this.connection.userID, fsPath);
+    if (canAccess) {
+      const type = await getItemType(fsPath);
+      if ("error" in type) throw new Error("You don't have access to that file, or it doesn't exist.");
+      if (type.type === "file") await writeLog(this.connection.userID, this.connection.username, "files-read", { filePath: fsPath, protocol: "ftp" }, "read a file");
+      return super.read(fileName, { start });
+    }
+    throw new Error("You don't have access to that file, or it doesn't exist.");
+  }
+  async write(fileName: string, { append, start }: { append?: boolean; start?: unknown; }) {
+    if (append === undefined) append = false;
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(fileName);
+    const canAccess = await checkPath(this.connection.userID, fsPath);
+    if (canAccess) {
+      super.write(fileName, { append, start });
+      await writeLog(this.connection.userID, this.connection.username, "files-edit", { filePath: fsPath, protocol: "ftp" }, "edited a file");
+      return;
+    }
+    throw new Error("You don't have access to that file, or it doesn't exist.");
+  }
+  async delete(path: string): Promise<unknown> {
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(path);
+    const canAccess = await checkPath(this.connection.userID, fsPath);
+    if (canAccess) {
+      super.delete(path);
+      await writeLog(this.connection.userID, this.connection.username, "files-delete", { filePath: fsPath, protocol: "ftp" }, "deleted a file");
+      return;
+    }
+    throw new Error("You don't have access to that file, or it doesn't exist.");
+  }
+  async mkdir(path: string): Promise<unknown> {
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(path);
+    const canAccess = await checkPath(this.connection.userID, fsPath);
+    if (canAccess) {
+      super.mkdir(path);
+      await writeLog(this.connection.userID, this.connection.username, "files-create", { filePath: fsPath, protocol: "ftp" }, "created a folder");
+      return;
+    }
+    throw new Error("You don't have access to that file, or it doesn't exist.");
+  }
+  async rename(from: string, to: string): Promise<unknown> {
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath: fromPath } = this._resolvePath(from);
+    // @ts-expect-error - again, exists in the code but not types
+    const { fsPath: toPath } = this._resolvePath(to);
+    if (await checkPath(this.connection.userID, fromPath) && await checkPath(this.connection.userID, toPath)) {
+      super.rename(fromPath, toPath);
+      await writeLog(this.connection.userID, this.connection.username, "files-move", { filePath: toPath, oldFilePath: fromPath, protocol: "ftp" }, "moved a file");
+      return;
+    }
+    throw new Error("You don't have access to one or more of those files, or they don't exist.");
+  }
+  async chmod(path: string, mode: string): Promise<unknown> {
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(path);
+    const canAccess = await checkPath(this.connection.userID, fsPath);
+    if (canAccess) {
+      super.chmod(path, mode);
+      await writeLog(this.connection.userID, this.connection.username, "files-edit", { filePath: fsPath, protocol: "ftp" }, "edited a file");
+      return;
+    }
+    throw new Error("You don't have access to that file, or it doesn't exist.");
   }
 }

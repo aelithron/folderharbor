@@ -9,5 +9,8 @@ declare global {
   }
 }
 declare module "ftp-srv" {
-  interface FtpConnection { userID: number }
+  interface FtpConnection { 
+    userID: number
+    username: string
+  }
 }
