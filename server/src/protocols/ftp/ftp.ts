@@ -4,9 +4,9 @@ import { ftpAuth } from "./helpers.js";
 export default async function startFTP(port: number, sslKey?: string, sslCert?: string): Promise<FtpSrv> {
   let server;
   const logger = {
-    warn: (msg: string) => console.warn(`FTP Warning - ${msg}`),
-    error: (msg: string) => console.error(`FTP Error - ${msg}`),
     fatal: (msg: string) => console.error(`FTP Error - ${msg}`),
+    error: () => {},
+    warn: () => {},
     info: () => {},
     debug: () => {},
     trace: () => {},
