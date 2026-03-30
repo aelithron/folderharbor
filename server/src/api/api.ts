@@ -3,14 +3,17 @@ import type { Server } from "http";
 import { router as authRouter } from "./auth.js";
 import { router as meRouter } from "./me.js";
 import { router as adminRouter } from "./admin/admin.js";
-import { router as filesRouter } from "./files/files.js";
+//import { router as filesRouter } from "./files/files.js";
 import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { getConfig } from "../index.js";
 import path from "path";
 import https from "https";
 export default async function startAPI(port: number, sslKey?: string, sslCert?: string): Promise<Server> {
   const app = express();
+  app.use(cors({ origin: (getConfig() || { api: { allowedOrigins: [] } }).api.allowedOrigins }));
+  app.use(contentTypeFixer());
   app.use(express.json());
   app.use(cookieParser());
   app.use(auth);
@@ -23,7 +26,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
   app.use("/auth", authRouter);
   app.use("/me", meRouter);
   app.use("/admin", adminRouter);
-  app.use("/files", filesRouter);
+  //app.use("/files", filesRouter);
   let server: Server;
   if (sslKey && sslCert) {
     server = https.createServer({ key: sslKey, cert: sslCert }, app).listen(port);
@@ -73,6 +76,12 @@ export function enforceAuth(): RequestHandler {
       }
     }
     if (!req.session) return res.status(401).json({ error: "unauthorized", message: "No authentication token provided, or an invalid one was sent." });
+    return next();
+  };
+}
+function contentTypeFixer(): RequestHandler {
+  return (req, res, next) => {
+    if (!req.headers["content-type"]) req.headers["content-type"] = "application/json";
     return next();
   };
 }

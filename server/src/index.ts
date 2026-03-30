@@ -49,11 +49,11 @@ async function startServer() {
       console.error(`SSL Error - ${e}`);
       process.exit(1);
     }
-    api = await startAPI(config.apiPort, ssl.key, ssl.cert);
+    api = await startAPI(config.api.port, ssl.key, ssl.cert);
     webdav = await startWebDAV(config.webdavPort, ssl.key, ssl.cert);
     ftp = await startFTP(config.ftpPort, ssl.key, ssl.cert);
   } else {
-    api = await startAPI(config.apiPort);
+    api = await startAPI(config.api.port);
     webdav = await startWebDAV(config.webdavPort);
     ftp = await startFTP(config.ftpPort);
   }

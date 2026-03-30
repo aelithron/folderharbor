@@ -5,7 +5,10 @@ import { fileURLToPath } from "url";
 import { getConfig, getConfigPath, setConfig } from "../index.js";
 
 export const Config = z.object({
-  apiPort: z.int().positive(),
+  api: z.object({
+    port: z.int().positive(),
+    allowedOrigins: z.array(z.string())
+  }),
   webdavPort: z.int().positive(),
   ftpPort: z.int().positive(),
   useSSL: z.boolean(),

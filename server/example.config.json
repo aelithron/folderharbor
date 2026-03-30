@@ -1,5 +1,8 @@
 {
-  "apiPort": 3000,
+  "api": {
+    "port": 3000,
+    "allowedOrigins": ["http://localhost:3001"]
+  },
   "webdavPort": 1900,
   "ftpPort": 2100,
   "useSSL": false,
