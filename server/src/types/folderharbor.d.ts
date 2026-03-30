@@ -8,3 +8,6 @@ declare global {
     }
   }
 }
+declare module "ftp-srv" {
+  interface FtpConnection { userID: number }
+}

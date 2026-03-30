@@ -1,11 +1,17 @@
 import { FileSystem, type FtpConnection } from "ftp-srv";
 import { getSession, prepareSession } from "../../users/sessions.js";
 import { writeLog } from "../../utils/auditlog.js";
-import fs from "fs";
+import { checkPath, getPaths } from "../../permissions/acls.js";
 import path from "path";
-import { getPaths } from "../../permissions/acls.js";
+import fs from "fs/promises";
+import { getItemType } from "../../core.js";
+import micromatch from "micromatch";
+import { getConfig } from "../../index.js";
+import type { Stats } from "fs";
 
-export function ftpAuth({ username, password }: { connection: FtpConnection, username: string, password: string }, resolve: (config: { fs?: FileSystem, root?: string, cwd?: string, blacklist?: Array<string>, whitelist?: Array<string> }) => void, reject: (err?: Error) => void) {
+type StatsWithName = Stats & { name: string };
+
+export function ftpAuth({ username, password, connection }: { connection: FtpConnection, username: string, password: string }, resolve: (config: { fs?: FileSystem, root?: string, cwd?: string, blacklist?: Array<string>, whitelist?: Array<string> }) => void, reject: (err?: Error) => void) {
   if (password.startsWith("token_")) {
     getSession(password.split("token_")[1]!).then((session) => {
       if ("error" in session) {
@@ -22,7 +28,8 @@ export function ftpAuth({ username, password }: { connection: FtpConnection, use
             return reject(new Error("An unknown error occured."));
         }
       }
-      return resolve({ root: "/" });
+      connection.userID = session.userID;
+      return resolve({ root: "/", fs: new FolderHarborFileSystem(connection, { root: "/", cwd: "/" }) });
     });
   } else {
     prepareSession(username, password).then((data) => {
@@ -43,41 +50,54 @@ export function ftpAuth({ username, password }: { connection: FtpConnection, use
             return reject(new Error("An unknown error occured."));
         }
       }
-      return resolve({ root: "/" });
+      connection.userID = data.userID;
+      return resolve({ root: "/", fs: new FolderHarborFileSystem(connection, { root: "/", cwd: "/" }) });
     });
   }
 }
 class FolderHarborFileSystem extends FileSystem {
-  get(fileName: string): Promise<any> {
-    const realPath = path.normalize(fileName);
-    fs.readdir(realPath, async (e, files) => {
-      const allowedFiles: string[] = [];
-      const paths = await getPaths(parseInt(this.connection.id));
-      if ("error" in paths) throw new Error("Something went wrong on the server's end, please contact your administrator.");
-      for (const item of files) {
-        let allowed = false;
-        const checkPath = path.normalize(path.join(itemPath.toString(), item));
-        const type = await getItemType(checkPath);
-        if (micromatch.isMatch(checkPath, getConfig()!.globalExclusions, { dot: true }) && !micromatch.isMatch(checkPath, getConfig()!.globalExclusionBypasses, { dot: true })) {
-          let bypassExclusions = false;
-          if (!("error" in type) && type.type === "folder") for (const prefix of getConfig()!.globalExclusionBypasses.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) if (prefix === checkPath || prefix.startsWith(checkPath + "/")) bypassExclusions = true;
-          if (!bypassExclusions) continue;
-        }
-        if (micromatch.isMatch(checkPath, paths.allow, { dot: true })) allowed = true;
-        if (micromatch.isMatch(checkPath, paths.deny, { dot: true })) allowed = false;
-        if (!allowed) {
-          if (!("error" in type) && type.type === "folder") {
-            for (const prefix of paths.allow.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) {
-              if (prefix === checkPath || prefix.startsWith(checkPath + "/")) {
-                allowed = true;
-                break;
-              }
+  async get(fileName: string): Promise<unknown> {
+    const canAccess = await checkPath(this.connection.userID, path.resolve(path.join(this.currentDirectory(), fileName)));
+    if (canAccess) return super.get(fileName);
+    throw new Error("You don't have access to that file, or it doesn't exist.");
+  }
+  async list(dirPath?: string): Promise<unknown> {
+    if (!dirPath) dirPath = ".";
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(dirPath);
+    const items = await fs.readdir(fsPath);
+    const allowedFiles: StatsWithName[] = [];
+    const paths = await getPaths(this.connection.userID);
+    if ("error" in paths) throw new Error("Something went wrong on the server's end, please contact your administrator.");
+    for (const item of items) {
+      let allowed = false;
+      const checkPath = path.resolve(path.join(fsPath, item));
+      const type = await getItemType(checkPath);
+      if (micromatch.isMatch(checkPath, getConfig()!.globalExclusions, { dot: true }) && !micromatch.isMatch(checkPath, getConfig()!.globalExclusionBypasses, { dot: true })) {
+        let bypassExclusions = false;
+        if (!("error" in type) && type.type === "folder") for (const prefix of getConfig()!.globalExclusionBypasses.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) if (prefix === checkPath || prefix.startsWith(checkPath + "/")) bypassExclusions = true;
+        if (!bypassExclusions) continue;
+      }
+      if (micromatch.isMatch(checkPath, paths.allow, { dot: true })) allowed = true;
+      if (micromatch.isMatch(checkPath, paths.deny, { dot: true })) allowed = false;
+      if (!allowed) {
+        if (!("error" in type) && type.type === "folder") {
+          for (const prefix of paths.allow.map(glob => { return path.normalize(glob.split(/[*?[{\]]/, 1)[0]!); })) {
+            if (prefix === checkPath || prefix.startsWith(checkPath + "/")) {
+              allowed = true;
+              break;
             }
           }
         }
-        if (allowed) allowedFiles.push(item);
       }
-      callback(e ? Errors.ResourceNotFound : Errors.None, allowedFiles);
-    });
+      let stat;
+      try {
+        stat = await fs.stat(checkPath) as StatsWithName;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_) { continue; }
+      stat.name = item;
+      if (allowed) allowedFiles.push(stat);
+    }
+    return allowedFiles;
   }
 }
