@@ -8,3 +8,4 @@ Folder structure:
 - `server/`: The FolderHarbor server, written in TypeScript.
 - `cli/`: CLI for administration, written in Go.
 - `landing/`: Landing page to describe what FolderHarbor is and offer links, written in TypeScript with Next.JS (React).
+- `web/`: Web client for adminstration, written in TypeScript with Next.JS (React).

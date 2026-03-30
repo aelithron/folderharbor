@@ -15,7 +15,7 @@
 			"path": "web",
 			"problemMatcher": [],
 			"label": "npm: dev - web",
-			"detail": "vite"
+			"detail": "next dev"
 		},
 		{
 			"type": "npm",
