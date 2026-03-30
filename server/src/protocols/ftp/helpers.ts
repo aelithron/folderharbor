@@ -26,27 +26,21 @@ export function ftpAuth({ username, password }: { connection: FtpConnection, use
       if ("error" in data) {
         switch (data.error) {
           case "server":
-            reject(new Error("Something went wrong on the server's end, please contact your administrator."));
-            return;
+            return reject(new Error("Something went wrong on the server's end, please contact your administrator."));
           case "not_found":
-            reject(new Error("That username doesn't exist."));
-            return;
+            return reject(new Error("That username doesn't exist."));
           case "wrong_password":
             writeLog(data.userID, username, "auth-login", { authSuccess: false, protocol: "ftp" }, "attempted to log in");
-            reject(new Error("Incorrect password."));
-            return;
+            return reject(new Error("Incorrect password."));
           case "locked":
-            reject(new Error("Your account is locked, please contact your administrator."));
-            return;
+            return reject(new Error("Your account is locked, please contact your administrator."));
           case "rate_limited":
-            reject(new Error("Too many failed login attempts, please wait before trying again or contact your administrator."));
-            return;
+            return reject(new Error("Too many failed login attempts, please wait before trying again or contact your administrator."));
           default:
-            reject(new Error("An unknown error occured."));
-            return;
+            return reject(new Error("An unknown error occured."));
         }
       }
-      resolve({ root: "/" });
+      return resolve({ root: "/" });
     });
   }
 }
