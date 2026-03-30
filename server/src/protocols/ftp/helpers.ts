@@ -107,8 +107,7 @@ class FolderHarborFileSystem extends FileSystem {
     if (!path) path = ".";
     // @ts-expect-error - this method exists in the code but not types
     const { fsPath } = this._resolvePath(path);
-    console.log(fsPath);
-    if (!(await fs.stat(fsPath)).isDirectory()) return this.cwd;
+    //if (!(await fs.stat(fsPath)).isDirectory()) return this.cwd;
     if (await checkPath(this.connection.userID, fsPath)) return super.chdir(path);
     throw new Error("You don't have access to that folder, or it doesn't exist.");
   }

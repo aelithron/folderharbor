@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  ftp-srv:
+    hash: 1feab48f66ed5521729bc20258bb59912b411ea12bc1450cb1c8da230c40e188
+    path: patches/ftp-srv.patch
+
 importers:
 
   .:
@@ -37,7 +42,7 @@ importers:
         version: 5.2.1
       ftp-srv:
         specifier: ^4.6.3
-        version: 4.6.3
+        version: 4.6.3(patch_hash=1feab48f66ed5521729bc20258bb59912b411ea12bc1450cb1c8da230c40e188)
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
@@ -2767,7 +2772,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  ftp-srv@4.6.3:
+  ftp-srv@4.6.3(patch_hash=1feab48f66ed5521729bc20258bb59912b411ea12bc1450cb1c8da230c40e188):
     dependencies:
       bluebird: 3.7.2
       bunyan: 1.8.15

@@ -1,0 +1,13 @@
+diff --git a/src/commands/registration/size.js b/src/commands/registration/size.js
+index ef8e754cd0c2d2f47f92c5752e85019029f44035..c1adb65cf4ce7858e9f94a064b32ee93d5e49189 100644
+--- a/src/commands/registration/size.js
++++ b/src/commands/registration/size.js
+@@ -8,7 +8,7 @@ module.exports = {
+ 
+     return Promise.try(() => this.fs.get(command.arg))
+     .then((fileStat) => {
+-      return this.reply(213, {message: fileStat.size});
++      return this.reply(213, {message: fileStat.size !== 0 ? fileStat.size : '0'});
+     })
+     .catch((err) => {
+       log.error(err);
