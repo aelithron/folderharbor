@@ -123,15 +123,15 @@ class FolderHarborFileSystem extends FileSystem {
     }
     throw new Error("You don't have access to that file, or it doesn't exist.");
   }
-  async write(fileName: string, { append, start }: { append?: boolean; start?: unknown; }) {
+  async write(fileName: string, { append, start }: { append?: boolean; start?: unknown; }): Promise<unknown> {
     if (append === undefined) append = false;
     // @ts-expect-error - this method exists in the code but not types
     const { fsPath } = this._resolvePath(fileName);
     const canAccess = await checkPath(this.connection.userID, fsPath);
+    console.log(fsPath, canAccess);
     if (canAccess) {
-      super.write(fileName, { append, start });
       await writeLog(this.connection.userID, this.connection.username, "files-edit", { filePath: fsPath, protocol: "ftp" }, "edited a file");
-      return;
+      return super.write(fileName, { append, start });
     }
     throw new Error("You don't have access to that file, or it doesn't exist.");
   }
