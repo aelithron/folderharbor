@@ -104,6 +104,13 @@ class FolderHarborFileSystem extends FileSystem {
     }
     return allowedFiles;
   }
+  async chdir(path?: string): Promise<string> {
+    // @ts-expect-error - this method exists in the code but not types
+    const { fsPath } = this._resolvePath(path);
+    const canAccess = await checkPath(this.connection.userID, fsPath);
+    if (canAccess) return super.chdir(path);
+    throw new Error("You don't have access to that folder, or it doesn't exist.");
+  }
   async read(fileName: string, { start }: { start?: unknown; }): Promise<unknown> {
     // @ts-expect-error - this method exists in the code but not types
     const { fsPath } = this._resolvePath(fileName);
