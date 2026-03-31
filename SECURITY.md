@@ -11,7 +11,7 @@ The scope varies for each component. If something is not in either list, please 
 ### Server
 In scope:
 - Authentication bypasses
-- Privelege escalation
+- Privilege escalation
 - Path traversal
 - Improper information exposure
 Out of scope:
