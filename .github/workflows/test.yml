@@ -5,35 +5,86 @@ on:
     branches: ["*"]
   pull_request:
     branches: ["*"]
+  workflow_call:
+
+permissions:
+  pull-requests: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+      cli: ${{ steps.filter.outputs.cli }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+    - uses: actions/checkout@v6
+    - uses: dorny/paths-filter@v4
+      id: filter
+      with:
+        filters: |
+          server:
+            - "server/**"
+          cli:
+            - "cli/**"
+          web:
+            - "web/**"
+
   server-test:
     name: Test Server
+    needs: changes
+    if: ${{ needs.changes.outputs.server == 'true' }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./server"
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
         with:
           version: 10
       - uses: actions/setup-node@v6
         with:
-          node-version: "24"
+          node-version: 24
           cache: "pnpm"
+          cache-dependency-path: "server/pnpm-lock.yaml"
       - run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm lint
   cli-test:
     name: Test CLI
+    needs: changes
+    if: ${{ needs.changes.outputs.cli == 'true' }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./cli"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
-          go-version: "1.20"
+          go-version: stable
+          cache: true
       - name: Vet
         run: go vet -v ./...
   web-test:
     name: Test Web Panel
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./web"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: "web/pnpm-lock.yaml"
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
