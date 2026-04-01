@@ -67,6 +67,7 @@ jobs:
         with:
           go-version: stable
           cache: true
+      - run: go mod download
       - name: Vet
         run: go vet -v ./...
   web-test:
