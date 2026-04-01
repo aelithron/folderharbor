@@ -56,12 +56,15 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: stable
+          go-version-file: "cli/go.mod"
           cache: true
+          cache-dependency-path: "cli/go.sum"
       - run: go mod download
       - name: Vet
-        run: go vet -v ./...
+        run: go vet ./...
       - name: Build
         run: |
+          mkdir dist
           GOOS=linux GOARCH=amd64 go build -o dist/folderharbor-cli-linux-amd64 .
           GOOS=linux GOARCH=arm64 go build -o dist/folderharbor-cli-linux-arm64 .
           GOOS=darwin GOARCH=amd64 go build -o dist/folderharbor-cli-macos-amd64 .
@@ -75,4 +78,4 @@ jobs:
           VERSION: ${{ env.VERSION }}
         with:
           name: "CLI ${{ env.VERSION }}"
-          files: "dist/**"
+          files: "cli/dist/**"
