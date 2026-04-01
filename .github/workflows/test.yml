@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   changes:
-    name: Check Changes
+    name: Check for Changes
     runs-on: ubuntu-latest
     outputs:
       server: ${{ steps.filter.outputs.server }}

@@ -2,11 +2,10 @@ name: Release
 
 on:
   push:
-    branches: ["main"]
     tags:
       - "server/v*"
       - "cli/v*"
-      - "web/v*"
+     # - "web/v*"
 
 jobs:
   server-release:
@@ -18,6 +17,8 @@ jobs:
         working-directory: "./server"
     steps:
       - uses: actions/checkout@v6
+      - name: Get Version
+        run: echo "VERSION=${GITHUB_REF_NAME#server/}" >> $GITHUB_ENV
       - uses: pnpm/action-setup@v5
         with:
           version: 10
@@ -31,3 +32,42 @@ jobs:
         run: pnpm lint
       - name: Compile
         run: pnpm build
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          name: "Server ${{ env.VERSION }}"
+  cli-release:
+    name: Release CLI
+    if: startsWith(github.ref, 'refs/tags/cli/')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./cli"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Version
+        run: echo "VERSION=${GITHUB_REF_NAME#cli/}" >> $GITHUB_ENV
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache: true
+      - name: Vet
+        run: go vet -v ./...
+      - name: Build
+        run: |
+          GOOS=linux GOARCH=amd64 go build -v -o dist/folderharbor-cli-linux-amd64 .
+          GOOS=linux GOARCH=arm64 go build -v -o dist/folderharbor-cli-linux-arm64 .
+          GOOS=darwin GOARCH=amd64 go build -v -o dist/folderharbor-cli-macos-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -v -o dist/folderharbor-cli-macos-arm64 .
+          GOOS=windows GOARCH=amd64 go build -v -o dist/folderharbor-cli-windows-amd64.exe .
+      - name: Checksums
+        run: sha256sum dist/* > dist/checksums.txt
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          name: "CLI ${{ env.VERSION }}"
+          files: "dist/**"
