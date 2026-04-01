@@ -5,13 +5,13 @@ on:
     branches: ["*"]
   pull_request:
     branches: ["*"]
-  workflow_call:
 
 permissions:
   pull-requests: read
 
 jobs:
   changes:
+    name: Check Changes
     runs-on: ubuntu-latest
     outputs:
       server: ${{ steps.filter.outputs.server }}
@@ -51,6 +51,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm lint
+      - name: Check Types
+        run: pnpm check-types
   cli-test:
     name: Test CLI
     needs: changes
