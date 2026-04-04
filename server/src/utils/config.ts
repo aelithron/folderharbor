@@ -15,10 +15,11 @@ export const Config = z.object({
   }),
   ftp: z.object({
     enabled: z.boolean(),
-    port: z.int().positive()
+    port: z.int().positive(),
+    pasv: z.object({ start: z.int().positive(), end: z.int().positive() }),
+    publicAddress: z.string().nullable()
   }),
   useSSL: z.boolean(),
-  serverDirectory: z.string().default("/"),
   failedLoginLimit: z.int().positive().default(5),
   selfUsernameChanges: z.boolean().default(true),
   filterMetadata: z.boolean().default(true),

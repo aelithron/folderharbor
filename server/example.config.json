@@ -9,10 +9,11 @@
   },
   "ftp": {
     "enabled": false,
-    "port": 2100
+    "port": 2100,
+    "pasv": { "start": 50000, "end": 50500 },
+    "publicAddress": null
   },
   "useSSL": false,
-  "serverDirectory": "/",
   "failedLoginLimit": 5,
   "selfUsernameChanges": true,
   "filterMetadata": true,

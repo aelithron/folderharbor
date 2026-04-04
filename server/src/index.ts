@@ -51,11 +51,11 @@ async function startServer() {
     }
     api = await startAPI(config.api.port, ssl.key, ssl.cert);
     if (config.webdav.enabled) webdav = await startWebDAV(config.webdav.port, ssl.key, ssl.cert);
-    if (config.ftp.enabled) ftp = await startFTP(config.ftp.port, ssl.key, ssl.cert);
+    if (config.ftp.enabled) ftp = await startFTP(config, ssl.key, ssl.cert);
   } else {
     api = await startAPI(config.api.port);
     if (config.webdav.enabled) webdav = await startWebDAV(config.webdav.port);
-    if (config.ftp.enabled) ftp = await startFTP(config.ftp.port);
+    if (config.ftp.enabled) ftp = await startFTP(config);
   }
 }
 async function stopServer() {
