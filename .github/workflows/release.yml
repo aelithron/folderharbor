@@ -77,7 +77,7 @@ jobs:
       - name: Attest Builds
         uses: actions/attest@v4
         with:
-          subject-path: 'dist/*'
+          subject-path: 'cli/dist/*'
       - name: Checksums
         run: sha256sum dist/* > dist/checksums.txt
       - name: Release
