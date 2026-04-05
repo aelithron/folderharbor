@@ -1,4 +1,5 @@
 "use client"
+import { db } from "@/utils/db";
 import { useState } from "react"
 
 export default function LoginForm() {
@@ -21,6 +22,7 @@ export default function LoginForm() {
       alert(`Error logging you in: ${body.message} (${body.error})`);
       return;
     }
+    await db.sessions.add({ server, token: body.token });
   }
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
