@@ -1,8 +1,10 @@
 "use client"
 import { db } from "@/utils/db";
+import { useRouter } from "next/navigation";
 import { useState } from "react"
 
 export default function LoginForm() {
+  const router = useRouter();
   const [server, setServer] = useState<string>(process.env.NEXT_PUBLIC_DEFAULT_URL || "");
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -22,7 +24,8 @@ export default function LoginForm() {
       alert(`Error logging you in: ${body.message} (${body.error})`);
       return;
     }
-    await db.sessions.add({ server, token: body.token });
+    await db.sessions.add({ server: new URL(server).toString(), token: body.token });
+    router.push("/");
   }
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
