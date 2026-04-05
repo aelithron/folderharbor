@@ -7,7 +7,7 @@ export default function Page() {
     <main className="flex flex-col p-8 md:p-20 min-h-screen">
       <div className="flex flex-col items-center justify-center text-center gap-1">
         <Image src={logo} alt="FolderHarbor Logo" loading="eager" className="w-1/4 h-1/4" />
-        <h1 className="text-2xl font-semibold">Log In</h1>
+        <h1 className="text-2xl font-semibold">Sign In</h1>
         <p>Please sign in to your FolderHarbor server to continue.</p>
         <LoginForm />
       </div>

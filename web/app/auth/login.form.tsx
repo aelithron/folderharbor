@@ -24,11 +24,11 @@ export default function LoginForm() {
       alert(`Error logging you in: ${body.message} (${body.error})`);
       return;
     }
-    await db.sessions.add({ server: new URL(server).toString(), token: body.token });
+    await db.sessions.add({ server: new URL(server).toString(), token: body.token, username: username });
     router.push("/");
   }
   return (
-    <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-2 items-center" onSubmit={handleSubmit}>
       <div className="flex flex-col gap-1">
         <label htmlFor="server">Server</label>
         <input id="server" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl" value={server} onChange={(e) => setServer(e.target.value)} />
@@ -41,7 +41,7 @@ export default function LoginForm() {
         <label htmlFor="password">Password</label>
         <input id="password" type="password" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl" value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
-      <button type="submit" className="rounded-xl p-1 mt-2 bg-violet-500 hover:text-sky-500">Log In</button>
+      <button type="submit" className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Sign In</button>
     </form>
   );
 }

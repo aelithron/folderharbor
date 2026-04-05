@@ -31,18 +31,21 @@ export default function AccountSelector() {
   return (
     <div className="flex flex-col">
       {sessions === undefined && <p>Loading...</p>}
-      {sessions?.length === 0 && <div className="flex flex-col">
-        <p>You aren&apos;t signed in yet!</p>
-        <Link href={"/auth"} className="bg-violet-500 text-white hover:text-sky-500 p-1 text-lg rounded-lg mt-3">Sign In</Link>
+      {sessions?.length === 0 && <div className="flex flex-col items-center">
+        <p>FolderHarbor is a powerful, multi-protocol file server.</p>
+        <p>If you know your server address, you can continue to log in.</p>
+        <p>Don&apos;t have a FolderHarbor server? <a href="https://github.com/aelithron/folderharbor" className="hover:text-sky-500 underline">Run one!</a></p>
+        <Link href={"/auth"} className="bg-violet-500 text-white hover:text-sky-500 p-1 px-2 text-lg rounded-lg mt-3 w-fit">Sign In</Link>
       </div>}
-      {sessions?.length !== 0 && <div className="flex flex-col gap-2">
-        <h1 className="text-lg">Sessions</h1>
-        {sessions?.map((session) => <div key={session.webID} className="flex gap-2 justify-between items-center p-2 bg-slate-500 rounded-xl">
-          <div>
-            <p>{session.server}</p>
+      {(sessions && sessions?.length !== 0) && <div className="flex flex-col gap-2 mt-2 items-center">
+        {sessions?.map((session) => <div key={session.webID} className="flex gap-4 justify-between items-center p-2 bg-slate-500 rounded-xl">
+          <div className="flex flex-col text-start">
+            <p>{session.username}</p>
+            <p className="text-slate-400 text-sm">{session.server}</p>
           </div>
           <button className="bg-red-500 p-1 rounded-xl hover:text-sky-500" onClick={() => logOut(session)}>x</button>
         </div>)}
+        <Link href={"/auth"} className="bg-violet-500 text-white hover:text-sky-500 p-1 px-2 text-lg rounded-lg mt-3 w-fit">Sign In</Link>
       </div>}
     </div>
   );
