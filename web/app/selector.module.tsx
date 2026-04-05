@@ -3,8 +3,10 @@ import { Session } from "@/folderharborweb";
 import { db } from "@/utils/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AccountSelector() {
+  const router = useRouter();
   const sessions = useLiveQuery(() => db.sessions.toArray());
   async function logOut(session: Session) {
     const check = confirm(`Are you sure you want to log out of ${session.server}?`);
@@ -27,6 +29,11 @@ export default function AccountSelector() {
       }
     }
     await db.sessions.delete(session.webID);
+    localStorage.removeItem("activeSession");
+  }
+  async function selectSession(webID: number) {
+    localStorage.setItem("activeSession", webID.toString());
+    router.push("/home");
   }
   return (
     <div className="flex flex-col">
@@ -39,10 +46,10 @@ export default function AccountSelector() {
       </div>}
       {(sessions && sessions?.length !== 0) && <div className="flex flex-col gap-2 mt-2 items-center">
         {sessions?.map((session) => <div key={session.webID} className="flex gap-4 justify-between items-center p-2 bg-slate-500 rounded-xl">
-          <div className="flex flex-col text-start">
-            <p>{session.username}</p>
+          <button onClick={() => selectSession(session.webID!)} className="flex flex-col text-start">
+            <p className="hover:text-sky-500">{session.username}</p>
             <p className="text-slate-400 text-sm">{session.server}</p>
-          </div>
+          </button>
           <button className="bg-red-500 p-1 rounded-xl hover:text-sky-500" onClick={() => logOut(session)}>x</button>
         </div>)}
         <Link href={"/auth"} className="bg-violet-500 text-white hover:text-sky-500 p-1 px-2 text-lg rounded-lg mt-3 w-fit">Sign In</Link>

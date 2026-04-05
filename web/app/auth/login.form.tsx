@@ -24,7 +24,8 @@ export default function LoginForm() {
       alert(`Error logging you in: ${body.message} (${body.error})`);
       return;
     }
-    await db.sessions.add({ server: new URL(server).toString(), token: body.token, username: username });
+    const session = await db.sessions.add({ server: new URL(server).toString(), token: body.token, username: username });
+    if (session) localStorage.setItem("activeSession", session.toString());
     router.push("/");
   }
   return (
