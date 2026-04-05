@@ -52,10 +52,25 @@ var getPermissionsCMD = &cobra.Command{
 	  for node := range permissions { fmt.Println("• " + permissions[node].ID + ": " + permissions[node].Description) }
 	},
 }
+var getProvidersCMD = &cobra.Command{
+	Use: "providers",
+	Short: "get the addresses for providers",
+	Long: "get the addresses for providers (webdav and ftp)",
+	Aliases: []string{"protocols", "addresses"},
+	Run: func(cmd *cobra.Command, args []string) {
+		providers := routes.GetProviders()
+		fmt.Println("Provider Addressses")
+		fmt.Println("-------------------")
+		if providers.WebDAV == "" && providers.FTP == "" { fmt.Println("The server doesn't display any of these, please ask your administrator for the correct provider addresses!") }
+    if providers.WebDAV != "" { fmt.Println("WebDAV: " + providers.WebDAV) }
+		if providers.FTP != "" { fmt.Println("FTP: " + providers.FTP) }
+	},
+}
 func init() {
 	rootCMD.AddCommand(toolsCMD)
 	toolsCMD.AddCommand(readLogsCMD)
 	toolsCMD.AddCommand(getPermissionsCMD)
+	toolsCMD.AddCommand(getProvidersCMD)
 }
 func logFormatter(log routes.LogEntry) (string) {
 	if log.Username == "" { log.Username = "Unknown User" }
