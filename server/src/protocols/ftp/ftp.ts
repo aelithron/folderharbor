@@ -31,5 +31,5 @@ function pasvResolver(address: string): string {
   const networks: { [key: string]: string } = {};
   for (const name of Object.keys(networkInterfaces())) for (const net of (networkInterfaces()!)[name]!) if (net.family === 'IPv4' && !net.internal) networks[net.address + "/24"] = net.address;
   for (const network in networks) if (new Netmask(network).contains(address) && networks[network] !== undefined) return networks[network];
-  return getConfig()?.ftp.publicAddress || "127.0.0.1";
+  return getConfig()?.ftp.pasv.address || "127.0.0.1";
 }

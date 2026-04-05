@@ -11,13 +11,14 @@ export const Config = z.object({
   }),
   webdav: z.object({
     enabled: z.boolean(),
-    port: z.int().positive()
+    port: z.int().positive(),
+    publicAddress: z.string().nullable(),
   }),
   ftp: z.object({
     enabled: z.boolean(),
     port: z.int().positive(),
-    pasv: z.object({ start: z.int().positive(), end: z.int().positive() }),
-    publicAddress: z.string().nullable()
+    publicAddress: z.string().nullable(),
+    pasv: z.object({ address: z.string().nullable(), start: z.int().positive(), end: z.int().positive() }),
   }),
   useSSL: z.boolean(),
   failedLoginLimit: z.int().positive().default(5),

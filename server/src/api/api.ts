@@ -10,6 +10,8 @@ import cors from "cors";
 import { getConfig } from "../index.js";
 import path from "path";
 import https from "https";
+import os from "os";
+
 export default async function startAPI(port: number, sslKey?: string, sslCert?: string): Promise<Server> {
   const app = express();
   app.use(cors({ origin: (getConfig() || { api: { allowedOrigins: [] } }).api.allowedOrigins }));
@@ -22,6 +24,45 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
     const config = getConfig();
     if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
     res.json({ selfUsernameChanges: config.selfUsernameChanges });
+  });
+  app.get("/providers", enforceAuth(), (req, res) => {
+    if (!req.session) {
+      console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+      return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+    }
+    const config = getConfig();
+    if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
+    let localIP = "127.0.0.1";
+    for (const netInterface of Object.values(os.networkInterfaces())) {
+      if (!netInterface) continue;
+      for (const address of netInterface) if (address.family === "IPv4" && !address.internal) {
+        localIP = address.address;
+        break;
+      }
+    }
+    let webdav = null;
+    let ftp = null;
+    if (config.webdav.enabled) switch (config.webdav.publicAddress) {
+      case "":
+        break;
+      case null:
+        webdav = `http${config.useSSL ? "s" : ""}://${localIP}:${config.webdav.port}`;
+        break;
+      default:
+        webdav = config.webdav.publicAddress;
+        break;
+    }
+    if (config.ftp.enabled) switch (config.ftp.publicAddress) {
+      case "":
+        break;
+      case null:
+        ftp = `http${config.useSSL ? "s" : ""}://${localIP}:${config.ftp.port}`;
+        break;
+      default:
+        ftp = config.ftp.publicAddress;
+        break;
+    }
+    return res.json({ webdav, ftp });
   });
   app.use("/auth", authRouter);
   app.use("/me", meRouter);

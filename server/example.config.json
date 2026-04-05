@@ -5,13 +5,14 @@
   },
   "webdav": {
     "enabled": true,
-    "port": 1900
+    "port": 1900,
+    "publicAddress": null
   },
   "ftp": {
     "enabled": false,
     "port": 2100,
-    "pasv": { "start": 50000, "end": 50500 },
-    "publicAddress": null
+    "publicAddress": null,
+    "pasv": { "address": null, "start": 50000, "end": 50500 }
   },
   "useSSL": false,
   "failedLoginLimit": 5,
