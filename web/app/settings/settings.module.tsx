@@ -4,10 +4,11 @@ import query from "@/utils/api";
 import { db } from "@/utils/db";
 import { useEffect, useState } from "react";
 
+type SelfInfo = { id: number, username: string, sessions: { id: number, createdAt: string, expiry: string }[], activeSession: number, failedLoginLockout: boolean, permissions: string[] };
 export default function Settings() {
   const [session, setSession] = useState<Session | undefined>();
-  const [selfInfo, setSelfInfo] = useState<{ id: number, username: string, sessions: { id: number, createdAt: string, expiry: string }[], activeSession: number, failedLoginLockout: boolean, permissions: string[] } | undefined>();
-  const [clientConfig, setClientConfig] = useState<{ selfUsernameChanges?: boolean }>({});
+  const [selfInfo, setSelfInfo] = useState<SelfInfo | undefined>();
+  const [clientConfig, setClientConfig] = useState<{ selfUsernameChanges: boolean } | undefined>();
   useEffect(() => {
     async function loadSession() { setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
@@ -35,8 +36,48 @@ export default function Settings() {
     loadClientConfig();
   }, [session]);
   return (
-    <div>
-
+    <div className="flex flex-col">
+      {(session && selfInfo && clientConfig) && <SettingsForm session={session} selfInfo={selfInfo} clientConfig={clientConfig} />}
+      {(!session || !selfInfo || !clientConfig) && <p className="text-lg text-center mt-2">Loading...</p>}
+    </div>
+  );
+}
+function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, selfInfo: SelfInfo, clientConfig: { selfUsernameChanges: boolean } }) {
+  const [username, setUsername] = useState<string>(selfInfo.username);
+  const [password, setPassword] = useState<string>("");
+  async function clearFailedLogins() {
+    const res = await query(session, "/me", { method: "PATCH", body: JSON.stringify({ clearFailedLogins: true }) });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    alert("Successfully reset failed login attempts!");
+  }
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
+      <form className="space-y-4">
+        <div className="flex flex-col gap-1 items-center">
+          <label htmlFor="username">Username</label>
+          {clientConfig.selfUsernameChanges
+            ? <input id="username" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl w-fit" value={username} onChange={(e) => setUsername(e.target.value)} />
+            : <div className="flex flex-col text-center items-center">
+              <p className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl w-fit">{username}</p>
+              <p>You can&apos;t change your own username!</p>
+              <p>Please ask your administrator to change it instead.</p>
+            </div>
+          }
+        </div>
+        <div className="flex flex-col gap-1 items-center">
+          <label htmlFor="password">Password</label>
+          <input id="password" type="password" placeholder="(leave blank to not change)" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl w-fit" value={password} onChange={(e) => setPassword(e.target.value)} />
+        </div>
+        <div className="md:col-span-3 text-center"><button type="submit" className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Save Changes</button></div>
+      </form>
+      <div className="flex flex-col gap-1 items-center">
+        <h2>Failed Logins</h2>
+        <pre>Locked? {selfInfo.failedLoginLockout ? "Yes" : "No"}</pre>
+        <button className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit mt-2" onClick={() => clearFailedLogins()}>Reset</button>
+      </div>
     </div>
   );
 }
