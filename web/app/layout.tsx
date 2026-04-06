@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css"
 import "./globals.css";
 
+config.autoAddCss = false
 const lato = Lato({ weight: "400" });
 export const metadata: Metadata = {
   title: {
