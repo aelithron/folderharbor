@@ -1,7 +1,7 @@
 "use client"
 import { Session } from "@/folderharborweb";
 import { db } from "@/utils/db";
-import { faSignOut, faSync, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faGear, faSignOut, faSync, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -30,13 +30,14 @@ export default function Header() {
   }
   return (
     <header className="flex z-25 sticky justify-between gap-2 p-2 md:px-8 bg-violet-700/40 w-full align-middle items-center">
-      <Link href={"/home"} className="text-lg flex items-center align-middle font-semibold hover:text-sky-500"><Image src={logo} alt="FolderHarbor Logo" loading="eager" height={50} width={50} /> FolderHarbor</Link>
+      <Link href={"/home"} className="text-lg flex items-center align-middle font-semibold hover:text-sky-500"><Image src={logo} alt="FolderHarbor Logo" loading="eager" height={50} width={50} className="w-auto h-auto" /> FolderHarbor</Link>
       <div className="relative">
         <button onClick={() => setOpen(!open)} className="hover:text-sky-500"><FontAwesomeIcon icon={faUser} size="lg" /></button>
         {open && <div className="absolute right-0 mt-4 flex flex-col p-2 rounded-lg bg-violet-700/40 z-50 w-max text-start items-center">
           <h1 className="text-lg font-semibold text-center">Welcome{session?.username ? `, ${session!.username}!` : "!"}</h1>
           <Link href={"/"} className="hover:text-sky-500"><FontAwesomeIcon icon={faSync} /> Switch Account</Link>
           <button onClick={() => signOut()} className="hover:text-sky-500"><FontAwesomeIcon icon={faSignOut} /> Sign Out</button>
+          <Link href={"/settings"} className="hover:text-sky-500"><FontAwesomeIcon icon={faGear} /> Settings</Link>
         </div>}
       </div>
     </header>
