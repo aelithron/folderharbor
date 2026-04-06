@@ -9,7 +9,7 @@ export default async function query(session: Session, path: string, init?: Reque
   headers.append("Authorization", `Bearer ${session.token}`);
   try {
     const res = await fetch(url.toString(), { ...init, headers });
-    body = await res.json();
+    if (res.status !== 204) body = await res.json();
   } catch (err) { return { error: `Error: ${err}` } }
   if (body.error) return { error: `Error (${body.error}): ${body.message}` }
   return { body };

@@ -1,5 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
+import query from "@/utils/api";
 import { db } from "@/utils/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
@@ -13,20 +14,8 @@ export default function AccountSelector() {
     if (!check) return;
     const tokenCheck = confirm("Do you want to invalidate this session's token? This will disconnect any clients you logged into with this token.");
     if (tokenCheck) {
-      let body;
-      const url = new URL(session.server);
-      url.pathname += "auth";
-      try {
-        const res = await fetch(url.toString(), { method: "DELETE", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session.token}` } });
-        if (res.status !== 204) body = await res.json();
-      } catch (err) {
-        alert(`Error logging you out: ${err}`);
-        return;
-      }
-      if (body && body.error) {
-        alert(`Error logging you out: ${body.message} (${body.error})`);
-        return;
-      }
+      const delReq = await query(session, "auth", { method: "DELETE" });
+      if ("error" in delReq) alert(delReq.error);
     }
     await db.sessions.delete(session.webID);
     localStorage.removeItem("activeSession");

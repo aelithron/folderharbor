@@ -26,7 +26,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-2">
       <h1 className="text-center text-2xl font-semibold">Welcome{session ? `, ${session.username}` : ""}</h1>
-      <div className="flex flex-col gap-2 items-center">
+      <div className="flex flex-col gap-4 mt-2 items-center">
         {webdavURL && <div className="flex flex-col text-center gap-2 items-center p-2 bg-slate-600 rounded-lg w-fit">
           <h1 className="text-lg font-semibold">WebDAV</h1>
           <p>The WebDAV server address is: {isSecureContext ? <button onClick={() => copyAlert(webdavURL)} className="underline hover:text-sky-500">{webdavURL}</button> : webdavURL}</p>
