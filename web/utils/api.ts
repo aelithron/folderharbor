@@ -11,6 +11,6 @@ export default async function query(session: Session, path: string, init?: Reque
     const res = await fetch(url.toString(), { ...init, headers });
     if (res.status !== 204) body = await res.json();
   } catch (err) { return { error: `Error: ${err}` } }
-  if ("error" in body) return { error: `Error (${body.error}): ${body.message}` }
+  if (body && "error" in body) return { error: `Error (${body.error}): ${body.message}` }
   return { body };
 }
