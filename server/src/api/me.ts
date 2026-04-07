@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  return res.json({ id: req.session.userID, username: user.username, sessions: (sessions.length > 0 ? sessions : undefined), activeSession: req.session.sessionID, failedLoginLockout: (user.failedLogins >= (getConfig()?.failedLoginLimit || 5)), permissions: permissions });
+  return res.json({ id: req.session.userID, username: user.username, sessions: (sessions.length > 0 ? sessions.filter((session) => session.expiry.getTime() > new Date().getTime()) : undefined), activeSession: req.session.sessionID, failedLoginLockout: (user.failedLogins >= (getConfig()?.failedLoginLimit || 5)), permissions: permissions });
 });
 router.patch("/", async (req, res) => {
   if (!req.session) {
