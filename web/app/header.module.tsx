@@ -19,10 +19,13 @@ export default function Header() {
     loadSession();
   }, []);
   async function signOut() {
-    const res = await query(session!, "auth", { method: "DELETE" });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    const tokenCheck = confirm("Do you want to invalidate this session's token? This will disconnect any clients you logged into with this token.");
+    if (tokenCheck) {
+      const res = await query(session!, "auth", { method: "DELETE" });
+      if ("error" in res) {
+        alert(res.error);
+        return;
+      }
     }
     await db.sessions.delete(session!.webID);
     localStorage.removeItem("activeSession");

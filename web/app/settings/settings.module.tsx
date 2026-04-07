@@ -2,6 +2,8 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
 type SelfInfo = { id: number, username: string, sessions: { id: number, createdAt: string, expiry: string }[], activeSession: number, failedLoginLockout: boolean, permissions: string[] };
@@ -46,12 +48,13 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
   const [username, setUsername] = useState<string>(selfInfo.username);
   const [password, setPassword] = useState<string>("");
   async function clearFailedLogins() {
-    const res = await query(session, "/me", { method: "PATCH", body: JSON.stringify({ clearFailedLogins: true }) });
+    const res = await query(session, "me", { method: "PATCH", body: JSON.stringify({ clearLoginAttempts: true }) });
     if ("error" in res) {
       alert(res.error);
       return;
     }
     alert("Successfully reset failed login attempts!");
+    window.location.reload();
   }
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
@@ -76,7 +79,18 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
       <div className="flex flex-col gap-1 items-center">
         <h2>Failed Logins</h2>
         <pre>Locked? {selfInfo.failedLoginLockout ? "Yes" : "No"}</pre>
-        <button className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit mt-2" onClick={() => clearFailedLogins()}>Reset</button>
+        <button className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2" onClick={() => clearFailedLogins()}>Reset</button>
+      </div>
+      <div className="flex flex-col gap-4 items-center">
+        <h2>Sessions</h2>
+        {selfInfo.sessions.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
+          <div className="flex flex-col">
+            <p className="text-lg">Session #{session.id}</p>
+            <p>Created {new Date(session.createdAt).toLocaleString()}</p>
+            <p>Expires {new Date(session.expiry).toLocaleString()}</p>
+          </div>
+          <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl"><FontAwesomeIcon icon={faTrash} /></button>
+        </div>)}
       </div>
     </div>
   );

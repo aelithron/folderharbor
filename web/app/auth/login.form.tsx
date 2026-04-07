@@ -55,7 +55,7 @@ export default function LoginForm() {
           }
           setStage("credentials");
         }}>
-          <label htmlFor="server">Or, enter a server address:</label>
+          <label htmlFor="server">{process.env.NEXT_PUBLIC_DEFAULT_URL ? "Or, e" : "E"}nter a server address:</label>
           <div className="flex gap-2">
             <input id="server" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl" value={server} onChange={(e) => setServer(e.target.value)} />
             <button type="submit" className="hover:text-sky-500"><FontAwesomeIcon icon={faArrowRight} /></button>

@@ -10,8 +10,6 @@ export default function AccountSelector() {
   const router = useRouter();
   const sessions = useLiveQuery(() => db.sessions.toArray());
   async function logOut(session: Session) {
-    const check = confirm(`Are you sure you want to log out of ${session.server}?`);
-    if (!check) return;
     const tokenCheck = confirm("Do you want to invalidate this session's token? This will disconnect any clients you logged into with this token.");
     if (tokenCheck) {
       const delReq = await query(session, "auth", { method: "DELETE" });
