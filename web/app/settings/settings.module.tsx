@@ -23,6 +23,10 @@ export default function Settings() {
         alert(res.error);
         return;
       }
+      if ("redirect" in res) {
+        window.location.href = res.redirect;
+        return;
+      }
       setSelfInfo(res.body);
     }
     async function loadClientConfig() {
@@ -30,6 +34,10 @@ export default function Settings() {
       const res = await query(session, "clientconfig");
       if ("error" in res) {
         alert(res.error);
+        return;
+      }
+      if ("redirect" in res) {
+        window.location.href = res.redirect;
         return;
       }
       setClientConfig({ selfUsernameChanges: res.body.selfUsernameChanges });

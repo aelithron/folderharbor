@@ -26,6 +26,10 @@ export default function Header() {
         alert(res.error);
         return;
       }
+      if ("redirect" in res) {
+        window.location.href = res.redirect;
+        return;
+      }
     }
     await db.sessions.delete(session!.webID);
     localStorage.removeItem("activeSession");

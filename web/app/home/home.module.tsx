@@ -19,6 +19,10 @@ export default function Home() {
         alert(res.error);
         return;
       }
+      if ("redirect" in res) {
+        window.location.href = res.redirect;
+        return;
+      }
       setWebdavURL(res.body.webdav);
       setftpURL(res.body.ftp);
     });

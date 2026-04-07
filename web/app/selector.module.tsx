@@ -14,6 +14,7 @@ export default function AccountSelector() {
     if (tokenCheck) {
       const delReq = await query(session, "auth", { method: "DELETE" });
       if ("error" in delReq) alert(delReq.error);
+      if ("redirect" in delReq) router.push(delReq.redirect);
     }
     await db.sessions.delete(session.webID);
     localStorage.removeItem("activeSession");
