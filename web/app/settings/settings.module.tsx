@@ -61,12 +61,30 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
       alert(res.error);
       return;
     }
+    if ("redirect" in res) {
+      window.location.href = res.redirect;
+      return;
+    }
     alert("Successfully reset failed login attempts!");
+    window.location.reload();
+  }
+  async function revokeSession(id: number) {
+    const res = await query(session, "me/session", { method: "DELETE", body: JSON.stringify({ sessionID: id }) });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      // eslint-disable-next-line react-hooks/immutability
+      window.location.href = res.redirect;
+      return;
+    }
     window.location.reload();
   }
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
-      <form className="space-y-4">
+      <form className="space-y-2">
+        <h2 className="text-center text-xl">Basic</h2>
         <div className="flex flex-col gap-1 items-center">
           <label htmlFor="username">Username</label>
           {clientConfig.selfUsernameChanges
@@ -85,19 +103,19 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
         <div className="md:col-span-3 text-center"><button type="submit" className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Save Changes</button></div>
       </form>
       <div className="flex flex-col gap-1 items-center">
-        <h2>Failed Logins</h2>
+        <h2 className="mb-2 text-xl">Failed Logins</h2>
         <pre>Locked? {selfInfo.failedLoginLockout ? "Yes" : "No"}</pre>
         <button className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2" onClick={() => clearFailedLogins()}>Reset</button>
       </div>
       <div className="flex flex-col gap-4 items-center">
-        <h2>Sessions</h2>
+        <h2 className="text-xl">Sessions</h2>
         {selfInfo.sessions.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
           <div className="flex flex-col">
             <p className="text-lg">Session #{session.id}</p>
             <p>Created {new Date(session.createdAt).toLocaleString()}</p>
             <p>Expires {new Date(session.expiry).toLocaleString()}</p>
           </div>
-          <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl"><FontAwesomeIcon icon={faTrash} /></button>
+          <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>
         </div>)}
       </div>
     </div>

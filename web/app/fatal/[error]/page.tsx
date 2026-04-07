@@ -1,7 +1,9 @@
 import { faLock, faSync, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Metadata } from "next";
 import Link from "next/link";
 
+export const metadata: Metadata = { title: "Error" }
 export default async function Page({ params, searchParams }: { params: Promise<{ error: string }>, searchParams: Promise<{ server: string, username: string }> }) {
   return (
     <div className="flex flex-col min-h-screen p-8 md:p-20 items-center text-center">

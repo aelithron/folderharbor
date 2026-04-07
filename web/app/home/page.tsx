@@ -1,6 +1,8 @@
+import { Metadata } from "next";
 import Header from "../header.module";
 import Home from "./home.module";
 
+export const metadata: Metadata = { title: "Home" }
 export default function Page() {
   return (
     <main>

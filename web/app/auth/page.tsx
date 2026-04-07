@@ -1,7 +1,9 @@
 import Image from "next/image";
 import logo from "@/public/logo.webp";
 import LoginForm from "./login.form";
+import { Metadata } from "next";
 
+export const metadata: Metadata = { title: "Sign In" }
 export default function Page() {
   return (
     <main className="flex flex-col p-8 md:p-20 min-h-screen">
