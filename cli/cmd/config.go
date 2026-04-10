@@ -1,5 +1,11 @@
 package cmd
-import "github.com/spf13/cobra"
+
+import (
+	"fmt"
+	"folderharbor-cli/routes"
+
+	"github.com/spf13/cobra"
+)
 
 var configCMD = &cobra.Command{
 	Use:   "config",
@@ -12,7 +18,12 @@ var readConfigCMD = &cobra.Command{
 	Long:  "read the server configuration",
 	Aliases: []string{"get"},
 	Run: func(cmd *cobra.Command, args []string) {
-		
+		config := routes.ReadConfig()
+		fmt.Println("Server Config")
+		fmt.Println("-------------")
+		for setting, value := range config {
+			fmt.Printf("• %s: %v\n", setting, value)
+		}
 	},
 }
 var editConfigCMD = &cobra.Command{
@@ -24,7 +35,7 @@ var editConfigCMD = &cobra.Command{
 	},
 }
 
-func main() {
+func init() {
 	rootCMD.AddCommand(configCMD)
 	configCMD.AddCommand(readConfigCMD)
 	configCMD.AddCommand(editConfigCMD)
