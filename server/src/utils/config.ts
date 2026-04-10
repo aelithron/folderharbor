@@ -66,7 +66,7 @@ export async function editConfig(newConfig: Partial<z.Infer<typeof Config>>): Pr
     console.error("Server Error - The config isn't loaded, but was attempted to be edited!");
     return { error: "config_unloaded" };
   }
-  if (newConfig.globalExclusions) return { error: "editing_readonly" };
+  if (newConfig.globalExclusions || newConfig.globalExclusionBypasses) return { error: "editing_readonly" };
   let config;
   try {
     config = Config.parse({ ...oldConfig, ...newConfig });
