@@ -27,11 +27,13 @@ var readConfigCMD = &cobra.Command{
 	},
 }
 var editConfigCMD = &cobra.Command{
-	Use:   "edit <key> <value>",
+	Use:   "edit <setting> <value>",
 	Short: "edit the config",
 	Long:  "modify the server configuration",
+	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		
+		routes.EditConfig(routes.ConfigEdit{ Setting: args[0], Value: args[1] })
+		fmt.Println("Applied config changes successfully.")
 	},
 }
 
