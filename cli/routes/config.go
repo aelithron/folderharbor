@@ -38,7 +38,7 @@ func ReadConfig() (map[string]any) {
 }
 func EditConfig(change ConfigEdit) {
 	auth := getAuth()
-	reqBody, _ := json.Marshal(([]map[string]any{ { change.Setting: change.Value } }))
+	reqBody, _ := json.Marshal(&map[string]any{ change.Setting: change.Value })
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/admin/config")

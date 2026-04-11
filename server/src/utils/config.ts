@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { getConfig, getConfigPath, setConfig } from "../index.js";
 
-export const Config = z.object({
+export const Config = z.strictObject({
   api: z.object({
     port: z.int().positive(),
     allowedOrigins: z.array(z.string())
