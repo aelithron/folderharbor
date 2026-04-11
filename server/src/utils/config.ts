@@ -2,6 +2,7 @@ import * as z from "zod";
 import path from "path";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
+import { merge } from "lodash-es";
 import { getConfig, getConfigPath, setConfig } from "../index.js";
 
 export const Config = z.strictObject({
@@ -69,7 +70,7 @@ export async function editConfig(newConfig: Partial<z.Infer<typeof Config>>): Pr
   if (newConfig.globalExclusions || newConfig.globalExclusionBypasses) return { error: "editing_readonly" };
   let config;
   try {
-    config = Config.parse({ ...oldConfig, ...newConfig });
+    config = Config.parse(merge({}, oldConfig, newConfig));
   } catch (e) { return { error: "malformed", message: `${e}` }; }
   await fs.writeFile(configPath, JSON.stringify(config, null, 2));
   setConfig(config);
