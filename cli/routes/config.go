@@ -3,15 +3,17 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 )
 
 type ConfigEdit struct {
 	Setting string
-	Value any
+	Value string
 }
 func ReadConfig() (map[string]any) {
 	auth := getAuth()
@@ -38,7 +40,8 @@ func ReadConfig() (map[string]any) {
 }
 func EditConfig(change ConfigEdit) {
 	auth := getAuth()
-	reqBody, _ := json.Marshal(&map[string]any{ change.Setting: change.Value })
+	fmt.Println(parseConfigUpdate(change))
+	reqBody, _ := json.Marshal(parseConfigUpdate(change))
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/admin/config")
@@ -56,4 +59,12 @@ func EditConfig(change ConfigEdit) {
 	var errBody APIError
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
+}
+func parseConfigUpdate(change ConfigEdit) (map[string]any) {
+	var parsed any
+	if err := json.Unmarshal([]byte(change.Value), &parsed); err != nil { parsed = change.Value }
+	parts := strings.Split(change.Setting, ".")
+	result := map[string]any{parts[len(parts)-1]: parsed}
+  for part := len(parts)-2; part >= 0; part-- { result = map[string]any{parts[part]: result}}
+	return result
 }
