@@ -3,7 +3,6 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -40,7 +39,6 @@ func ReadConfig() (map[string]any) {
 }
 func EditConfig(change ConfigEdit) {
 	auth := getAuth()
-	fmt.Println(parseConfigUpdate(change))
 	reqBody, _ := json.Marshal(parseConfigUpdate(change))
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
