@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { createSession, revokeSession } from "../users/sessions.js";
 import { enforceAuth } from "./api.js";
 import { writeLog } from "../utils/auditlog.js";
+import { getEffectivePermissions } from "../permissions/permissions.js";
 const router: Router = express.Router();
 router.post("/", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
@@ -25,8 +26,19 @@ router.post("/", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
+  const permissions = await getEffectivePermissions(session.userID);
+  if ("error" in permissions) {
+    switch (permissions.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "Error looking up your session, please sign in again." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
   await writeLog(session.userID, req.body.username, "auth-login", { authSuccess: true, protocol: "api" }, "logged in");
-  return res.cookie("token", session.token).json(session);
+  return res.cookie("token", session.token).json({ ...session, permissions: permissions });
 });
 
 router.use(enforceAuth());
