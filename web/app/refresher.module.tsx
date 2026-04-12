@@ -10,14 +10,7 @@ export default function RefreshSession() {
         const session = await db.sessions.get(parseInt(localStorage.getItem("activeSession")!));
         if (!session) return;
         const res = await query(session, "me");
-        if ("error" in res) {
-          alert(res.error);
-          return;
-        }
-        if ("redirect" in res) {
-          window.location.href = res.redirect;
-          return;
-        }
+        if ("error" in res || "redirect" in res) return;
         db.sessions.update(parseInt(localStorage.getItem("activeSession")!), { permissions: res.body.permissions || [], username: res.body.username });
       }
     }

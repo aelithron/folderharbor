@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import Header from "../header.module";
 import Settings from "./settings.module";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
 export const metadata: Metadata = { title: "Settings" }
 export default function Page() {
@@ -10,6 +12,7 @@ export default function Page() {
       <div className="flex flex-col p-8 md:p-20 min-h-screen">
         <h1 className="text-3xl font-semibold text-center">Settings</h1>
         <Settings />
+        <p className="mt-auto text-center text-sm text-slate-500"><FontAwesomeIcon icon={faGithub} /> <a href="https://github.com/aelithron/folderharbor" target="_blank" className="underline hover:text-sky-500">FolderHarbor Web</a> ({process.env.IMAGE_TAG || "Unknown Version"})</p>
       </div>
     </main>
   );

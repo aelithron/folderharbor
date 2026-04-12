@@ -8,10 +8,11 @@ import Image from "next/image";
 import logo from "@/public/logo.webp";
 import Link from "next/link";
 import query from "@/utils/api";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState<boolean>(false);
   const [session, setSession] = useState<Session | undefined>();
   useEffect(() => {
@@ -36,10 +37,10 @@ export default function Header() {
     router.push("/");
   }
   return (
-    <header className="flex z-25 sticky justify-between gap-2 p-2 md:px-8 bg-violet-700/40 w-full align-middle items-center">
+    <header className="flex z-25 sticky justify-between gap-2 py-2 px-3 md:px-8 bg-violet-700/40 w-full align-middle items-center">
       <Link href={"/home"} className="text-lg flex items-center align-middle font-semibold hover:text-sky-500"><Image src={logo} alt="FolderHarbor Logo" loading="eager" height={50} width={50} className="w-auto h-auto" /> FolderHarbor</Link>
       <div className="flex gap-2">
-        {(session ? session.permissions.length : 0) >= 1 && <Link href={"/admin"} className="hover:text-sky-500 py-1.5 px-2 bg-violet-800 rounded-xl font-semibold"><FontAwesomeIcon icon={faGear} size="lg" /> Admin</Link>}
+        {((session ? session.permissions.length : 0) >= 1 && !pathname.startsWith("/admin")) && <Link href={"/admin"} className="hover:text-sky-500 py-1.5 px-2 bg-violet-800 rounded-xl font-semibold"><FontAwesomeIcon icon={faGear} size="lg" /> Admin</Link>}
         <div className="relative">
           <button onClick={() => setOpen(!open)} className="hover:text-sky-500 p-1.5 bg-violet-800 rounded-xl"><FontAwesomeIcon icon={faUser} size="lg" /></button>
           {open && <div className="absolute right-0 mt-4 flex flex-col p-2 rounded-lg bg-violet-700/40 z-50 w-max text-start items-center gap-0.5">
