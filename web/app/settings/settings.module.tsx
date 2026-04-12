@@ -2,7 +2,7 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faLock, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
@@ -115,7 +115,7 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
             <p>Created {new Date(session.createdAt).toLocaleString()}</p>
             <p>Expires {new Date(session.expiry).toLocaleString()}</p>
           </div>
-          <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>
+          {session.id === selfInfo.activeSession ? <p className="bg-slate-500 p-1 rounded-xl"><FontAwesomeIcon icon={faLock} /></p> : <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>}
         </div>)}
       </div>
     </div>
