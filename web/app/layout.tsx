@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
+import RefreshSession from "./refresher.module";
 import "@fortawesome/fontawesome-svg-core/styles.css"
 import "./globals.css";
 
@@ -16,7 +17,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${lato.className} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <RefreshSession />
+      </body>
     </html>
   );
 }

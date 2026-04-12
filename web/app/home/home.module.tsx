@@ -9,7 +9,7 @@ export default function Home() {
   const [webdavURL, setWebdavURL] = useState<string | null>(null);
   const [ftpURL, setftpURL] = useState<string | null>(null);
   useEffect(() => {
-    async function loadSession() { setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
+    async function loadSession() { if (localStorage.getItem("activeSession")) setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
   }, []);
   useEffect(() => {
@@ -73,5 +73,5 @@ export default function Home() {
 }
 function copyAlert(text: string) {
   navigator.clipboard.writeText(text);
-  alert(`Copied "${text}" to the clipboard!`);
+  alert(`Copied "${text}" to your clipboard!`);
 }

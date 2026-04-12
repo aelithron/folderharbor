@@ -2,6 +2,8 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
+import { faServer, faTrash, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -37,11 +39,11 @@ export default function AccountSelector() {
         {sessions?.map((session) => <div key={session.webID} className="flex gap-4 justify-between items-center p-2 bg-slate-500 rounded-xl">
           <button onClick={() => selectSession(session.webID!)} className="flex flex-col text-start">
             <p className="hover:text-sky-500">{session.username}</p>
-            <p className="text-slate-400 text-sm">{session.server}</p>
+            <p className="text-slate-400 text-sm"><FontAwesomeIcon icon={faServer} /> {session.server}</p>
           </button>
-          <button className="bg-red-500 p-1 rounded-xl hover:text-sky-500" onClick={() => logOut(session)}>x</button>
+          <button className="bg-red-500 p-1 rounded-xl hover:text-sky-500" onClick={() => logOut(session)}><FontAwesomeIcon icon={faTrash} /></button>
         </div>)}
-        <Link href={"/auth"} className="bg-violet-500 text-white hover:text-sky-500 p-1 px-2 text-lg rounded-lg mt-3 w-fit">Add Account</Link>
+        <Link href={"/auth"} className="bg-violet-500 text-white hover:text-sky-500 p-1 px-2 text-lg rounded-lg mt-3 w-fit"><FontAwesomeIcon icon={faUserPlus} /> Add Account</Link>
       </div>}
     </div>
   );

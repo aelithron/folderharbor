@@ -12,7 +12,7 @@ export default function Settings() {
   const [selfInfo, setSelfInfo] = useState<SelfInfo | undefined>();
   const [clientConfig, setClientConfig] = useState<{ selfUsernameChanges: boolean } | undefined>();
   useEffect(() => {
-    async function loadSession() { setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
+    async function loadSession() { if (localStorage.getItem("activeSession")) setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
   }, []);
   useEffect(() => {

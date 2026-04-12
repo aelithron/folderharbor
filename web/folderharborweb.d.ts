@@ -3,4 +3,5 @@ export type Session = {
   server: string
   token: string
   username: string
+  permissions: string[]
 }

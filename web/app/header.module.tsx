@@ -15,7 +15,7 @@ export default function Header() {
   const [open, setOpen] = useState<boolean>(false);
   const [session, setSession] = useState<Session | undefined>();
   useEffect(() => {
-    async function loadSession() { setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
+    async function loadSession() { if (localStorage.getItem("activeSession")) setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
   }, []);
   async function signOut() {
@@ -38,14 +38,17 @@ export default function Header() {
   return (
     <header className="flex z-25 sticky justify-between gap-2 p-2 md:px-8 bg-violet-700/40 w-full align-middle items-center">
       <Link href={"/home"} className="text-lg flex items-center align-middle font-semibold hover:text-sky-500"><Image src={logo} alt="FolderHarbor Logo" loading="eager" height={50} width={50} className="w-auto h-auto" /> FolderHarbor</Link>
-      <div className="relative">
-        <button onClick={() => setOpen(!open)} className="hover:text-sky-500"><FontAwesomeIcon icon={faUser} size="lg" /></button>
-        {open && <div className="absolute right-0 mt-4 flex flex-col p-2 rounded-lg bg-violet-700/40 z-50 w-max text-start items-center">
-          <h1 className="text-lg font-semibold text-center">Welcome{session?.username ? `, ${session!.username}!` : "!"}</h1>
-          <Link href={"/"} className="hover:text-sky-500"><FontAwesomeIcon icon={faSync} /> Switch Account</Link>
-          <button onClick={() => signOut()} className="hover:text-sky-500"><FontAwesomeIcon icon={faSignOut} /> Sign Out</button>
-          <Link href={"/settings"} className="hover:text-sky-500"><FontAwesomeIcon icon={faGear} /> Settings</Link>
-        </div>}
+      <div className="flex gap-2">
+        {(session ? session.permissions.length : 0) >= 1 && <Link href={"/admin"} className="hover:text-sky-500 py-1.5 px-2 bg-violet-800 rounded-xl font-semibold"><FontAwesomeIcon icon={faGear} size="lg" /> Admin</Link>}
+        <div className="relative">
+          <button onClick={() => setOpen(!open)} className="hover:text-sky-500 p-1.5 bg-violet-800 rounded-xl"><FontAwesomeIcon icon={faUser} size="lg" /></button>
+          {open && <div className="absolute right-0 mt-4 flex flex-col p-2 rounded-lg bg-violet-700/40 z-50 w-max text-start items-center gap-0.5">
+            <h1 className="text-lg font-semibold text-center">Welcome{session?.username ? `, ${session!.username}!` : "!"}</h1>
+            <Link href={"/settings"} className="hover:text-sky-500"><FontAwesomeIcon icon={faGear} /> Settings</Link>
+            <button onClick={() => signOut()} className="hover:text-sky-500"><FontAwesomeIcon icon={faSignOut} /> Sign Out</button>
+            <Link href={"/"} className="hover:text-sky-500"><FontAwesomeIcon icon={faSync} /> Switch Account</Link>
+          </div>}
+        </div>
       </div>
     </header>
   )
