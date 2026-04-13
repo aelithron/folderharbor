@@ -82,9 +82,9 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
     window.location.reload();
   }
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
+    <div className={`grid grid-cols-1 ${selfInfo.permissions.length >= 1 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-4 md:gap-2 mt-4`}>
       <form className="space-y-2">
-        <h2 className="text-center text-xl">Basic</h2>
+        <h2 className="text-center text-xl font-semibold">Basic</h2>
         <div className="flex flex-col gap-1 items-center">
           <label htmlFor="username">Username</label>
           {clientConfig.selfUsernameChanges
@@ -101,14 +101,14 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
           <input id="password" type="password" placeholder="(leave blank to not change)" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl w-fit" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         <div className="md:col-span-3 text-center"><button type="submit" className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Save Changes</button></div>
+        <div className="flex flex-col gap-1 items-center mt-6">
+          <h2 className="text-xl font-semibold">Failed Logins</h2>
+          <pre>Locked from new logins? {selfInfo.failedLoginLockout ? "Yes" : "No"}</pre>
+          <button type="button" className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2" onClick={() => clearFailedLogins()}>Reset</button>
+        </div>
       </form>
-      <div className="flex flex-col gap-1 items-center">
-        <h2 className="mb-2 text-xl">Failed Logins</h2>
-        <pre>Locked? {selfInfo.failedLoginLockout ? "Yes" : "No"}</pre>
-        <button className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2" onClick={() => clearFailedLogins()}>Reset</button>
-      </div>
       <div className="flex flex-col gap-4 items-center">
-        <h2 className="text-xl">Sessions</h2>
+        <h2 className="text-xl font-semibold">Sessions</h2>
         {selfInfo.sessions.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
           <div className="flex flex-col">
             <p className="text-lg">Session #{session.id}</p>
@@ -118,6 +118,10 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
           {session.id === selfInfo.activeSession ? <p className="bg-slate-500 p-1 rounded-xl"><FontAwesomeIcon icon={faLock} /></p> : <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>}
         </div>)}
       </div>
+      {selfInfo.permissions.length >= 1 && <div className="flex flex-col gap-3 items-center">
+        <h2 className="text-xl font-semibold">Permissions</h2>
+        <div className="flex flex-col gap-1 bg-slate-600 p-2 rounded-lg items-center">{selfInfo.permissions.map((permission) => <pre key={permission}> - {permission}</pre>)}</div>
+      </div>}
     </div>
   );
 }
