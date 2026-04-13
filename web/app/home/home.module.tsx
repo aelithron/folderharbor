@@ -39,7 +39,7 @@ export default function Home() {
               <h2 className="font-semibold">Token (Suggested)</h2>
               <p>A session token can be used to access WebDAV!</p>
               <p>This is more secure than a username and password, but will expire.</p>
-              <p>Enter {isSecureContext ? <button onClick={() => copyAlert(session!.token)} className="underline hover:text-sky-500"><pre>{session!.token}</pre></button> : <pre>{session!.token}</pre>} into the Password box in your WebDAV client.</p>
+              <div>Enter {isSecureContext ? <button onClick={() => copyAlert(session!.token)} className="underline hover:text-sky-500"><pre>{session!.token}</pre></button> : <pre>{session!.token}</pre>} into the Password box in your WebDAV client.</div>
             </div>
             <div className="flex flex-col gap-2">
               <h2 className="font-semibold">Standard</h2>
@@ -57,7 +57,7 @@ export default function Home() {
               <h2 className="font-semibold">Token (Suggested)</h2>
               <p>A session token can be used to access FTP!</p>
               <p>This is more secure than a username and password, but will expire.</p>
-              <p>Enter {isSecureContext ? <button onClick={() => copyAlert(session!.token)} className="underline hover:text-sky-500"><pre>{session!.token}</pre></button> : <pre>{session!.token}</pre>} into the Password box in your FTP client.</p>
+              <div>Enter {isSecureContext ? <button onClick={() => copyAlert(session!.token)} className="underline hover:text-sky-500"><pre>{session!.token}</pre></button> : <pre>{session!.token}</pre>} into the Password box in your FTP client.</div>
             </div>
             <div className="flex flex-col gap-2">
               <h2 className="font-semibold">Standard</h2>

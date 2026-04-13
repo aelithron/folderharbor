@@ -82,7 +82,7 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
     window.location.reload();
   }
   return (
-    <div className={`grid grid-cols-1 ${selfInfo.permissions.length >= 1 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-4 md:gap-2 mt-4`}>
+    <div className={`grid grid-cols-1 ${selfInfo.permissions.length >= 1 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-4 md:gap-2 my-4`}>
       <form className="space-y-2">
         <h2 className="text-center text-xl font-semibold">Basic</h2>
         <div className="flex flex-col gap-1 items-center">
