@@ -32,7 +32,7 @@ export default function Users() {
     <div className="flex flex-col mt-4">
       {(session && users) && <div className="bg-slate-700 p-2 rounded-lg gap-2">
         {users.sort((a, b) => a.id - b.id).map((user) => <div key={user.id} className="flex gap-2 items-center">
-          {(session.permissions.includes("users:read") || session.permissions.includes("users:read.full")) ? <Link href={`/users/${user.id}`} className="font-semibold text-lg underline hover:text-sky-500">{user.username}</Link> : <h1 className="font-semibold text-lg">{user.username}</h1>}
+          {(session.permissions.includes("users:read") || session.permissions.includes("users:read.full")) ? <Link href={`/admin/users/${user.id}`} className="font-semibold text-lg underline hover:text-sky-500">{user.username}</Link> : <h1 className="font-semibold text-lg">{user.username}</h1>}
           <p className="text-sm text-slate-500">(User #{user.id})</p>
         </div>)}
       </div>}

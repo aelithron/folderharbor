@@ -32,7 +32,7 @@ export default function Roles() {
     <div className="flex flex-col mt-4">
       {(session && roles) && <div className="bg-slate-700 p-2 rounded-lg gap-2">
         {roles.sort((a, b) => a.id - b.id).map((role) => <div key={role.id} className="flex gap-2 items-center">
-          {session.permissions.includes("roles:read") ? <Link href={`/roles/${role.id}`} className="font-semibold text-lg underline hover:text-sky-500">{role.name}</Link> : <h1 className="font-semibold text-lg">{role.name}</h1>}
+          {session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role.id}`} className="font-semibold text-lg underline hover:text-sky-500">{role.name}</Link> : <h1 className="font-semibold text-lg">{role.name}</h1>}
           <p className="text-sm text-slate-500">(Role #{role.id})</p>
         </div>)}
       </div>}

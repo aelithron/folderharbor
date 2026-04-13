@@ -32,7 +32,7 @@ export default function ACLs() {
     <div className="flex flex-col mt-4">
       {(session && acls) && <div className="bg-slate-700 p-2 rounded-lg gap-2">
         {acls.sort((a, b) => a.id - b.id).map((acl) => <div key={acl.id} className="flex gap-2 items-center">
-          {session.permissions.includes("acls:read") ? <Link href={`/acls/${acl.id}`} className="font-semibold text-lg underline hover:text-sky-500">{acl.name}</Link> : <h1 className="font-semibold text-lg">{acl.name}</h1>}
+          {session.permissions.includes("acls:read") ? <Link href={`/admin/acls/${acl.id}`} className="font-semibold text-lg underline hover:text-sky-500">{acl.name}</Link> : <h1 className="font-semibold text-lg">{acl.name}</h1>}
           <p className="text-sm text-slate-500">(ACL #{acl.id})</p>
         </div>)}
       </div>}
