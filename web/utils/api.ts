@@ -3,7 +3,8 @@ import { Session } from "@/folderharborweb";
 export default async function query(session: Session, path: string, init?: RequestInit): Promise<{ error: string } | { redirect: string } |{ body: any }> {
   let body;
   const url = new URL(session.server);
-  url.pathname += path;
+  url.pathname += path.split("?")[0];
+  if (path.split("?").length >= 2) url.search += path.split("?")[1];
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
   headers.append("Authorization", `Bearer ${session.token}`);
