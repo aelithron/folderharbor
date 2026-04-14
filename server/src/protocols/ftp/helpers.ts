@@ -170,15 +170,4 @@ class FolderHarborFileSystem extends FileSystem {
     }
     throw new Error("You don't have access to that file, or it doesn't exist.");
   }
-  /*
-  resolve(path: string): string | "" {
-    // @ts-expect-error - this method exists in the code but not types
-    const { fsPath } = this._resolvePath(path);
-    if (getConfig()!.filterMetadata) {
-      const name = 
-      if ((name.startsWith("._") || name === ".DS_Store" || name === "desktop.ini" || name === "thumbs.db")) return true;
-      return false;
-    } else return fsPath;
-  }
-  */
 }
