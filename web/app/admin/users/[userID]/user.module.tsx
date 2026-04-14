@@ -33,7 +33,8 @@ export default function UserSettings({ userID }: { userID: number }) {
     loadUser();
   }, [session, userID]);
   return (
-    <div className="flex flex-col mt-4">
+    <div className="flex flex-col">
+      <p className="text-sm text-slate-700 mb-4">User ID: {userID}</p>
       {(session && user) && <SettingsPanel session={session} user={user} />}
       {(!session || !user) && <p className="text-lg text-center mt-2">Loading...</p>}
     </div>
@@ -118,7 +119,19 @@ function UserGrants({ session, user }: { session: Session, user: FullUser }) {
       <h2 className="text-xl font-semibold">Grants</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         <div className="flex flex-col">
-          <h1>Roles</h1>
+          <h1 className="text-lg">Roles</h1>
+          <ul className="list-disc list-inside">{user.roles.map((role) => <li key={role}>{session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role}`} className="underline hover:text-sky-500">{role}</Link> : role}</li>)}</ul>
+          {user.roles.length === 0 && <p>None</p>}
+        </div>
+        <div className="flex flex-col">
+          <h1 className="text-lg">ACLs</h1>
+          <ul className="list-disc list-inside">{user.acls.map((acl) => <li key={acl}>{session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{acl}</Link> : acl}</li>)}</ul>
+          {user.acls.length === 0 && <p>None</p>}
+        </div>
+        <div className="flex flex-col">
+          <h1 className="text-lg">Direct Permissions</h1>
+          <ul className="list-disc list-inside">{user.permissions.map((permission) => <li key={permission}>{permission}</li>)}</ul>
+          {user.permissions.length === 0 && <p>None</p>}
         </div>
       </div>
     </div>
