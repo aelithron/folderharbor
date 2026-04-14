@@ -5,7 +5,7 @@ import { db } from "@/utils/db";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 type LimitedUser = { access: "limited" | "full", username: string, locked: boolean, failedLogins: number }
 type FullUser = LimitedUser & { access: "full", roles: number[], acls: number[], permissions: string[], sessions?: { id: number, createdAt: string, expiry: string }[] }
@@ -68,17 +68,59 @@ function SettingsPanel({ session, user }: { session: Session, user: LimitedUser 
           {session.permissions.includes("users:edit") && <button type="button" className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2" onClick={() => clearFailedLogins()}>Reset</button>}
         </div>
       </form>
-      {user.access === "full" && <div className="flex flex-col gap-4 items-center">
+      {user.access === "full" && <UserGrants session={session} user={user as FullUser} />}
+      {user.access === "full" && <div className="flex flex-col gap-4 items-center md:col-span-3">
         <h2 className="text-xl font-semibold">Sessions</h2>
-        {(user as FullUser).sessions && (user as FullUser).sessions!.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
-          <div className="flex flex-col">
-            <p className="text-lg">Session #{session.id}</p>
-            <p>Created {new Date(session.createdAt).toLocaleString()}</p>
-            <p>Expires {new Date(session.expiry).toLocaleString()}</p>
-          </div>
-          <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>
-        </div>)}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          {(user as FullUser).sessions && (user as FullUser).sessions!.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
+            <div className="flex flex-col">
+              <p className="text-lg">Session #{session.id}</p>
+              <p>Created {new Date(session.createdAt).toLocaleString()}</p>
+              <p>Expires {new Date(session.expiry).toLocaleString()}</p>
+            </div>
+            {/*<button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>*/}
+          </div>)}
+        </div>
       </div>}
+    </div>
+  );
+}
+function UserGrants({ session, user }: { session: Session, user: FullUser }) {
+  const [roles, setRoles] = useState<number[]>(user.roles);
+  const [acls, setACLs] = useState<number[]>(user.acls);
+  const [permissions, setPermissions] = useState<string[]>(user.permissions);
+  const [allPermissions, setAllPermissions] = useState<{ id: string, description: string }[] | undefined>();
+  useEffect(() => {
+    async function loadPermissions() {
+      if (!session) return;
+      const res = await query(session, `admin/permissions`);
+      if ("error" in res) {
+        alert(res.error);
+        return;
+      }
+      if ("redirect" in res) {
+        window.location.href = res.redirect;
+        return;
+      }
+      setAllPermissions(res.body);
+    }
+    loadPermissions();
+  }, [session]);
+  function grantItem(item: unknown, state: unknown[], setState: Dispatch<SetStateAction<unknown[]>>) {
+    const newState = new Set<unknown>();
+    for (const current of state) newState.add(current);
+    newState.add(item);
+    setState([...newState]);
+  }
+  function revokeItem(item: unknown, state: unknown[], setState: Dispatch<SetStateAction<unknown[]>>) { setState(state.filter((current) => current !== item)); }
+  return (
+    <div className="flex flex-col gap-4 items-center md:col-span-2">
+      <h2 className="text-xl font-semibold">Grants</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <div className="flex flex-col">
+          <h1>Roles</h1>
+        </div>
+      </div>
     </div>
   );
 }
