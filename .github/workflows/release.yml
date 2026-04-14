@@ -5,7 +5,7 @@ on:
     tags:
       - "server/v*"
       - "cli/v*"
-     # - "web/v*"
+      - "web/v*"
 
 jobs:
   server-release:
@@ -87,3 +87,50 @@ jobs:
         with:
           name: "CLI ${{ env.VERSION }}"
           files: "cli/dist/**"
+  web-release:
+    name: Release Web Panel
+    if: startsWith(github.ref, 'refs/tags/web/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: "./web"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Get Version
+        run: echo "VERSION=${GITHUB_REF_NAME#web/}" >> $GITHUB_ENV
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: "server/pnpm-lock.yaml"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}:web-latest
+            ghcr.io/${{ github.repository }}:web-${{ steps.get_version.outputs.VERSION }}
+          build-args: |
+            IMAGE_TAG=${{ steps.get_version.outputs.VERSION }}
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          VERSION: ${{ env.VERSION }}
+        with:
+          name: "Web ${{ env.VERSION }}"
