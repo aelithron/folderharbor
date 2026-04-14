@@ -6,20 +6,20 @@ import { merge } from "lodash-es";
 import { getConfig, getConfigPath, setConfig } from "../index.js";
 
 export const Config = z.strictObject({
-  api: z.object({
+  api: z.strictObject({
     port: z.int().positive(),
     allowedOrigins: z.array(z.string())
   }),
-  webdav: z.object({
+  webdav: z.strictObject({
     enabled: z.boolean(),
     port: z.int().positive(),
     publicAddress: z.string().nullable(),
   }),
-  ftp: z.object({
+  ftp: z.strictObject({
     enabled: z.boolean(),
     port: z.int().positive(),
     publicAddress: z.string().nullable(),
-    pasv: z.object({ address: z.string().nullable(), start: z.int().positive(), end: z.int().positive() }),
+    pasv: z.strictObject({ address: z.string().nullable(), start: z.int().positive(), end: z.int().positive() }),
   }),
   useSSL: z.boolean(),
   failedLoginLimit: z.int().positive().default(5),
