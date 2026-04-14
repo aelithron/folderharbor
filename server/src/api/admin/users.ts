@@ -95,7 +95,6 @@ router.patch("/:userID", async (req, res) => {
   updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
   if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
   const result = await editUser(parseInt(req.params.userID), updateParams);
-  if (result === undefined) return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
   if ("error" in result) {
     switch (result.error) {
       case "server":
@@ -216,6 +215,54 @@ router.patch("/:userID/grant", async (req, res) => {
   if (changed.roles) updateParams.roles = [...roles];
   if (changed.acls) updateParams.acls = [...acls];
   if (changed.permissions) updateParams.permissions = [...permissions];
+  const result = await editUser(parseInt(req.params.userID), updateParams);
+  if ("error" in result) {
+    switch (result.error) {
+      case "server":
+        return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+      case "not_found":
+        return res.status(400).json({ error: "not_found", message: "The provided user doesn't exist." });
+      default:
+        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+    }
+  }
+  await writeLog(req.session.userID, req.session.username, "users-edit", { id: parseInt(req.params.userID), newContents: updateParams }, "edited a user");
+  return res.json({ success: true });
+});
+router.put("/:userID/grant", async (req, res) => {
+  if (!req.session) {
+    console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
+    return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+  }
+  if (!await checkPermission(req.session.userID, "users:grant")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
+  let updateParams: Partial<{ roles: number[], acls: number[], permissions: Permission[] }> = {};
+  if (Array.isArray(req.body.permissions)) for (const node of req.body.permissions) if (!getPermissionIDs().includes(node)) return res.status(400).json({ error: "permissions", message: `Permission "${node}" doesn't exist, please correct this and try again.` });
+  if (Array.isArray(req.body.acls)) {
+    const acls = await getAllACLs();
+    if ("error" in acls) {
+      switch (acls.error) {
+        case "server":
+          return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+        default:
+          return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+      }
+    }
+    for (const id of req.body.acls) if (!acls.find(acl => acl.id === id)) return res.status(400).json({ error: "acls", message: `ACL "${id}" doesn't exist, please correct this and try again.` });
+  }
+  if (Array.isArray(req.body.roles)) {
+    const roles = await getAllRoles();
+    if ("error" in roles) {
+      switch (roles.error) {
+        case "server":
+          return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
+        default:
+          return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+      }
+    }
+    for (const id of req.body.roles) if (!roles.find(role => role.id === id)) return res.status(400).json({ error: "roles", message: `Role "${id}" doesn't exist, please correct this and try again.` });
+  }
+  updateParams = { roles: (Array.isArray(req.body.roles) ? req.body.roles : undefined), acls: (Array.isArray(req.body.acls) ? req.body.acls : undefined), permissions: (Array.isArray(req.body.permissions) ? req.body.permissions : undefined) };
+  if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
   const result = await editUser(parseInt(req.params.userID), updateParams);
   if ("error" in result) {
     switch (result.error) {

@@ -1,7 +1,10 @@
 **⚠️ This project is not completed yet, and will have bugs! DO NOT use this in production.**
 # FolderHarbor ![IMG](https://hackatime-badge.hackclub.com/U08RJ1PEM7X/folderharbor)
-Powerful multi-protocol file server filled with features. \
+![IMG](https://github.com/aelithron/folderharbor/blob/main/server/src/api/welcome/logo.webp?raw=true)
+A powerful, multi-protocol file server with Role-Based Access Control (RBAC). \
 This project was made for Hack Club [Flavortown](https://flavortown.hackclub.com)!
+## Features
+This server supports 
 ## Info
 Welcome to the FolderHarbor monorepo! (this is my first time making a monorepo, i hope it's good :3)
 Folder structure:
