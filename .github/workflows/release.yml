@@ -40,6 +40,8 @@ jobs:
           VERSION: ${{ env.VERSION }}
         with:
           name: "Server ${{ env.VERSION }}"
+          make_latest: true
+          body: "This is the FolderHarbor Server, the core you need to run to use the server."
   cli-release:
     name: Release CLI
     if: startsWith(github.ref, 'refs/tags/cli/')
@@ -87,6 +89,10 @@ jobs:
         with:
           name: "CLI ${{ env.VERSION }}"
           files: "cli/dist/**"
+          make_latest: false
+          body: |
+            This is the FolderHarbor CLI, used for server administration and access.
+            **You need a running FolderHarbor Server to use this!**
   web-release:
     name: Release Web Panel
     if: startsWith(github.ref, 'refs/tags/web/')
@@ -129,14 +135,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         env:
           VERSION: ${{ env.VERSION }}
         with:
           context: ./web
           push: true
           sbom: true
-          provenance: true
+          provenance: mode=max
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/${{ github.repository }}/web:latest
@@ -155,3 +161,8 @@ jobs:
           VERSION: ${{ env.VERSION }}
         with:
           name: "Web Panel ${{ env.VERSION }}"
+          make_latest: false
+          body: |
+            This is the FolderHarbor web panel, used for server administration and access.
+            This is released as a [Docker image](https://github.com/users/aelithron/packages/container/package/folderharbor%2Fweb), so you should get it from there.
+            **You need a running FolderHarbor Server to use this!**
