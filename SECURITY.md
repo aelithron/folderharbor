@@ -14,6 +14,7 @@ In scope:
 - Privilege escalation
 - Path traversal
 - Improper information exposure
+
 Out of scope:
 - DoS/DDoS attacks
 - Administrator error
@@ -22,6 +23,7 @@ Out of scope:
 ### CLI
 In scope:
 - TLS validation
+
 Out of scope:
 - Credential storage security
 - Non-major supply-chain issues (report them to the upstream provider)
@@ -30,6 +32,7 @@ Out of scope:
 In scope:
 - CSRF
 - XSS
+
 Out of scope:
 - DoS/DDoS attacks
 - Non-major supply-chain issues (report them to the upstream provider)
