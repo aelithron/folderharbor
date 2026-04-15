@@ -132,7 +132,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          context: .
+          context: ./web
           push: true
           sbom: true
           provenance: true
