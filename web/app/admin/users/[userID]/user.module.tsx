@@ -5,6 +5,7 @@ import { db } from "@/utils/db";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 type LimitedUser = { access: "limited" | "full", username: string, locked: boolean, failedLogins: number }
@@ -41,6 +42,7 @@ export default function UserSettings({ userID }: { userID: number }) {
   );
 }
 function SettingsPanel({ session, user, userID }: { session: Session, user: LimitedUser | FullUser, userID: number }) {
+  const router = useRouter();
   const [username, setUsername] = useState<string>(user.username);
   const [password, setPassword] = useState<string>("");
   async function updateInfo(e: React.SubmitEvent) {
@@ -55,6 +57,32 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
       return;
     }
     alert(`Updated ${username !== user.username ? username : user.username}'s information!${password !== "" ? "\nThey have been signed out across their devices, and will need to log in again." : ""}`);
+  }
+  async function toggleLock() {
+    const res = await query(session, `admin/users/${userID}/lock`, { method: "PATCH", body: JSON.stringify({ locked: !user.locked }) });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      window.location.href = res.redirect;
+      return;
+    }
+    window.location.reload();
+  }
+  async function deleteUser() {
+    const check = confirm(`Are you sure you want to permanently delete "${user.username}" (ID ${userID}) on "${session.server}"?`);
+    if (!check) return;
+    const res = await query(session, `admin/users/${userID}`, { method: "DELETE" });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      window.location.href = res.redirect;
+      return;
+    }
+    router.push("/users");
   }
   return (
     <div className={`grid gap-4 grid-cols-1 ${user.access === "full" ? "md:grid-cols-3 md:grid-rows-2" : ""}`}>
@@ -76,16 +104,18 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
             <pre>{username}</pre>
           </div>
         </div>}
-        <div className="flex flex-col gap-1 items-center mt-6">
-          <h2 className="text-lg">Locked</h2>
-          <p>Status: {user.locked ? "Yes" : "No"}</p>
-          {session.permissions.includes("users:lock") && <button className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit mt-2">{user.locked ? "Unlock" : "Lock"}</button>}
+        <div className="flex gap-3 items-center mt-6 justify-center">
+          <p>Locked: {user.locked ? "Yes" : "No"}</p>
+          {session.permissions.includes("users:lock") && <button onClick={toggleLock} className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit">{user.locked ? "Unlock" : "Lock"}</button>}
         </div>
-        <div className="flex flex-col gap-1 items-center mt-6">
-          <h2 className="text-lg">Failed Logins</h2>
-          <p>Count: {user.failedLogins}</p>
-          {session.permissions.includes("users:edit") && <button className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2">Reset</button>}
+        <div className="flex gap-3 items-center mt-2 justify-center">
+          <p>Failed Logins: {user.failedLogins}</p>
+          {session.permissions.includes("users:edit") && <button className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit">Reset</button>}
         </div>
+        {session.permissions.includes("users:delete") && <div>
+          <h2 className="text-lg">Danger</h2>
+          <button onClick={deleteUser} className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2">Delete User</button>
+        </div>}
       </div>
       {user.access === "full" && <UserGrants session={session} user={user as FullUser} userID={userID} />}
       {user.access === "full" && <div className="flex flex-col gap-4 items-center md:col-span-3">
