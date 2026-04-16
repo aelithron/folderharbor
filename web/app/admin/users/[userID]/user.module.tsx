@@ -35,19 +35,32 @@ export default function UserSettings({ userID }: { userID: number }) {
   return (
     <div className="flex flex-col">
       <p className="text-sm text-slate-700 mb-4">User ID: {userID}</p>
-      {(session && user) && <SettingsPanel session={session} user={user} />}
+      {(session && user) && <SettingsPanel session={session} user={user} userID={userID} />}
       {(!session || !user) && <p className="text-lg text-center mt-2">Loading...</p>}
     </div>
   );
 }
-function SettingsPanel({ session, user }: { session: Session, user: LimitedUser | FullUser }) {
+function SettingsPanel({ session, user, userID }: { session: Session, user: LimitedUser | FullUser, userID: number }) {
   const [username, setUsername] = useState<string>(user.username);
   const [password, setPassword] = useState<string>("");
+  async function updateInfo(e: React.SubmitEvent) {
+    e.preventDefault();
+    const res = await query(session, `admin/users/${userID}`, { method: "PATCH", body: JSON.stringify({ username: (username !== user.username ? username : undefined), password: (password !== "" ? password : undefined) }) });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      window.location.href = res.redirect;
+      return;
+    }
+    alert(`Updated ${username !== user.username ? username : user.username}'s information!${password !== "" ? "\nThey have been signed out across their devices, and will need to log in again." : ""}`);
+  }
   return (
     <div className={`grid gap-4 grid-cols-1 ${user.access === "full" ? "md:grid-cols-3 md:grid-rows-2" : ""}`}>
       <div className="space-y-2">
         <h2 className="text-center text-xl font-semibold">Basic</h2>
-        {session.permissions.includes("users:edit") ? <form className="space-y-2">
+        {session.permissions.includes("users:edit") ? <form className="space-y-2" onSubmit={updateInfo}>
           <div className="flex flex-col gap-1 items-center">
             <label htmlFor="username" className="text-lg">Username</label>
             <input id="username" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl w-fit" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -74,7 +87,7 @@ function SettingsPanel({ session, user }: { session: Session, user: LimitedUser 
           {session.permissions.includes("users:edit") && <button className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2">Reset</button>}
         </div>
       </div>
-      {user.access === "full" && <UserGrants session={session} user={user as FullUser} />}
+      {user.access === "full" && <UserGrants session={session} user={user as FullUser} userID={userID} />}
       {user.access === "full" && <div className="flex flex-col gap-4 items-center md:col-span-3">
         <h2 className="text-xl font-semibold">Sessions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -91,7 +104,7 @@ function SettingsPanel({ session, user }: { session: Session, user: LimitedUser 
     </div>
   );
 }
-function UserGrants({ session, user }: { session: Session, user: FullUser }) {
+function UserGrants({ session, user, userID }: { session: Session, user: FullUser, userID: number }) {
   const [roles, setRoles] = useState<number[]>(user.roles);
   const [acls, setACLs] = useState<number[]>(user.acls);
   const [permissions, setPermissions] = useState<string[]>(user.permissions);
@@ -129,7 +142,7 @@ function UserGrants({ session, user }: { session: Session, user: FullUser }) {
           <ul className="list-disc list-inside">{permissions.map((permission) => <li key={permission}>
             {permission}
             <button onClick={() => revokeItem(permission, permissions, setPermissions)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>
-            </li>)}</ul>
+          </li>)}</ul>
           {permissions.length === 0 && <p>None</p>}
         </div>
       </div>

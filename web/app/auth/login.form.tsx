@@ -29,6 +29,10 @@ export default function LoginForm() {
     }
     const session = await db.sessions.add({ server: new URL(server).toString(), token: body.token, username: username, permissions: body.permissions || [] });
     if (session) localStorage.setItem("activeSession", session.toString());
+    if (await db.sessions.count() === 1) {
+      router.push("/home");
+      return;
+    }
     router.push("/");
   }
   return (

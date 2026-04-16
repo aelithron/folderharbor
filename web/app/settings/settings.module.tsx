@@ -4,6 +4,7 @@ import query from "@/utils/api";
 import { db } from "@/utils/db";
 import { faLock, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type SelfInfo = { id: number, username: string, sessions: { id: number, createdAt: string, expiry: string }[], activeSession: number, failedLoginLockout: boolean, permissions: string[] };
@@ -53,6 +54,7 @@ export default function Settings() {
   );
 }
 function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, selfInfo: SelfInfo, clientConfig: { selfUsernameChanges: boolean } }) {
+  const router = useRouter();
   const [username, setUsername] = useState<string>(selfInfo.username);
   const [password, setPassword] = useState<string>("");
   async function clearFailedLogins() {
@@ -81,9 +83,29 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
     }
     window.location.reload();
   }
+  async function updateInfo(e: React.SubmitEvent) {
+    e.preventDefault();
+    const res = await query(session, "me", { method: "PATCH", body: JSON.stringify({ username: (username !== selfInfo.username ? username : undefined), password: (password !== "" ? password : undefined) }) });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      window.location.href = res.redirect;
+      return;
+    }
+    alert(`Updated your info successfully!${password !== "" ? `\nYou have been signed out of all sessions, and will need to log in again.\nAs a reminder, your server address is "${session.server}", and your username is "${username !== selfInfo.username ? username : selfInfo.username}".` : ""}`);
+    if (password !== "") {
+      db.sessions.delete(parseInt(localStorage.getItem("activeSession")!));
+      localStorage.removeItem("activeSession");
+      router.push("/");
+      return;
+    }
+    if (username !== selfInfo.username) db.sessions.update(parseInt(localStorage.getItem("activeSession")!), { username: username });
+  }
   return (
     <div className={`grid grid-cols-1 ${selfInfo.permissions.length >= 1 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-4 md:gap-2 my-4`}>
-      <form className="space-y-2">
+      <form className="space-y-2" onSubmit={updateInfo}>
         <h2 className="text-center text-xl font-semibold">Basic</h2>
         <div className="flex flex-col gap-1 items-center">
           <label htmlFor="username">Username</label>
@@ -111,7 +133,7 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
         <h2 className="text-xl font-semibold">Sessions</h2>
         {selfInfo.sessions.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
           <div className="flex flex-col">
-            <p className="text-lg">Session #{session.id}</p>
+            <p className="text-lg">Session #{session.id} {session.id === selfInfo.activeSession && "(Current)"}</p>
             <p>Created {new Date(session.createdAt).toLocaleString()}</p>
             <p>Expires {new Date(session.expiry).toLocaleString()}</p>
           </div>
@@ -120,7 +142,7 @@ function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, s
       </div>
       {selfInfo.permissions.length >= 1 && <div className="flex flex-col gap-3 items-center">
         <h2 className="text-xl font-semibold">Permissions</h2>
-        <div className="flex flex-col gap-1 bg-slate-600 p-2 rounded-lg items-center">{selfInfo.permissions.map((permission) => <pre key={permission}> - {permission}</pre>)}</div>
+        <div className="flex flex-col gap-1 bg-slate-600 p-2 rounded-lg">{selfInfo.permissions.map((permission) => <pre key={permission}> - {permission}</pre>)}</div>
       </div>}
     </div>
   );
