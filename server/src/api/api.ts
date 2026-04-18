@@ -25,7 +25,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
     if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
     res.json({ selfUsernameChanges: config.selfUsernameChanges, registration: config.registration.enabled });
   });
-  app.get("/providers", enforceAuth(), (req, res) => {
+  app.get("/protocols", enforceAuth(), (req, res) => {
     if (!req.session) {
       console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
       return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
