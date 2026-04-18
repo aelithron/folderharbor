@@ -1,6 +1,6 @@
 import express, { Router } from "express";
-import { checkPermission } from "../../permissions/permissions.js";
-import { createACL, deleteACL, editACL, getACL, getAllACLs } from "../../permissions/acls.js";
+import { checkPermission } from "../../rbac/permissions.js";
+import { createACL, deleteACL, editACL, getACL, getAllACLs } from "../../rbac/acls.js";
 import { writeLog } from "../../utils/auditlog.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {

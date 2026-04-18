@@ -1,7 +1,7 @@
 import type { BasicPrivilege, PrivilegeManagerCallback, ReturnCallback } from "webdav-server";
 import { Errors, Path, PhysicalFileSystem, PrivilegeManager, Resource, type ITestableUserManager, type IUser, type ReadDirInfo } from "webdav-server/lib/index.v2.js";
 import { getSession, prepareSession } from "../../users/sessions.js";
-import { checkPath, getPaths } from "../../permissions/acls.js";
+import { checkPath, getPaths } from "../../rbac/acls.js";
 import { writeLog } from "../../utils/auditlog.js";
 import fs from "fs";
 import micromatch from "micromatch";

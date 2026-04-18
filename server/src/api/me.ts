@@ -4,7 +4,7 @@ import { editUser, getUser } from "../users/users.js";
 import { getUserSessions, revokeAllSessions, revokeSession } from "../users/sessions.js";
 import { getConfig } from "../index.js";
 import { DateTime } from "luxon";
-import { getEffectivePermissions } from "../permissions/permissions.js";
+import { getEffectivePermissions } from "../rbac/permissions.js";
 import { writeLog } from "../utils/auditlog.js";
 const router: Router = express.Router();
 router.use(enforceAuth());

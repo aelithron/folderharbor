@@ -1,5 +1,5 @@
 import { boolean, integer, json, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import type { Permission } from "../permissions/permissions.js";
+import type { Permission } from "../rbac/permissions.js";
 import type { AuditBody, AuditAction } from "../utils/auditlog.js";
 
 export const usersTable = pgTable("users", {

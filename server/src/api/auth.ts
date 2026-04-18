@@ -2,7 +2,7 @@ import express, { Router } from "express";
 import { createSession, revokeSession } from "../users/sessions.js";
 import { enforceAuth } from "./api.js";
 import { writeLog } from "../utils/auditlog.js";
-import { getEffectivePermissions } from "../permissions/permissions.js";
+import { getEffectivePermissions } from "../rbac/permissions.js";
 import { getConfig } from "../index.js";
 import { createUser } from "../users/users.js";
 const router: Router = express.Router();

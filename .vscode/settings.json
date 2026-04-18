@@ -5,6 +5,6 @@
     }
   ],
   "yaml.schemas": {
-    "https://nfpm.goreleaser.com/static/schema.json": "file:///home/nova/Coding/folderharbor/cli/nfpm.yml"
+    "https://nfpm.goreleaser.com/static/schema.json": "file:///home/nova/Coding/folderharbor/cli/nfpm/*.yml"
   }
 }

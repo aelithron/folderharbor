@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { getPaths } from "./permissions/acls.js";
+import { getPaths } from "./rbac/acls.js";
 import micromatch from "micromatch";
 import { getConfig } from "./index.js";
 

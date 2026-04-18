@@ -1,7 +1,7 @@
 import express, { Router } from "express";
-import { checkPermission, getPermissionIDs, permissions, type Permission } from "../../permissions/permissions.js";
-import { createRole, deleteRole, editRole, getAllRoles, getRole } from "../../permissions/roles.js";
-import { getAllACLs } from "../../permissions/acls.js";
+import { checkPermission, getPermissionIDs, permissions, type Permission } from "../../rbac/permissions.js";
+import { createRole, deleteRole, editRole, getAllRoles, getRole } from "../../rbac/roles.js";
+import { getAllACLs } from "../../rbac/acls.js";
 import { writeLog } from "../../utils/auditlog.js";
 const router: Router = express.Router();
 router.get("/", async (req, res) => {

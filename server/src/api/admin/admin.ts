@@ -4,7 +4,7 @@ import { router as usersRouter } from "./users.js";
 import { router as rolesRouter } from "./roles.js";
 import { router as aclsRouter } from "./acls.js";
 import { router as configRouter } from "./config.js";
-import { checkPermission, permissions } from "../../permissions/permissions.js";
+import { checkPermission, permissions } from "../../rbac/permissions.js";
 import { readLogs } from "../../utils/auditlog.js";
 const router: Router = express.Router();
 router.get("/permissions", (req, res) => { res.json(permissions); });

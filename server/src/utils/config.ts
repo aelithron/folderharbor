@@ -27,7 +27,7 @@ export const Config = z.strictObject({
   failedLoginLimit: z.int().positive().default(5),
   registration: z.strictObject({
     enabled: z.boolean(),
-    defaultRole: z.int().positive().nullable()
+    defaultRole: z.int().positive().nullable().readonly()
   }),
   selfUsernameChanges: z.boolean(),
   filterMetadata: z.boolean(),
@@ -73,7 +73,7 @@ export async function editConfig(newConfig: Partial<z.Infer<typeof Config>>): Pr
     console.error("Server Error - The config isn't loaded, but was attempted to be edited!");
     return { error: "config_unloaded" };
   }
-  if (newConfig.globalExclusions || newConfig.globalExclusionBypasses) return { error: "editing_readonly" };
+  if (newConfig.globalExclusions || newConfig.globalExclusionBypasses || newConfig.registration?.defaultRole) return { error: "editing_readonly" };
   let config;
   try {
     config = Config.parse(merge({}, oldConfig, newConfig));

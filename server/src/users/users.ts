@@ -2,7 +2,7 @@ import db from "../utils/db.js";
 import { usersTable } from "../utils/schema.js";
 import { eq } from "drizzle-orm";
 import * as argon2 from "argon2";
-import { type Permission } from "../permissions/permissions.js";
+import { type Permission } from "../rbac/permissions.js";
 
 export async function createUser(username: string, password: string, { roles, acls, permissions, locked }: { roles?: number[], acls?: number[], permissions?: Permission[], locked?: boolean }): Promise<{ id: number } | { error: "server" | "username_used" }> {
   try {

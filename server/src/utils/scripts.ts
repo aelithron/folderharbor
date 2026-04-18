@@ -1,8 +1,8 @@
 import prompt from "prompt-sync";
 import { createUser, editUser, getAllUsers } from "../users/users.js";
-import { createACL } from "../permissions/acls.js";
-import { createRole } from "../permissions/roles.js";
-import { getPermissionIDs } from "../permissions/permissions.js";
+import { createACL } from "../rbac/acls.js";
+import { createRole } from "../rbac/roles.js";
+import { getPermissionIDs } from "../rbac/permissions.js";
 import { writeLog } from "./auditlog.js";
 export async function setUpServer() {
   if ((process.getuid && process.getgid) && !(process.getuid() === 0 || process.getgid() === 0)) {

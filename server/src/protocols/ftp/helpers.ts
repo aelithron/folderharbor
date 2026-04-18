@@ -1,7 +1,7 @@
 import { FileSystem, type FtpConnection } from "ftp-srv";
 import { getSession, prepareSession } from "../../users/sessions.js";
 import { writeLog } from "../../utils/auditlog.js";
-import { checkPath, getPaths } from "../../permissions/acls.js";
+import { checkPath, getPaths } from "../../rbac/acls.js";
 import path from "path";
 import fs from "fs/promises";
 import { getItemType } from "../../core.js";

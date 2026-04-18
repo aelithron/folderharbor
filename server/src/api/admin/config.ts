@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { checkPermission } from "../../permissions/permissions.js";
+import { checkPermission } from "../../rbac/permissions.js";
 import { getConfig } from "../../index.js";
 import { editConfig } from "../../utils/config.js";
 import { writeLog } from "../../utils/auditlog.js";
