@@ -23,7 +23,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
   app.get("/clientconfig", (req, res) => {
     const config = getConfig();
     if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
-    res.json({ selfUsernameChanges: config.selfUsernameChanges });
+    res.json({ selfUsernameChanges: config.selfUsernameChanges, registration: config.registration.enabled });
   });
   app.get("/providers", enforceAuth(), (req, res) => {
     if (!req.session) {
@@ -46,7 +46,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
       case "":
         break;
       case null:
-        webdav = `http${config.useSSL ? "s" : ""}://${localIP}:${config.webdav.port}`;
+        webdav = `http${config.webdav.ssl ? "s" : ""}://${localIP}:${config.webdav.port}`;
         break;
       default:
         webdav = config.webdav.publicAddress;
@@ -56,7 +56,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
       case "":
         break;
       case null:
-        ftp = `ftp${config.useSSL ? "s" : ""}://${localIP}:${config.ftp.port}`;
+        ftp = `ftp${config.webdav.ssl ? "s" : ""}://${localIP}:${config.ftp.port}`;
         break;
       default:
         ftp = config.ftp.publicAddress;

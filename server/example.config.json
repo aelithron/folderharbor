@@ -18,7 +18,10 @@
     "pasv": { "address": null, "start": 50000, "end": 50500 }
   },
   "failedLoginLimit": 5,
-  "selfRegistration": false,
+  "registration": {
+    "enabled": false,
+    "defaultRole": null
+  },
   "selfUsernameChanges": true,
   "filterMetadata": true,
   "globalExclusions": [

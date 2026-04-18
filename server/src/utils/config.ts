@@ -25,7 +25,10 @@ export const Config = z.strictObject({
     pasv: z.strictObject({ address: z.string().nullable(), start: z.int().positive(), end: z.int().positive() })
   }),
   failedLoginLimit: z.int().positive().default(5),
-  selfRegistration: z.boolean(),
+  registration: z.strictObject({
+    enabled: z.boolean(),
+    defaultRole: z.int().positive().nullable()
+  }),
   selfUsernameChanges: z.boolean(),
   filterMetadata: z.boolean(),
   globalExclusions: z.array(z.string()).readonly(),

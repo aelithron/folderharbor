@@ -43,11 +43,11 @@ router.post("/", async (req, res) => {
   return res.cookie("token", session.token).json({ ...session, permissions: permissions });
 });
 router.post("/register", async (req, res) => {
-  if (!getConfig()?.selfRegistration) return res.status(400).json({ error: "registration", message: "This server has registration disabled! Please ask the server's administrator to create an account for you." });
+  if (!getConfig()?.registration.enabled) return res.status(400).json({ error: "registration", message: "This server has registration disabled! Please ask the server's administrator to create an account for you." });
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (!req.body.username || (req.body.username as string).length < 1) return res.status(400).json({ error: "username", message: "Your request doesn't include a username." });
   if (!req.body.password || (req.body.password as string).length < 1) return res.status(400).json({ error: "password", message: "Your request doesn't include a password." });
-  const newUser = await createUser(req.body.username, req.body.password, {});
+  const newUser = await createUser(req.body.username, req.body.password, { roles: (getConfig()?.registration.defaultRole ? [getConfig()!.registration.defaultRole!] : []) });
     if ("error" in newUser) {
     switch (newUser.error) {
       case "server":
@@ -58,7 +58,7 @@ router.post("/register", async (req, res) => {
         return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
     }
   }
-  await writeLog(0, "System", "users-create", { id: newUser.id, newContents: { username: req.body.username, password: "[redacted]" }, protocol: "internal" }, "created a user (with registration form)");
+  await writeLog(0, "System", "users-create", { id: newUser.id, newContents: { username: req.body.username, password: "[redacted]", roles: (getConfig()?.registration.defaultRole ? [getConfig()!.registration.defaultRole!] : undefined) }, protocol: "internal" }, "created a user (with registration form)");
   const session = await createSession(req.body.username, req.body.password);
   if ("error" in session) {
     switch (session.error) {
