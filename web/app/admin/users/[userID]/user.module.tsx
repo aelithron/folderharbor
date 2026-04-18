@@ -2,7 +2,7 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { isEqual } from "lodash-es";
 import Link from "next/link";
@@ -172,7 +172,10 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
             {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(role, roles, setRoles)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
           </li>)}</ul>
           {roles.length === 0 && <p>None</p>}
-          <input />
+          {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
+            <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.role} onChange={(e) => setNewGrant({ ...newGrant, role: e.target.value })} />
+            <button onClick={() => grantItem(parseInt(newGrant.role), roles, setRoles)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
+          </div>}
         </div>
         <div className="flex flex-col">
           <h1 className="text-lg">ACLs</h1>
@@ -181,6 +184,10 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
             {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
           </li>)}</ul>
           {acls.length === 0 && <p>None</p>}
+          {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
+            <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.acl} onChange={(e) => setNewGrant({ ...newGrant, acl: e.target.value })} />
+            <button onClick={() => grantItem(parseInt(newGrant.acl), acls, setACLs)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
+          </div>}
         </div>
         <div className="flex flex-col">
           <h1 className="text-lg">Direct Permissions</h1>
@@ -189,9 +196,13 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
             {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(permission, permissions, setPermissions)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
           </li>)}</ul>
           {permissions.length === 0 && <p>None</p>}
+          {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
+            <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.permission} onChange={(e) => setNewGrant({ ...newGrant, permission: e.target.value })} />
+            <button onClick={() => grantItem(newGrant.permission, permissions, setPermissions)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
+          </div>}
         </div>
       </div>
-      <button onClick={applyChanges} className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Save Grants</button>
+      <button onClick={applyChanges} className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit">Save Grants</button>
     </div>
   );
 }
