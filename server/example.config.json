@@ -1,21 +1,24 @@
 {
   "api": {
     "port": 3000,
+    "ssl": false,
     "allowedOrigins": ["http://localhost:3001"]
   },
   "webdav": {
     "enabled": true,
     "port": 1900,
+    "ssl": false,
     "publicAddress": null
   },
   "ftp": {
     "enabled": false,
     "port": 2100,
+    "ssl": false,
     "publicAddress": null,
     "pasv": { "address": null, "start": 50000, "end": 50500 }
   },
-  "useSSL": false,
   "failedLoginLimit": 5,
+  "selfRegistration": false,
   "selfUsernameChanges": true,
   "filterMetadata": true,
   "globalExclusions": [

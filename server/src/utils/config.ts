@@ -8,23 +8,26 @@ import { getConfig, getConfigPath, setConfig } from "../index.js";
 export const Config = z.strictObject({
   api: z.strictObject({
     port: z.int().positive(),
+    ssl: z.boolean(),
     allowedOrigins: z.array(z.string())
   }),
   webdav: z.strictObject({
     enabled: z.boolean(),
     port: z.int().positive(),
-    publicAddress: z.string().nullable(),
+    ssl: z.boolean(),
+    publicAddress: z.string().nullable()
   }),
   ftp: z.strictObject({
     enabled: z.boolean(),
     port: z.int().positive(),
+    ssl: z.boolean(),
     publicAddress: z.string().nullable(),
-    pasv: z.strictObject({ address: z.string().nullable(), start: z.int().positive(), end: z.int().positive() }),
+    pasv: z.strictObject({ address: z.string().nullable(), start: z.int().positive(), end: z.int().positive() })
   }),
-  useSSL: z.boolean(),
   failedLoginLimit: z.int().positive().default(5),
-  selfUsernameChanges: z.boolean().default(true),
-  filterMetadata: z.boolean().default(true),
+  selfRegistration: z.boolean(),
+  selfUsernameChanges: z.boolean(),
+  filterMetadata: z.boolean(),
   globalExclusions: z.array(z.string()).readonly(),
   globalExclusionBypasses: z.array(z.string()).readonly()
 });

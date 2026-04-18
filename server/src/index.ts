@@ -41,21 +41,33 @@ async function startServer() {
     console.error(`Config Error - ${e}`);
     process.exit(1);
   }
-  if (config.useSSL) {
-    let ssl;
+  let ssl = null;
+  if (config.api.ssl || config.webdav.ssl || config.ftp.ssl) {
     try {
       ssl = await loadCert(configPath);
     } catch (e) {
       console.error(`SSL Error - ${e}`);
       process.exit(1);
     }
-    api = await startAPI(config.api.port, ssl.key, ssl.cert);
-    if (config.webdav.enabled) webdav = await startWebDAV(config.webdav.port, ssl.key, ssl.cert);
-    if (config.ftp.enabled) ftp = await startFTP(config, ssl.key, ssl.cert);
+  }
+  if (config.api.ssl) {
+    api = await startAPI(config.api.port, ssl!.key, ssl!.cert);
   } else {
     api = await startAPI(config.api.port);
-    if (config.webdav.enabled) webdav = await startWebDAV(config.webdav.port);
-    if (config.ftp.enabled) ftp = await startFTP(config);
+  }
+  if (config.webdav.enabled) {
+    if (config.webdav.ssl) {
+      webdav = await startWebDAV(config.webdav.port, ssl!.key, ssl!.cert);
+    } else {
+      webdav = await startWebDAV(config.webdav.port);
+    }
+  }
+  if (config.ftp.enabled) {
+    if (config.ftp.ssl) {
+    ftp = await startFTP(config, ssl!.key, ssl!.cert);
+    } else { 
+      ftp = await startFTP(config);
+    }
   }
 }
 async function stopServer() {
