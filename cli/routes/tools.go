@@ -81,11 +81,11 @@ func GetPermissions() ([]Permission) {
 	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
 	return body
 }
-func GetProviders() (ProviderList) {
+func GetProtocols() (ProviderList) {
 	auth := getAuth()
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
-	addr.Path = path.Join(addr.Path, "/providers")
+	addr.Path = path.Join(addr.Path, "/protocols")
 	req, err := http.NewRequest(http.MethodGet, addr.String(), nil)
 	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
 	req.AddCookie(&cookie)

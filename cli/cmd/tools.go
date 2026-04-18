@@ -53,15 +53,15 @@ var getPermissionsCMD = &cobra.Command{
 	},
 }
 var getProvidersCMD = &cobra.Command{
-	Use: "providers",
-	Short: "get the addresses for providers",
-	Long: "get the addresses for providers (webdav and ftp)",
-	Aliases: []string{"protocols", "addresses"},
+	Use: "protocols",
+	Short: "get the addresses for file protocols",
+	Long: "get the addresses for file protocols (webdav and ftp)",
+	Aliases: []string{"providers", "addresses"},
 	Run: func(cmd *cobra.Command, args []string) {
-		providers := routes.GetProviders()
-		fmt.Println("Provider Addressses")
+		providers := routes.GetProtocols()
+		fmt.Println("Protocol Addressses")
 		fmt.Println("-------------------")
-		if providers.WebDAV == "" && providers.FTP == "" { fmt.Println("The server doesn't display any of these, please ask your administrator for the correct provider addresses!") }
+		if providers.WebDAV == "" && providers.FTP == "" { fmt.Println("The server doesn't display any of these, please ask your administrator for the correct protocol addresses!") }
     if providers.WebDAV != "" { fmt.Println("WebDAV: " + providers.WebDAV) }
 		if providers.FTP != "" { fmt.Println("FTP: " + providers.FTP) }
 	},
