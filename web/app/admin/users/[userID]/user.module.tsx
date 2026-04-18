@@ -4,6 +4,7 @@ import query from "@/utils/api";
 import { db } from "@/utils/db";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { isEqual } from "lodash-es";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -82,7 +83,7 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
       window.location.href = res.redirect;
       return;
     }
-    router.push("/users");
+    router.push("/admin/users");
   }
   return (
     <div className={`grid gap-4 grid-cols-1 ${user.access === "full" ? "md:grid-cols-3 md:grid-rows-2" : ""}`}>
@@ -97,7 +98,7 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
             <label htmlFor="password" className="text-lg">Password</label>
             <input id="password" type="password" placeholder="(leave blank to not change)" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl w-fit" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          <div className="md:col-span-3 text-center"><button type="submit" className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Save Changes</button></div>
+          <div className="md:col-span-3 text-center"><button type="submit" className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Save</button></div>
         </form> : <div>
           <div className="flex flex-col gap-1 items-center">
             <label htmlFor="username">Username</label>
@@ -138,6 +139,7 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
   const [roles, setRoles] = useState<number[]>(user.roles);
   const [acls, setACLs] = useState<number[]>(user.acls);
   const [permissions, setPermissions] = useState<string[]>(user.permissions);
+  const [newGrant, setNewGrant] = useState<{ role: string, acl: string, permission: string }>({ role: "", acl: "", permission: "" });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function grantItem(item: any, state: any[], setState: Dispatch<SetStateAction<any[]>>) {
     const newState = new Set<unknown>();
@@ -147,6 +149,18 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function revokeItem(item: any, state: any[], setState: Dispatch<SetStateAction<any[]>>) { setState(state.filter((current) => current !== item)); }
+  async function applyChanges() {
+    const res = await query(session, `admin/users/${userID}/grant`, { method: "PUT", body: JSON.stringify({ roles: (!isEqual(roles, user.roles) ? roles : undefined), acls: (!isEqual(acls, user.acls) ? acls : undefined), permissions: (!isEqual(permissions, user.permissions) ? permissions : undefined) }) });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      window.location.href = res.redirect;
+      return;
+    }
+    if (res.body.message !== "Nothing to update.") alert("Saved new grants successfully!");
+  }
   return (
     <div className="flex flex-col gap-4 items-center md:col-span-2">
       <h2 className="text-xl font-semibold">Grants</h2>
@@ -155,15 +169,16 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           <h1 className="text-lg">Roles</h1>
           <ul className="list-disc list-inside">{roles.map((role) => <li key={role}>
             {session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role}`} className="underline hover:text-sky-500">{role}</Link> : role}
-            <button onClick={() => revokeItem(role, roles, setRoles)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>
+            {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(role, roles, setRoles)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
           </li>)}</ul>
           {roles.length === 0 && <p>None</p>}
+          <input />
         </div>
         <div className="flex flex-col">
           <h1 className="text-lg">ACLs</h1>
           <ul className="list-disc list-inside">{acls.map((acl) => <li key={acl}>
             {session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{acl}</Link> : acl}
-            <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>
+            {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
           </li>)}</ul>
           {acls.length === 0 && <p>None</p>}
         </div>
@@ -171,11 +186,12 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           <h1 className="text-lg">Direct Permissions</h1>
           <ul className="list-disc list-inside">{permissions.map((permission) => <li key={permission}>
             {permission}
-            <button onClick={() => revokeItem(permission, permissions, setPermissions)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>
+            {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(permission, permissions, setPermissions)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
           </li>)}</ul>
           {permissions.length === 0 && <p>None</p>}
         </div>
       </div>
+      <button onClick={applyChanges} className="rounded-xl p-1 px-2 mt-2 bg-violet-500 hover:text-sky-500 w-fit">Save Grants</button>
     </div>
   );
 }

@@ -14,7 +14,7 @@ export default function Home() {
   }, []);
   useEffect(() => {
     if (!session) return;
-    query(session, "providers").then((res) => {
+    query(session, "protocols").then((res) => {
       if ("error" in res) {
         alert(res.error);
         return;
