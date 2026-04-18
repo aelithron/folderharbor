@@ -5,3 +5,7 @@ export type Session = {
   username: string
   permissions: string[]
 }
+export type ClientConfig = {
+  selfUsernameChanges: boolean
+  registration: boolean
+}

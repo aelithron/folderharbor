@@ -130,6 +130,7 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
             </div>
             {/*<button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>*/}
           </div>)}
+          {(user as FullUser).sessions?.length === 0 && <p>None</p>}
         </div>
       </div>}
     </div>

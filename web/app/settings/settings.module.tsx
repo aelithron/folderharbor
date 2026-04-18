@@ -1,5 +1,5 @@
 "use client"
-import { Session } from "@/folderharborweb";
+import { ClientConfig, Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
 import { faLock, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +11,7 @@ type SelfInfo = { id: number, username: string, sessions: { id: number, createdA
 export default function Settings() {
   const [session, setSession] = useState<Session | undefined>();
   const [selfInfo, setSelfInfo] = useState<SelfInfo | undefined>();
-  const [clientConfig, setClientConfig] = useState<{ selfUsernameChanges: boolean } | undefined>();
+  const [clientConfig, setClientConfig] = useState<ClientConfig | undefined>();
   useEffect(() => {
     async function loadSession() { if (localStorage.getItem("activeSession")) setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
