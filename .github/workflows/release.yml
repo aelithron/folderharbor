@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Get Version
-        run: echo "VERSION=${GITHUB_REF_NAME#cli/}" >> $GITHUB_ENV
+        run: echo "VERSION=${GITHUB_REF_NAME#cli/v}" >> $GITHUB_ENV
       - uses: actions/setup-go@v6
         with:
           go-version: stable
@@ -71,11 +71,21 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: |
           mkdir dist
-          GOOS=linux GOARCH=amd64 go build -o dist/folderharbor-cli-${{ env.VERSION }}-linux-amd64 .
-          GOOS=linux GOARCH=arm64 go build -o dist/folderharbor-cli-${{ env.VERSION }}-linux-arm64 .
-          GOOS=darwin GOARCH=amd64 go build -o dist/folderharbor-cli-${{ env.VERSION }}-macos-amd64 .
-          GOOS=darwin GOARCH=arm64 go build -o dist/folderharbor-cli-${{ env.VERSION }}-macos-arm64 .
-          GOOS=windows GOARCH=amd64 go build -o dist/folderharbor-cli-${{ env.VERSION }}-windows-amd64.exe .
+          GOOS=linux GOARCH=amd64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-linux-amd64 .
+          GOOS=linux GOARCH=arm64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-linux-arm64 .
+          GOOS=darwin GOARCH=amd64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-macos-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-macos-arm64 .
+          GOOS=windows GOARCH=amd64 go build -o dist/folderharbor-cli-v${{ env.VERSION }}-windows-amd64.exe .
+      - name: Package Linux
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          GOARCH=amd64 envsubst < cli/nfpm.yml > cli/nfpm-amd64.yml
+          GOARCH=arm64 envsubst < cli/nfpm.yml > cli/nfpm-arm64.yml
+          GOARCH=amd64 nfpm package --packager deb --config ./nfpm-amd64.yml --target ./dist/
+          GOARCH=amd64 nfpm package --packager rpm --config ./nfpm-amd64.yml --target ./dist/
+          GOARCH=arm64 nfpm package --packager deb --config ./nfpm-arm64.yml --target ./dist/
+          GOARCH=arm64 nfpm package --packager rpm --config ./nfpm-arm64.yml --target ./dist/
       - name: Attest Builds
         uses: actions/attest@v4
         with:
@@ -87,7 +97,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          name: "CLI ${{ env.VERSION }}"
+          name: "CLI v${{ env.VERSION }}"
           files: "cli/dist/**"
           make_latest: false
           body: |
