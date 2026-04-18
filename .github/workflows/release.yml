@@ -59,7 +59,6 @@ jobs:
         run: echo "VERSION=${GITHUB_REF_NAME#cli/v}" >> $GITHUB_ENV
       - uses: actions/setup-go@v6
         with:
-          go-version: stable
           go-version-file: "cli/go.mod"
           cache: true
           cache-dependency-path: "cli/go.sum"
@@ -80,6 +79,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         run: |
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
           GOARCH=amd64 envsubst < nfpm.yml > nfpm-amd64.yml
           GOARCH=arm64 envsubst < nfpm.yml > nfpm-arm64.yml
           GOARCH=amd64 nfpm package --packager deb --config ./nfpm-amd64.yml --target ./dist/
