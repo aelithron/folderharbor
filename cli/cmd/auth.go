@@ -42,8 +42,32 @@ var logoutCMD = &cobra.Command{
 		fmt.Println("Logged out successfully.")
 	},
 }
+var registerCMD = &cobra.Command{
+	Use:   "register",
+	Short: "create an account on a folderharbor server",
+	Long:  "register for a new account on a folderharbor server",
+	Run: func(cmd *cobra.Command, args []string) {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter your server's URL: ")
+		url, _ := reader.ReadString('\n')
+		clientConfig := routes.GetClientConfig(strings.TrimSpace(url))
+		if clientConfig.Registration == false {
+			fmt.Fprintln(os.Stderr, "This server doesn't allow you to register.\nPlease ask the server's administrator to create an account for you.")
+			os.Exit(1)
+		}
+		fmt.Print("Enter your new username: ")
+		username, _ := reader.ReadString('\n')
+		fmt.Print("Enter your new password: ")
+		password, err := term.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil { panic (err) }
+		fmt.Println()
+		routes.Register(strings.TrimSpace(url), strings.TrimSpace(username), string(password))
+		fmt.Println("Successfully registered and logged in!")
+	},
+}
 func init() {
 	rootCMD.AddCommand(authCMD)
 	authCMD.AddCommand(loginCMD)
 	authCMD.AddCommand(logoutCMD)
+	authCMD.AddCommand(registerCMD)
 }

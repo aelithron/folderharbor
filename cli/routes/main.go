@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -27,6 +28,7 @@ type Grant struct {
 }
 type ClientConfig struct {
   SelfUsernameChanges bool `json:"selfUsernameChanges"`
+	Registration bool `json:"registration"`
 }
 type createRes struct { ID int `json:"id"` }
 
@@ -44,9 +46,17 @@ func handleAPIError(error APIError) {
 	fmt.Fprintf(os.Stderr, "Error (%s): %s\n", error.Error, error.Message)
 	os.Exit(1)
 }
-func GetClientConfig() (ClientConfig) {
-	auth := getAuth()
-	addr, err := url.Parse(auth.Server)
+func GetServerAddress() (string) {
+	server, err := url.Parse(viper.GetString("server"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "You aren't logged in to a FolderHarbor server!\nPlease run " + `"folderharbor auth login"` + " to log in.\n")
+		os.Exit(1)
+	}
+	return server.String()
+}
+func GetClientConfig(address string) (ClientConfig) {
+	if !strings.Contains(address, "://") { address = "https://" + address }
+	addr, err := url.Parse(address)
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/clientconfig")
 	res, err := http.Get(addr.String())

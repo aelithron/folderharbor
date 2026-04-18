@@ -62,3 +62,23 @@ func Logout() {
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
 }
+func Register(address, username, password string) {
+	reqBody, _ := json.Marshal(&login{ Username: username, Password: password })
+	if !strings.Contains(address, "://") { address = "https://" + address }
+	addr, err := url.Parse(address)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/auth/register")
+	resp, err := http.Post(addr.String(), "application/json", bytes.NewBuffer(reqBody))
+	if err != nil { panic (err) }
+	defer resp.Body.Close()
+	resBody, err := io.ReadAll(resp.Body)
+	if err != nil { panic (err) }
+	var errBody APIError
+	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
+	if errBody.Error != "" { handleAPIError(errBody) }
+	var body authRes
+	if err := json.Unmarshal(resBody, &body); err != nil { panic (err) }
+	viper.Set("server", addr.Scheme + "://" + addr.Host)
+	viper.Set("token", body.Token)
+	viper.WriteConfig()
+}

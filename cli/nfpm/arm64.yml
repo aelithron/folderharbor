@@ -1,13 +1,13 @@
 name: folderharbor-cli
 version: ${VERSION}
-arch: ${GOARCH}
+arch: arm64
 section: utils
 maintainer: Nova <aelithron@gmail.com>
 description: An administration CLI for FolderHarbor servers
 license: MIT
 
 contents:
-  - src: ./dist/folderharbor-cli-v${VERSION}-linux-${GOARCH}
+  - src: ./dist/folderharbor-cli-v*-linux-arm64
     dst: /usr/bin/folderharbor
     file_info:
       mode: 0755

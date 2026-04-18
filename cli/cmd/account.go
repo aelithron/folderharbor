@@ -70,7 +70,8 @@ var changeOwnUsernameCMD = &cobra.Command{
 	Short: "change your username",
 	Long:  "update your username on folderharbor",
   Run: func(cmd *cobra.Command, args []string) {
-		clientConfig := routes.GetClientConfig()
+		server := routes.GetServerAddress()
+		clientConfig := routes.GetClientConfig(server)
 		if clientConfig.SelfUsernameChanges == false {
 			fmt.Fprintln(os.Stderr, "This server doesn't allow you to change your username.\nPlease contact your administrator and ask them to change it for you.")
 			os.Exit(1)
