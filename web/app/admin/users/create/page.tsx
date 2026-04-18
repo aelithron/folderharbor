@@ -1,10 +1,12 @@
 import { Metadata } from "next";
-import Users from "./users.module";
+import CreateUser from "./create.module";
+
 export const metadata: Metadata = { title: "Users • Admin" }
 export default function Page() {
   return (
     <main className="flex flex-col p-8 md:p-20 min-h-screen">
-      <Users />
+      <h1 className="text-2xl font-semibold text-center">Create User</h1>
+      <CreateUser />
     </main>
   );
 }

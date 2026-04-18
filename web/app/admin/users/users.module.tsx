@@ -2,6 +2,8 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -29,7 +31,11 @@ export default function Users() {
     loadUsers();
   }, [session]);
   return (
-    <div className="flex flex-col mt-4">
+    <div className="flex flex-col">
+      <div className="flex justify-between gap-2 mb-3">
+        <h1 className="text-2xl font-semibold">Users</h1>
+        {session?.permissions.includes("users:create") && <Link href={"/admin/users/create"} className="bg-violet-500 hover:text-sky-500 py-1 px-2 rounded-lg"><FontAwesomeIcon icon={faPlus} /> Create</Link>}
+      </div>
       {(session && users) && <div className="bg-slate-700 p-2 rounded-lg gap-2">
         {users.sort((a, b) => a.id - b.id).map((user) => <div key={user.id} className="flex gap-2 items-center">
           {(session.permissions.includes("users:read") || session.permissions.includes("users:read.full")) ? <Link href={`/admin/users/${user.id}`} className="font-semibold text-lg underline hover:text-sky-500">{user.username}</Link> : <h1 className="font-semibold text-lg">{user.username}</h1>}

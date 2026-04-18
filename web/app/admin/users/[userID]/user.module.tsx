@@ -119,7 +119,7 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
         </div>}
       </div>
       {user.access === "full" && <UserGrants session={session} user={user as FullUser} userID={userID} />}
-      {user.access === "full" && <div className="flex flex-col gap-4 items-center md:col-span-3">
+      {user.access === "full" && <div className="flex flex-col gap-3 items-center md:col-span-3">
         <h2 className="text-xl font-semibold">Sessions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           {(user as FullUser).sessions && (user as FullUser).sessions!.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
@@ -130,7 +130,7 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
             </div>
             {/*<button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>*/}
           </div>)}
-          {(user as FullUser).sessions?.length === 0 && <p>None</p>}
+          {(!(user as FullUser).sessions || (user as FullUser).sessions!.length === 0) && <p className="md:col-span-3">None</p>}
         </div>
       </div>}
     </div>
