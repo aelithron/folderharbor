@@ -80,8 +80,8 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         run: |
-          GOARCH=amd64 envsubst < cli/nfpm.yml > cli/nfpm-amd64.yml
-          GOARCH=arm64 envsubst < cli/nfpm.yml > cli/nfpm-arm64.yml
+          GOARCH=amd64 envsubst < nfpm.yml > nfpm-amd64.yml
+          GOARCH=arm64 envsubst < nfpm.yml > nfpm-arm64.yml
           GOARCH=amd64 nfpm package --packager deb --config ./nfpm-amd64.yml --target ./dist/
           GOARCH=amd64 nfpm package --packager rpm --config ./nfpm-amd64.yml --target ./dist/
           GOARCH=arm64 nfpm package --packager deb --config ./nfpm-arm64.yml --target ./dist/
