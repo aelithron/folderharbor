@@ -2,8 +2,10 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
+import { Source_Code_Pro } from "next/font/google";
 import { useEffect, useState } from "react";
 
+const sourceCodePro = Source_Code_Pro({ weight: "400" });
 export default function Home() {
   const [session, setSession] = useState<Session | undefined>();
   const [webdavURL, setWebdavURL] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export default function Home() {
               <h2 className="font-semibold">Token (Suggested)</h2>
               <p>A session token can be used to access WebDAV!</p>
               <p>This is more secure than a username and password, but will expire.</p>
-              <div>Enter {isSecureContext ? <button onClick={() => copyAlert(session!.token)} className="underline hover:text-sky-500"><pre>{session!.token}</pre></button> : <pre>{session!.token}</pre>} into the Password box in your WebDAV client.</div>
+              <div>Enter {isSecureContext ? <button onClick={() => copyAlert(`token_${session!.token}`)} className="underline hover:text-sky-500"><p className={`break-all blur-xs hover:blur-none ${sourceCodePro.className}`}>token_{session!.token}</p></button> : <p className={`break-all blur-xs hover:blur-none ${sourceCodePro.className}`}>token_{session!.token}</p>} into the Password box in your WebDAV client.</div>
             </div>
             <div className="flex flex-col gap-2">
               <h2 className="font-semibold">Standard</h2>
@@ -57,7 +59,7 @@ export default function Home() {
               <h2 className="font-semibold">Token (Suggested)</h2>
               <p>A session token can be used to access FTP!</p>
               <p>This is more secure than a username and password, but will expire.</p>
-              <div>Enter {isSecureContext ? <button onClick={() => copyAlert(session!.token)} className="underline hover:text-sky-500"><pre>{session!.token}</pre></button> : <pre>{session!.token}</pre>} into the Password box in your FTP client.</div>
+              <div>Enter {isSecureContext ? <button onClick={() => copyAlert(`token_${session!.token}`)} className="underline hover:text-sky-500"><p className={`break-all blur-xs hover:blur-none ${sourceCodePro.className}`}>token_{session!.token}</p></button> : <p className={`break-all blur-xs hover:blur-none ${sourceCodePro.className}`}>token_{session!.token}</p>} into the Password box in your FTP client.</div>
             </div>
             <div className="flex flex-col gap-2">
               <h2 className="font-semibold">Standard</h2>
