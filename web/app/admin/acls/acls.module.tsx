@@ -2,6 +2,8 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -29,7 +31,11 @@ export default function ACLs() {
     loadACLs();
   }, [session]);
   return (
-    <div className="flex flex-col mt-4">
+    <div className="flex flex-col">
+      <div className="flex justify-between gap-2 mb-3">
+        <h1 className="text-2xl font-semibold">ACLs</h1>
+        {session?.permissions.includes("acls:create") && <Link href={"/admin/acls/create"} className="bg-violet-500 hover:text-sky-500 py-1 px-2 rounded-lg"><FontAwesomeIcon icon={faPlus} /> Create</Link>}
+      </div>
       {(session && acls) && <div className="bg-slate-700 p-2 rounded-lg gap-2">
         {acls.sort((a, b) => a.id - b.id).map((acl) => <div key={acl.id} className="flex gap-2 items-center">
           {session.permissions.includes("acls:read") ? <Link href={`/admin/acls/${acl.id}`} className="font-semibold text-lg underline hover:text-sky-500">{acl.name}</Link> : <h1 className="font-semibold text-lg">{acl.name}</h1>}

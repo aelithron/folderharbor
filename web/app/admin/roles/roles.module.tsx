@@ -2,6 +2,8 @@
 import { Session } from "@/folderharborweb";
 import query from "@/utils/api";
 import { db } from "@/utils/db";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -29,7 +31,11 @@ export default function Roles() {
     loadRoles();
   }, [session]);
   return (
-    <div className="flex flex-col mt-4">
+    <div className="flex flex-col">
+      <div className="flex justify-between gap-2 mb-3">
+        <h1 className="text-2xl font-semibold">Roles</h1>
+        {session?.permissions.includes("roles:create") && <Link href={"/admin/roles/create"} className="bg-violet-500 hover:text-sky-500 py-1 px-2 rounded-lg"><FontAwesomeIcon icon={faPlus} /> Create</Link>}
+      </div>
       {(session && roles) && <div className="bg-slate-700 p-2 rounded-lg gap-2">
         {roles.sort((a, b) => a.id - b.id).map((role) => <div key={role.id} className="flex gap-2 items-center">
           {session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role.id}`} className="font-semibold text-lg underline hover:text-sky-500">{role.name}</Link> : <h1 className="font-semibold text-lg">{role.name}</h1>}

@@ -230,7 +230,7 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           <div className="flex flex-col">
             <h1 className="text-lg">ACLs</h1>
             <ul className="list-disc list-inside">{acls.map((acl) => <div key={acl} className="flex justify-between">
-              <li>{session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl}</Link> : (lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl)}</li>
+              <li>{session.permissions.includes("acls:read") ? <Link href={`/admin/acls/${acl}`} className="underline hover:text-sky-500">{lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl}</Link> : (lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl)}</li>
               {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
             </div>)}</ul>
             {acls.length === 0 && <p>None</p>}

@@ -18,7 +18,7 @@ export default function RoleSettings({ roleID }: { roleID: number }) {
     loadSession();
   }, []);
   useEffect(() => {
-    async function loadUser() {
+    async function loadRole() {
       if (!session) return;
       const res = await query(session, `admin/roles/${roleID}`);
       if ("error" in res) {
@@ -31,7 +31,7 @@ export default function RoleSettings({ roleID }: { roleID: number }) {
       }
       setRole(res.body);
     }
-    loadUser();
+    loadRole();
   }, [session, roleID]);
   return (
     <div className="flex flex-col">
@@ -159,12 +159,12 @@ function RoleGrants({ session, role, roleID }: { session: Session, role: Role, r
           <div className="flex flex-col">
             <h1 className="text-lg">ACLs</h1>
             <ul className="list-disc list-inside">{acls.map((acl) => <div key={acl} className="flex justify-between">
-              <li>{session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl}</Link> : (lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl)}</li>
-              {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
+              <li>{session.permissions.includes("acls:read") ? <Link href={`/admin/acls/${acl}`} className="underline hover:text-sky-500">{lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl}</Link> : (lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl)}</li>
+              {session.permissions.includes("roles:edit") && <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
             </div>)}</ul>
             {acls.length === 0 && <p>None</p>}
           </div>
-          {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
+          {session.permissions.includes("roles:edit") && <div className="flex gap-2 items-center justify-center mt-2">
             {lists.acls ? <select className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.acl} onChange={(e) => setNewGrant({ ...newGrant, acl: e.target.value })}>
               <option></option>
               {lists.acls.sort((a, b) => a.id - b.id).map((acl) => <option key={acl.id} value={acl.id}>{acl.name} (ID #{acl.id})</option>)}
@@ -178,11 +178,11 @@ function RoleGrants({ session, role, roleID }: { session: Session, role: Role, r
             <h1 className="text-lg">Permissions</h1>
             <ul className="list-disc list-inside">{permissions.map((permission) => <div key={permission} className="flex justify-between">
               <li>{permission}</li>
-              {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(permission, permissions, setPermissions)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
+              {session.permissions.includes("roles:edit") && <button onClick={() => revokeItem(permission, permissions, setPermissions)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
             </div>)}</ul>
             {permissions.length === 0 && <p>None</p>}
           </div>
-          {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
+          {session.permissions.includes("roles:edit") && <div className="flex gap-2 items-center justify-center mt-2">
             {lists.permissions ? <select className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.permission} onChange={(e) => setNewGrant({ ...newGrant, permission: e.target.value })}>
               <option></option>
               {lists.permissions.map((permission) => <option key={permission.id} value={permission.id}>{permission.id}</option>)}
@@ -192,7 +192,7 @@ function RoleGrants({ session, role, roleID }: { session: Session, role: Role, r
           </div>}
         </div>
       </div>
-      {session.permissions.includes("users:grant") && <button onClick={applyChanges} className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit">Save Grants</button>}
+      {session.permissions.includes("roles:edit") && <button onClick={applyChanges} className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit">Save Grants</button>}
     </div>
   );
 }
