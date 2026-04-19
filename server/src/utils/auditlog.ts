@@ -8,6 +8,7 @@ export type AuditAction = (
   `files-${"create" | "read" | "edit" | "delete" | "move" | "list"}` |
   `${"users" | "roles" | "acls"}-${"create" | "read" | "edit" | "delete"}` |
   "auth-login" |
+  "sessions-delete" |
   `config-${"read" | "edit"}`
 );
 export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileType: "file" | "folder", protocol: "api" | "webdav" | "ftp" } | { id: number, accessLevel: "full" | "limited", newContents: unknown, protocol: "api" | "internal" } | { authSuccess: boolean, protocol: "api" | "webdav" | "ftp" } | { newConfigItems: Partial<z.infer<typeof Config>> }>;
