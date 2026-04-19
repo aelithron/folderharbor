@@ -41,7 +41,7 @@ export default function Settings() {
         window.location.href = res.redirect;
         return;
       }
-      setClientConfig({ selfUsernameChanges: res.body.selfUsernameChanges });
+      setClientConfig({ selfUsernameChanges: res.body.selfUsernameChanges, registration: res.body.registration });
     }
     loadSelfInfo();
     loadClientConfig();
@@ -53,7 +53,7 @@ export default function Settings() {
     </div>
   );
 }
-function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, selfInfo: SelfInfo, clientConfig: { selfUsernameChanges: boolean } }) {
+function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, selfInfo: SelfInfo, clientConfig: ClientConfig }) {
   const router = useRouter();
   const [username, setUsername] = useState<string>(selfInfo.username);
   const [password, setPassword] = useState<string>("");

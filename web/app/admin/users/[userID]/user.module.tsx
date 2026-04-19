@@ -85,6 +85,32 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
     }
     router.push("/admin/users");
   }
+  async function revokeSession(id: number) {
+    const res = await query(session, `admin/sessions/${id}`, { method: "DELETE" });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      // eslint-disable-next-line react-hooks/immutability
+      window.location.href = res.redirect;
+      return;
+    }
+    window.location.reload();
+  }
+  async function clearFailedLogins() {
+    const res = await query(session, `admin/users/${userID}`, { method: "PATCH", body: JSON.stringify({ clearLoginAttempts: true }) });
+    if ("error" in res) {
+      alert(res.error);
+      return;
+    }
+    if ("redirect" in res) {
+      window.location.href = res.redirect;
+      return;
+    }
+    alert("Successfully reset failed login attempts!");
+    window.location.reload();
+  }
   return (
     <div className={`grid gap-4 grid-cols-1 ${user.access === "full" ? "md:grid-cols-3 md:grid-rows-2" : ""}`}>
       <div className="space-y-2">
@@ -111,7 +137,7 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
         </div>
         <div className="flex gap-3 items-center mt-2 justify-center">
           <p>Failed Logins: {user.failedLogins}</p>
-          {session.permissions.includes("users:edit") && <button className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit">Reset</button>}
+          {session.permissions.includes("users:edit") && <button onClick={clearFailedLogins} className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit">Reset</button>}
         </div>
         {session.permissions.includes("users:delete") && <div>
           <h2 className="text-lg">Danger</h2>
@@ -122,13 +148,13 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
       {user.access === "full" && <div className="flex flex-col gap-3 items-center md:col-span-3">
         <h2 className="text-xl font-semibold">Sessions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          {(user as FullUser).sessions && (user as FullUser).sessions!.map((session) => <div key={session.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
+          {(user as FullUser).sessions && (user as FullUser).sessions!.map((sessionItem) => <div key={sessionItem.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
             <div className="flex flex-col">
-              <p className="text-lg">Session #{session.id}</p>
-              <p>Created {new Date(session.createdAt).toLocaleString()}</p>
-              <p>Expires {new Date(session.expiry).toLocaleString()}</p>
+              <p className="text-lg">Session #{sessionItem.id}</p>
+              <p>Created {new Date(sessionItem.createdAt).toLocaleString()}</p>
+              <p>Expires {new Date(sessionItem.expiry).toLocaleString()}</p>
             </div>
-            {/*<button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(session.id)}><FontAwesomeIcon icon={faTrash} /></button>*/}
+            {session.permissions.includes("users:edit") && <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(sessionItem.id)}><FontAwesomeIcon icon={faTrash} /></button>}
           </div>)}
           {(!(user as FullUser).sessions || (user as FullUser).sessions!.length === 0) && <p className="md:col-span-3">None</p>}
         </div>
