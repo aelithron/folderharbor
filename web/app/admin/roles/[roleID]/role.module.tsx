@@ -72,7 +72,7 @@ function SettingsPanel({ session, role, roleID }: { session: Session, role: Role
     router.push("/admin/roles");
   }
   return (
-    <div className={`grid gap-4 grid-cols-1 ${session.permissions.includes("roles:edit") ? "md:grid-cols-3" : ""}`}>
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
       <div className="space-y-2">
         <h2 className="text-center text-xl font-semibold">Basic</h2>
         {session.permissions.includes("roles:edit") ? <form className="space-y-2" onSubmit={updateInfo}>

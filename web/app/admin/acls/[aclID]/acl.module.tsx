@@ -71,7 +71,7 @@ function SettingsPanel({ session, acl, aclID }: { session: Session, acl: ACL, ac
     router.push("/admin/acls");
   }
   return (
-    <div className={`grid gap-4 grid-cols-1 ${session.permissions.includes("acls:edit") ? "md:grid-cols-3" : ""}`}>
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
       <div className="space-y-2">
         <h2 className="text-center text-xl font-semibold">Basic</h2>
         {session.permissions.includes("acls:edit") ? <form className="space-y-2" onSubmit={updateInfo}>
