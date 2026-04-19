@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"cmp"
 	"fmt"
 	"folderharbor-cli/routes"
 	"os"
@@ -40,6 +41,7 @@ var getUserCMD = &cobra.Command{
 		userID, err := strconv.Atoi(args[0])
 		if err != nil { panic (err) }
 		info := routes.GetUser(userID)
+		slices.SortFunc(info.Sessions, func(a, b routes.Session) int { return cmp.Compare(a.ID, b.ID) })
 		fmt.Println("Information for " + info.Username + " (ID " + fmt.Sprint(userID) + ")")
 		fmt.Println("----------------------------")
 		if info.Locked == true {

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"cmp"
 	"fmt"
 	"folderharbor-cli/routes"
 	"net/url"
@@ -27,6 +28,7 @@ var ownInfoCMD = &cobra.Command{
 	Long: "get information about your account",
 	Run: func(cmd *cobra.Command, args []string) {
 		info := routes.GetOwnInfo()
+		slices.SortFunc(info.Sessions, func(a, b routes.Session) int { return cmp.Compare(a.ID, b.ID) })
 		fmt.Println("Information for " + info.Username + " (ID " + fmt.Sprint(info.ID) + ")")
 		fmt.Println("----------------------------")
 		fmt.Println("Active Sessions:")
