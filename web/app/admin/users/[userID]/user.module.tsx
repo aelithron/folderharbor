@@ -212,7 +212,7 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           <div className="flex flex-col">
             <h1 className="text-lg">Roles</h1>
             <ul className="list-disc list-inside">{roles.map((role) => <li key={role}>
-              {session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role}`} className="underline hover:text-sky-500">{role}</Link> : role}
+              {session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role}`} className="underline hover:text-sky-500">{lists.roles ? `${lists.roles.find((item) => item.id === role)?.name || "Role"} (#${role})` : role}</Link> : (lists.roles ? `${lists.roles.find((item) => item.id === role)?.name || "Role"} (#${role})` : role)}
               {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(role, roles, setRoles)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
             </li>)}</ul>
             {roles.length === 0 && <p>None</p>}
@@ -220,7 +220,7 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
             {lists.roles ? <select className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.role} onChange={(e) => setNewGrant({ ...newGrant, role: e.target.value })}>
               <option></option>
-              {lists.roles.map((role) => <option key={role.id} value={role.id}>{role.name} (ID #{role.id})</option>)}
+              {lists.roles.sort((a, b) => a.id - b.id).map((role) => <option key={role.id} value={role.id}>{role.name} (ID #{role.id})</option>)}
             </select>
               : <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.role} onChange={(e) => setNewGrant({ ...newGrant, role: e.target.value })} />}
             <button onClick={() => grantItem(parseInt(newGrant.role), roles, setRoles)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
@@ -230,7 +230,7 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           <div className="flex flex-col">
             <h1 className="text-lg">ACLs</h1>
             <ul className="list-disc list-inside">{acls.map((acl) => <li key={acl}>
-              {session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{acl}</Link> : acl}
+              {session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl}</Link> : (lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl)}
               {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
             </li>)}</ul>
             {acls.length === 0 && <p>None</p>}
@@ -238,7 +238,7 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
             {lists.acls ? <select className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.acl} onChange={(e) => setNewGrant({ ...newGrant, acl: e.target.value })}>
               <option></option>
-              {lists.acls.map((acl) => <option key={acl.id} value={acl.id}>{acl.name} (ID #{acl.id})</option>)}
+              {lists.acls.sort((a, b) => a.id - b.id).map((acl) => <option key={acl.id} value={acl.id}>{acl.name} (ID #{acl.id})</option>)}
             </select>
               : <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.acl} onChange={(e) => setNewGrant({ ...newGrant, acl: e.target.value })} />}
             <button onClick={() => grantItem(parseInt(newGrant.acl), acls, setACLs)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
