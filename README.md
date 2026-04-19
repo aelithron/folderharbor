@@ -11,5 +11,11 @@ Welcome to the FolderHarbor monorepo! (this is my first time making a monorepo, 
 Folder structure:
 - `server/`: The FolderHarbor server, written in TypeScript.
 - `cli/`: CLI for administration, written in Go.
-- `landing/`: Landing page to describe what FolderHarbor is and offer links, written in TypeScript with Next.JS (React).
 - `web/`: Web client for adminstration, written in TypeScript with Next.JS (React).
+- `landing/`: Landing page to describe what FolderHarbor is and offer links, written in TypeScript with Next.JS (React).
+## Setup
+Each component has its own setup process, documented in its README.
+- [Server Setup](https://github.com/aelithron/folderharbor/blob/main/server/README.md#L3)
+- [CLI Setup](https://github.com/aelithron/folderharbor/blob/main/cli/README.md#L3)
+- [Web Setup](https://github.com/aelithron/folderharbor/blob/main/web/README.md#L3)
+- [Landing Setup](https://github.com/aelithron/folderharbor/blob/main/landing/README.md#L3) (you likely won't need this one!)
