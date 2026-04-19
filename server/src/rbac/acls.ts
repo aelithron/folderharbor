@@ -37,6 +37,7 @@ export async function checkPath(userID: number, checkedPath: string): Promise<bo
   if ("error" in paths) return false;
   let allowed = false;
   const itemPath = path.normalize(checkedPath);
+  if (itemPath === "/") return true;
   if (micromatch.isMatch(itemPath, getConfig()!.globalExclusions, { dot: true }) && !micromatch.isMatch(itemPath, getConfig()!.globalExclusionBypasses, { dot: true })) {
     const type = await getItemType(itemPath);
     let bypassExclusions = false;
