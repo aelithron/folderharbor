@@ -167,7 +167,7 @@ function RoleGrants({ session, role, roleID }: { session: Session, role: Role, r
           {session.permissions.includes("roles:edit") && <div className="flex gap-2 items-center justify-center mt-2">
             {lists.acls ? <select className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.acl} onChange={(e) => setNewGrant({ ...newGrant, acl: e.target.value })}>
               <option></option>
-              {lists.acls.sort((a, b) => a.id - b.id).map((acl) => <option key={acl.id} value={acl.id}>{acl.name} (ID #{acl.id})</option>)}
+              {lists.acls.filter((acl) => acls.find((item) => item === acl.id) === undefined).sort((a, b) => a.id - b.id).map((acl) => <option key={acl.id} value={acl.id}>{acl.name} (ID #{acl.id})</option>)}
             </select>
               : <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.acl} onChange={(e) => setNewGrant({ ...newGrant, acl: e.target.value })} />}
             <button onClick={() => grantItem(parseInt(newGrant.acl), acls, setACLs)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
@@ -185,7 +185,7 @@ function RoleGrants({ session, role, roleID }: { session: Session, role: Role, r
           {session.permissions.includes("roles:edit") && <div className="flex gap-2 items-center justify-center mt-2">
             {lists.permissions ? <select className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.permission} onChange={(e) => setNewGrant({ ...newGrant, permission: e.target.value })}>
               <option></option>
-              {lists.permissions.map((permission) => <option key={permission.id} value={permission.id}>{permission.id}</option>)}
+              {lists.permissions.filter((permission) => permissions.find((item) => item === permission.id) === undefined).map((permission) => <option key={permission.id} value={permission.id}>{permission.id}</option>)}
             </select>
               : <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.permission} onChange={(e) => setNewGrant({ ...newGrant, permission: e.target.value })} />}
             <button onClick={() => grantItem(newGrant.permission, permissions, setPermissions)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
