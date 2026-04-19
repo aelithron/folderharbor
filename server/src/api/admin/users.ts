@@ -81,7 +81,7 @@ router.get("/:userID", async (req, res) => {
     }
   }
   await writeLog(req.session.userID, req.session.username, "users-read", { id: parseInt(req.params.userID), accessLevel }, "read a user");
-  if (accessLevel === "full") return res.json({ access: "full", username: otherUser.username, roles: otherUser.roles, permissions: otherUser.permissions, acls: otherUser.acls, failedLogins: otherUser.failedLogins, locked: otherUser.locked, sessions: (sessions.length > 0 ? sessions : undefined) });
+  if (accessLevel === "full") return res.json({ access: "full", username: otherUser.username, roles: otherUser.roles, permissions: otherUser.permissions, acls: otherUser.acls, failedLogins: otherUser.failedLogins, locked: otherUser.locked, sessions: (sessions.length > 0 ? sessions.filter((session) => session.expiry.getTime() > new Date().getTime()) : undefined) });
   if (accessLevel === "limited") return res.json({ access: "limited", username: otherUser.username, failedLogins: otherUser.failedLogins, locked: otherUser.locked });
 });
 router.patch("/:userID", async (req, res) => {
