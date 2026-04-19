@@ -25,7 +25,7 @@ router.get("/logs", async (req, res) => {
   if ("error" in logs && logs.error === "server") return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   return res.json(logs);
 });
-router.delete("/session/:sessionID", async (req, res) => {
+router.delete("/sessions/:sessionID", async (req, res) => {
   if (!req.session) {
     console.error(`Server Error - Couldn't read session in an auth-enforced route!\nPath: ${req.originalUrl}\nMethod: ${req.method}`);
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });

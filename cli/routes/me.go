@@ -71,10 +71,10 @@ func UpdateOwnInfo(info SelfInfoWrite) {
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
 }
-type ownSessionRevoke struct { SessionID int `json:"sessionID"` }
+type sessionRevoke struct { SessionID int `json:"sessionID"` }
 func RevokeOwnSession(sessionID int) {
 	auth := getAuth()
-	reqBody, _ := json.Marshal(&ownSessionRevoke{ SessionID: sessionID });
+	reqBody, _ := json.Marshal(&sessionRevoke{ SessionID: sessionID });
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/me/session")

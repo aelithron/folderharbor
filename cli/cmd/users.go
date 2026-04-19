@@ -203,6 +203,18 @@ var clearFailedLoginsCMD = &cobra.Command{
 		fmt.Println("Successfully reset user #" + fmt.Sprint(userID) + "'s failed login attempts.")
 	},
 }
+var revokeSessionCMD = &cobra.Command{
+	Use: "revoke-session <id>",
+	Short: "revoke a session",
+	Long: "revoke a session, logging it out",
+	Args: cobra.ExactArgs(1),
+  Run: func(cmd *cobra.Command, args []string) {
+		sessionID, err := strconv.Atoi(args[0])
+		if err != nil { panic (err) }
+		routes.RevokeSession(sessionID)
+		fmt.Println("Successfully revoked session #" + fmt.Sprint(sessionID) + ".")
+	},
+}
 var grantUserCMD = &cobra.Command{
 	Use: "grant <id> <type>",
 	Short: "grant roles/permissions/ACLs",
@@ -298,6 +310,7 @@ func init() {
 	updateUserCMD.AddCommand(changeUsernameCMD)
 	updateUserCMD.AddCommand(changePasswordCMD)
 	updateUserCMD.AddCommand(clearFailedLoginsCMD)
+	updateUserCMD.AddCommand(revokeSessionCMD)
 	usersCMD.AddCommand(grantUserCMD)
 	usersCMD.AddCommand(revokeUserCMD)
 }

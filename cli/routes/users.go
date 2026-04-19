@@ -190,3 +190,23 @@ func DeleteUser(userID int) {
 	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
 	if errBody.Error != "" { handleAPIError(errBody) }
 }
+func RevokeSession(sessionID int) {
+	auth := getAuth()
+	addr, err := url.Parse(auth.Server)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/admin/sessions/" + fmt.Sprint(sessionID))
+	req, err := http.NewRequest(http.MethodDelete, addr.String(), nil)
+	cookie := http.Cookie{ Name: "token", Value: auth.Token, Path: "/" }
+	req.AddCookie(&cookie)
+	req.Header.Add("Content-Type", "application/json")
+	if err != nil { panic (err) }
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil { panic (err) }
+	defer res.Body.Close()
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil { panic (err) }
+	var errBody APIError
+	if err := json.Unmarshal(resBody, &errBody); err != nil { panic (err) }
+	if errBody.Error != "" { handleAPIError(errBody) }
+}
