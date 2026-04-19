@@ -141,8 +141,50 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
   const [acls, setACLs] = useState<number[]>(user.acls);
   const [permissions, setPermissions] = useState<string[]>(user.permissions);
   const [newGrant, setNewGrant] = useState<{ role: string, acl: string, permission: string }>({ role: "", acl: "", permission: "" });
+  const [lists, setLists] = useState<{ roles?: { id: number, name: string }[], acls?: { id: number, name: string }[], permissions?: { id: string, description: string }[] }>({});
+  useEffect(() => {
+    async function loadLists() {
+      if (!session) return;
+      let roles;
+      let acls;
+      if (session.permissions.includes("roles:list")) {
+        roles = await query(session, `admin/roles`);
+        if ("error" in roles) {
+          alert(roles.error);
+          return;
+        }
+        if ("redirect" in roles) {
+          window.location.href = roles.redirect;
+          return;
+        }
+      }
+      if (session.permissions.includes("acls:list")) {
+        acls = await query(session, `admin/acls`);
+        if ("error" in acls) {
+          alert(acls.error);
+          return;
+        }
+        if ("redirect" in acls) {
+          window.location.href = acls.redirect;
+          return;
+        }
+      }
+      const permissions = await query(session, `admin/permissions`);
+      if ("error" in permissions) {
+        alert(permissions.error);
+        return;
+      }
+      if ("redirect" in permissions) {
+        window.location.href = permissions.redirect;
+        return;
+      }
+      setLists({ roles: (roles ? roles.body : undefined), acls: (acls ? acls.body : undefined), permissions: permissions.body });
+    }
+    loadLists();
+  }, [session]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function grantItem(item: any, state: any[], setState: Dispatch<SetStateAction<any[]>>) {
+    if (!item || item === "") return;
     const newState = new Set<unknown>();
     for (const current of state) newState.add(current);
     newState.add(item);
@@ -198,12 +240,16 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
           </li>)}</ul>
           {permissions.length === 0 && <p>None</p>}
           {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
-            <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.permission} onChange={(e) => setNewGrant({ ...newGrant, permission: e.target.value })} />
+            {lists.permissions ? <select className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.permission} onChange={(e) => setNewGrant({ ...newGrant, permission: e.target.value })}>
+              <option></option>
+              {lists.permissions.map((permission) => <option key={permission.id} value={permission.id}>{permission.id}</option>)}
+            </select>
+            : <input className="bg-slate-500 p-1 rounded-lg w-24" value={newGrant.permission} onChange={(e) => setNewGrant({ ...newGrant, permission: e.target.value })} />}
             <button onClick={() => grantItem(newGrant.permission, permissions, setPermissions)} className="bg-violet-500 p-1 rounded-lg"><FontAwesomeIcon icon={faPlus} /></button>
           </div>}
         </div>
       </div>
-      <button onClick={applyChanges} className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit">Save Grants</button>
+      {session.permissions.includes("users:grant") && <button onClick={applyChanges} className="rounded-xl p-1 px-2 bg-violet-500 hover:text-sky-500 w-fit">Save Grants</button>}
     </div>
   );
 }
