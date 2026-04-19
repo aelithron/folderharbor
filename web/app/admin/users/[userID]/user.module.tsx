@@ -207,14 +207,14 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
   return (
     <div className="flex flex-col gap-4 items-center md:col-span-2">
       <h2 className="text-xl font-semibold">Grants</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
         <div className="flex flex-col justify-between">
           <div className="flex flex-col">
             <h1 className="text-lg">Roles</h1>
-            <ul className="list-disc list-inside">{roles.map((role) => <li key={role}>
-              {session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role}`} className="underline hover:text-sky-500">{lists.roles ? `${lists.roles.find((item) => item.id === role)?.name || "Role"} (#${role})` : role}</Link> : (lists.roles ? `${lists.roles.find((item) => item.id === role)?.name || "Role"} (#${role})` : role)}
+            <ul className="list-disc list-inside">{roles.map((role) => <div key={role} className="flex justify-between">
+              <li>{session.permissions.includes("roles:read") ? <Link href={`/admin/roles/${role}`} className="underline hover:text-sky-500">{lists.roles ? `${lists.roles.find((item) => item.id === role)?.name || "Role"} (#${role})` : role}</Link> : (lists.roles ? `${lists.roles.find((item) => item.id === role)?.name || "Role"} (#${role})` : role)}</li>
               {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(role, roles, setRoles)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
-            </li>)}</ul>
+            </div>)}</ul>
             {roles.length === 0 && <p>None</p>}
           </div>
           {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
@@ -229,10 +229,10 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
         <div className="flex flex-col justify-between">
           <div className="flex flex-col">
             <h1 className="text-lg">ACLs</h1>
-            <ul className="list-disc list-inside">{acls.map((acl) => <li key={acl}>
-              {session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl}</Link> : (lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl)}
+            <ul className="list-disc list-inside">{acls.map((acl) => <div key={acl} className="flex justify-between">
+              <li>{session.permissions.includes("acls:read") ? <Link href={`/admin/acl/${acl}`} className="underline hover:text-sky-500">{lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl}</Link> : (lists.acls ? `${lists.acls.find((item) => item.id === acl)?.name || "ACL"} (#${acl})` : acl)}</li>
               {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(acl, acls, setACLs)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
-            </li>)}</ul>
+            </div>)}</ul>
             {acls.length === 0 && <p>None</p>}
           </div>
           {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
@@ -247,10 +247,10 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
         <div className="flex flex-col justify-between">
           <div className="flex flex-col">
             <h1 className="text-lg">Direct Permissions</h1>
-            <ul className="list-disc list-inside">{permissions.map((permission) => <li key={permission}>
-              {permission}
+            <ul className="list-disc list-inside">{permissions.map((permission) => <div key={permission} className="flex justify-between">
+              <li>{permission}</li>
               {session.permissions.includes("users:grant") && <button onClick={() => revokeItem(permission, permissions, setPermissions)} className="ml-1 hover:text-sky-500"><FontAwesomeIcon icon={faTrash} /></button>}
-            </li>)}</ul>
+            </div>)}</ul>
             {permissions.length === 0 && <p>None</p>}
           </div>
           {session.permissions.includes("users:grant") && <div className="flex gap-2 items-center justify-center mt-2">
