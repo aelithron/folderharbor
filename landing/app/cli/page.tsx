@@ -19,12 +19,13 @@ export default async function Page() {
         <div className="flex justify-center"><Image src={cliPhoto} alt="A stylized screenshot of the FolderHarbor CLI." loading="eager" className="rounded-xl" /></div>
       </div>
       <div className="flex flex-col gap-2 mt-4 text-center items-center">
-        <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Features</h2>
+        <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Highlights</h2>
         <ul className="list-disc text-start">
           <li>Easy-to-use syntax with help menus</li>
           <li>Information-dense outputs</li>
           <li>Speed (the CLI is built to work fast!)</li>
-          <li>Designed for <Link href={"/server"} className="underline hover:text-sky-500">FolderHarbor Server</Link></li>
+          <li>Designed for the <Link href={"/server"} className="underline hover:text-sky-500">FolderHarbor Server</Link></li>
+          <li>Fully <a href="https://github.com/aelithron/folderharbor" className="underline hover:text-sky-500">free and open source</a> under the MIT license</li>
         </ul>
       </div>
     </main>
