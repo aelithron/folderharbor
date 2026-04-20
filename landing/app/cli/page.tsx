@@ -1,4 +1,4 @@
-import { faTerminal, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faTerminal, faDownload, faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import { headers } from "next/headers";
@@ -40,57 +40,58 @@ async function DownloadCLI() {
       os = "other";
     } else os = "linux";
   } else os = "other";
-  const base = `https://github.com/aelithron/folderharbor/releases/download/cli/${version.tag}/folderharbor-cli-${version.tag}`;
+  const base = `https://github.com/aelithron/folderharbor/releases/download/cli/${version.tag}/folderharbor-cli`;
   return (
-    <div className="flex flex-col gap-2 bg-slate-700 p-3 rounded-xl mt-4">
+    <div className="flex flex-col gap-2 bg-slate-700 p-3 rounded-xl my-4">
       <h1 className="text-lg font-semibold">Download {version.name}</h1>
       {os === "macOS" && <div>
         <div className="grid grid-cols-2 gap-2">
-          <a href={`${base}-macos-arm64`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Apple Silicon</a>
-          <a href={`${base}-macos-amd64`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Intel Macs</a>
+          <a href={`${base}-${version.tag}-macos-arm64`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Apple Silicon</a>
+          <a href={`${base}-${version.tag}-macos-amd64`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Intel Macs</a>
         </div>
-        <div className="flex gap-2 mt-2 items-center">
-          <p>Or, download for:</p>
-          <a href={`${base}-linux-amd64`} target="_blank" className="hover:text-sky-500">Linux x86_64</a>
-          |
-          <a href={`${base}-linux-arm64`} target="_blank" className="hover:text-sky-500">Linux ARM64</a>
-          |
-          <a href={`${base}-windows-amd64.exe`} target="_blank" className="hover:text-sky-500">Windows</a>
+        <div className="flex flex-col gap-2 mt-2 text-start">
+          <p className="text-center">Or, download for:</p>
+          <a href={`${base}-${version.tag}-linux-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux x86_64</a>
+          <a href={`${base}-${version.tag}-linux-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux ARM64</a>
+          <a href={`${base}-${version.tag}-windows-amd64.exe`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Windows</a>
+          <a href={`https://github.com/aelithron/folderharbor/releases/cli%2F${version.tag}`} target="_blank" className="hover:text-sky-500 mt-2"><FontAwesomeIcon icon={faUpRightFromSquare} /> GitHub Release</a>
         </div>
       </div>}
       {os === "windows" && <div>
-        <a href={`${base}-windows-amd64.exe`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Windows</a>
-        <div className="flex gap-2 mt-2 items-center">
-          <p>Or, download for:</p>
-          <a href={`${base}-macos-arm64`} target="_blank" className="hover:text-sky-500">Apple Silicon Macs</a>
-          |
-          <a href={`${base}-macos-amd64`} target="_blank" className="hover:text-sky-500">Intel Macs</a>
-          |
-          <a href={`${base}-linux-amd64`} target="_blank" className="hover:text-sky-500">Linux x86_64</a>
-          |
-          <a href={`${base}-linux-arm64`} target="_blank" className="hover:text-sky-500">Linux ARM64</a>
+        <a href={`${base}-${version.tag}-windows-amd64.exe`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Windows</a>
+        <div className="flex flex-col gap-2 mt-2 text-start">
+          <p className="text-center">Or, download for:</p>
+          <a href={`${base}-${version.tag}-macos-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Apple Silicon Macs</a>
+          <a href={`${base}-${version.tag}-macos-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Intel Macs</a>
+          <a href={`${base}-${version.tag}-linux-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux x86_64</a>
+          <a href={`${base}-${version.tag}-linux-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux ARM64</a>
+          <a href={`https://github.com/aelithron/folderharbor/releases/cli%2F${version.tag}`} target="_blank" className="hover:text-sky-500 mt-2"><FontAwesomeIcon icon={faUpRightFromSquare} /> GitHub Release</a>
         </div>
       </div>}
       {os === "linux" && <div>
         <div className="grid grid-cols-2 gap-2">
-          <a href={`${base}-linux-amd64`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux x86_64</a>
-          <a href={`${base}-linux-arm64`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux ARM64</a>
+          <a href={`${base}_${version.tag.slice(1).replaceAll("-", ".")}_amd64.deb`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> .deb x86_64</a>
+          <a href={`${base}_${version.tag.slice(1).replaceAll("-", ".")}_arm64.deb`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> .deb ARM64</a>
+          <a href={`${base}-${version.tag.slice(1).replaceAll("-", ".")}-1.x86_64.rpm`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> .rpm x86_64</a>
+          <a href={`${base}-${version.tag.slice(1).replaceAll("-", ".")}-1.aarch64.rpm`} target="_blank" className="bg-violet-500 p-1 px-2 rounded-xl hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> .rpm ARM64</a>
+          <a href={`${base}-${version.tag}-linux-amd64`} target="_blank" className=" hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux x86_64</a>
+          <a href={`${base}-${version.tag}-linux-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux ARM64</a>
         </div>
-        <div className="flex gap-2 mt-2 items-center">
-          <p>Or, download for:</p>
-          <a href={`${base}-macos-arm64`} target="_blank" className="hover:text-sky-500">Apple Silicon Macs</a>
-          |
-          <a href={`${base}-macos-amd64`} target="_blank" className="hover:text-sky-500">Intel Macs</a>
-          |
-          <a href={`${base}-windows-amd64.exe`} target="_blank" className="hover:text-sky-500">Windows</a>
+        <div className="flex flex-col gap-2 mt-2 text-start">
+          <p className="text-center">Or, download for:</p>
+          <a href={`${base}-${version.tag}-macos-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Apple Silicon Macs</a>
+          <a href={`${base}-${version.tag}-macos-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Intel Macs</a>
+          <a href={`${base}-${version.tag}-windows-amd64.exe`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Windows</a>
+          <a href={`https://github.com/aelithron/folderharbor/releases/cli%2F${version.tag}`} target="_blank" className="hover:text-sky-500 mt-2"><FontAwesomeIcon icon={faUpRightFromSquare} /> GitHub Release</a>
         </div>
       </div>}
       {os === "other" && <div className="flex flex-col gap-2 mt-2 text-start">
-        <a href={`${base}-macos-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Apple Silicon Macs</a>
-        <a href={`${base}-macos-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Intel Macs</a>
-        <a href={`${base}-linux-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux x86_64</a>
-        <a href={`${base}-linux-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux ARM64</a>
-        <a href={`${base}-windows-amd64.exe`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Windows</a>
+        <a href={`${base}-${version.tag}-macos-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Apple Silicon Macs</a>
+        <a href={`${base}-${version.tag}-macos-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Intel Macs</a>
+        <a href={`${base}-${version.tag}-linux-amd64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux x86_64</a>
+        <a href={`${base}-${version.tag}-linux-arm64`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Linux ARM64</a>
+        <a href={`${base}-${version.tag}-windows-amd64.exe`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Windows</a>
+        <a href={`https://github.com/aelithron/folderharbor/releases/cli%2F${version.tag}`} target="_blank" className="hover:text-sky-500 mt-2"><FontAwesomeIcon icon={faUpRightFromSquare} /> GitHub Release</a>
       </div>}
     </div>
   )
