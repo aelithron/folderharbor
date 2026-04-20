@@ -1,13 +1,13 @@
-import { faTerminal, faDownload, faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { faTerminal, faDownload, faUpRightFromSquare, faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import { headers } from "next/headers";
 import Image from "next/image";
 import cliPhoto from "@/public/shots/cli.webp";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "CLI" }
 export default async function Page() {
-
   return (
     <main className="flex flex-col min-h-screen p-8 md:px-16">
       <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-2">
@@ -17,6 +17,15 @@ export default async function Page() {
           <DownloadCLI />
         </div>
         <div className="flex justify-center"><Image src={cliPhoto} alt="A stylized screenshot of the FolderHarbor CLI." loading="eager" className="rounded-xl" /></div>
+      </div>
+      <div className="flex flex-col gap-2 mt-4 text-center items-center">
+        <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Features</h2>
+        <ul className="list-disc text-start">
+          <li>Easy-to-use syntax with help menus</li>
+          <li>Information-dense outputs</li>
+          <li>Speed (the CLI is built to work fast!)</li>
+          <li>Designed for <Link href={"/server"} className="underline hover:text-sky-500">FolderHarbor Server</Link></li>
+        </ul>
       </div>
     </main>
   );

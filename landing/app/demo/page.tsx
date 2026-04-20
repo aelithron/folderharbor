@@ -47,16 +47,16 @@ export default function Page() {
           <h1 className="text-2xl font-semibold justify-center text-center"><FontAwesomeIcon icon={faTerminal} /> CLI</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="md:col-span-2">
-              <p>FolderHarbor has a powerful CLI! You can download it from <Link href={"/cli"} target="_blank" className="underline hover:text-sky-500">this page</Link>. Download and install the CLI for your computer platform.</p>
-              <p>Then, run the &quot;folderharbor auth login&quot; command in your terminal. This will ask for a server address, enter &quot;https://demo.fh.novatea.dev&quot;. From there, enter your username and password from when you registered.</p>
-              <p>Once authenticated, run &quot;folderharbor --help&quot;. You can then test any of the functions it lists by following the instructions for the command!</p>
+              <p>FolderHarbor has a powerful CLI! You can download it from <Link href={"/cli"} target="_blank" className="underline hover:text-sky-500">this page</Link>.</p>
+              <p>Once you have downloaded and installed it, run the &quot;folderharbor auth login&quot; command in your terminal. This will ask for a server address, enter &quot;https://demo.fh.novatea.dev&quot;. From there, enter your username and password from when you registered.</p>
+              <p>Once authenticated, run &quot;folderharbor --help&quot;. You can then test any of the functions it lists by following the instructions for the command! I suggest starting with &quot;folderharbor account get&quot;.</p>
             </div>
           </div>
         </div>
         <div className="flex flex-col gap-2 mt-4">
           <h1 className="text-2xl font-semibold justify-center text-center"><FontAwesomeIcon icon={faStar} /> Done!</h1>
           <p>Thanks for trying out FolderHarbor! This project has taken over 3 months to complete, with over 100 hours of coding time. I&apos;m truly grateful that you&apos;ve taken the time to look at FolderHarbor. ~Nova</p>
-          <p>If you want to run your own FolderHarbor server, check out the <Link href={"/server"} target="_blank" className="underline hover:text-sky-500">page for FolderHarbor Server</Link> for self-hosting instructions! You can also self-host the <Link href={"/server"} target="_blank" className="underline hover:text-sky-500">FolderHarbor web panel</Link> if you would rather not use my hosted one.</p>
+          <p>If you want to run your own FolderHarbor server, check out the <Link href={"/server"} target="_blank" className="underline hover:text-sky-500">page for FolderHarbor Server</Link> for self-hosting instructions! You can also self-host the <Link href={"/web"} target="_blank" className="underline hover:text-sky-500">FolderHarbor web panel</Link> if you would rather not use my hosted one.</p>
         </div>
       </div>
     </main>
