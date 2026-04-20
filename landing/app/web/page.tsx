@@ -1,7 +1,7 @@
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
-import webPhoto from "@/public/shots/web.webp"
+import webPhoto from "@/public/shots/web.webp";
 import Image from "next/image";
 
 export const metadata: Metadata = { title: "Web" }
