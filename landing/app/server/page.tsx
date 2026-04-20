@@ -6,7 +6,13 @@ import serverPhoto from "@/public/shots/server.webp";
 import Link from "next/link";
 
 export const metadata: Metadata = { title: "Server" }
-export default function Page() {
+export default async function Page() {
+  let version;
+  try {
+    const res = await fetch("https://api.github.com/repos/aelithron/folderharbor/releases", { headers: { "User-Agent": "Aelithron-FolderHarbor-LandingPage", "Authorization": `Bearer ${process.env.GITHUB_PAT!}` } });
+    const tag = (await res.json() as { tag_name: string, name: string }[]).find((item) => item.tag_name.startsWith("server/"));
+    if (tag) version = { name: tag.name, tag: tag.tag_name.split("/")[1] }
+  } catch {}
   return (
     <main className="flex flex-col min-h-screen p-8 md:px-16">
       <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-2">
@@ -14,7 +20,7 @@ export default function Page() {
           <h1 className="text-4xl font-semibold"><FontAwesomeIcon icon={faServer} /> FolderHarbor Server</h1>
           <p className="text-lg">The fully-featured server at the core of FolderHarbor.</p>
           <div className="flex flex-col gap-2 bg-slate-700 p-3 rounded-xl my-4">
-            <h1 className="text-lg font-semibold">Download Server</h1>
+            <h1 className="text-lg font-semibold">Download {version ? version.name : "Server"}</h1>
             <p>coming soon :3</p>
           </div>
         </div>

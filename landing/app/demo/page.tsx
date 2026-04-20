@@ -24,7 +24,7 @@ export default function Page() {
         <h1 className="text-2xl font-semibold justify-center text-center"><FontAwesomeIcon icon={faGlobe} /> Web Panel</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2 space-y-2">
-            <p>Go to <a href="https://panel.fh.novatea.dev/auth" className="underline hover:text-sky-500" target="_blank">the public web panel</a>. Select the default server, &quot;https://demo.fh.novatea.dev&quot;. Type any username of your choice, and enter a password (make sure to keep track of these). Then, click Register. You will be sent to the home page, welcome to FolderHarbor!</p>
+            <p>Go to <a href="https://panel.fh.novatea.dev/auth" className="underline hover:text-sky-500" target="_blank">the public web panel</a>. Select the default server, <code>&quot;https://demo.fh.novatea.dev&quot;</code>. Type any username of your choice, and enter a password (make sure to keep track of these). Then, click Register. You will be sent to the home page, welcome to FolderHarbor!</p>
             <p>In this demo server, you have nearly full administrator permissions. You can click the Admin button on the top bar to use and explore the administrator dashboard. Feel free to edit your own account, but please don&apos;t mess with other people&apos;s accounts!</p>
           </div>
         </div>
@@ -35,9 +35,9 @@ export default function Page() {
               <p>On the web panel&apos;s home page, there are instructions on how to connect with WebDAV and FTP. Pick one (or both) and follow the instructions. If you want to use token-based login, click on your token.</p>
               <p>My recommendations on how to connect are below:</p>
               <ul className="list-disc ml-4">
-                <li>macOS: Open Finder and click Go in the toolbar. Then, select &quot;Connect to Server...&quot; and enter the WebDAV/FTP server address from the web panel. Enter your username and password, or put the token from the web panel into the password box. NOTE: FTP is read-only in Finder, this is a macOS limitation. Use WebDAV instead for write access!</li>
-                <li>Linux: Open your DE&apos;s file manager (GNOME Files, Dolphin, and Nemo all support this, and likely others). Go to the Network tab and enter the WebDAV/FTP server address from the web panel. Enter your username and password, or put the token from the web panel into the password box (make sure it starts with &quot;token_&quot;).</li>
-                <li>Windows: Open the File Explorer. Go to &quot;This PC&quot; and click on the 3 dots {"->"} &quot;Add a network location&quot;. Click Next twice, then enter the WebDAV/FTP server address from the web panel into the box. Click Next, then un-check &quot;Log on anonymously&quot; and enter your username. Click Next twice more, then Finish. Finally, enter your password (or put the token from the web panel into the password box, making sure it starts with &quot;token_&quot;). NOTE: You may have better performance and luck with FTP than WebDAV on Windows, though both should work.</li>
+                <li>macOS: Open Finder and click Go in the toolbar. Then, select &quot;Connect to Server...&quot; and enter the WebDAV/FTP server address from the web panel. Enter your username and password, or put the token from the web panel into the password box (making sure it starts with &quot;<code>token_</code>&quot;). NOTE: FTP is read-only in Finder, this is a macOS limitation. Use WebDAV instead for write access!</li>
+                <li>Linux: Open your file manager (GNOME Files, Dolphin, and Nemo all support this, and likely others). Go to the Network tab and enter the WebDAV/FTP server address from the web panel. Enter your username and password, or put the token from the web panel into the password box (make sure it starts with &quot;<code>token_</code>&quot;).</li>
+                <li>Windows: Open the File Explorer. Go to &quot;This PC&quot; and click on the 3 dots {"->"} &quot;Add a network location&quot;. Click Next twice, then enter the WebDAV/FTP server address from the web panel into the box. Click Next, then un-check &quot;Log on anonymously&quot; and enter your username. Click Next twice more, then Finish. Finally, enter your password (or put the token from the web panel into the password box, making sure it starts with &quot;<code>token_</code>&quot;). NOTE: You may have better performance and luck with FTP than WebDAV on Windows, though both should work.</li>
               </ul>
               <p className="mt-2">From here, feel free to explore the files on the server a bit! If you want, you can also give your user account the &quot;Everything&quot; (ID #1) ACL, which will give you a few extra files :3</p>
             </div>
@@ -48,14 +48,14 @@ export default function Page() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="md:col-span-2">
               <p>FolderHarbor has a powerful CLI! You can download it from <Link href={"/cli"} target="_blank" className="underline hover:text-sky-500">this page</Link>.</p>
-              <p>Once you have downloaded and installed it, run the &quot;folderharbor auth login&quot; command in your terminal. This will ask for a server address, enter &quot;https://demo.fh.novatea.dev&quot;. From there, enter your username and password from when you registered.</p>
-              <p>Once authenticated, run &quot;folderharbor --help&quot;. You can then test any of the functions it lists by following the instructions for the command! I suggest starting with &quot;folderharbor account get&quot;.</p>
+              <p>Once you have downloaded and installed it, run the <code>folderharbor auth login</code> command in your terminal. This will ask for a server address, enter <code>&quot;https://demo.fh.novatea.dev&quot;</code>. From there, enter your username and password from when you registered.</p>
+              <p>Once authenticated, run <code>folderharbor --help</code>. You can then test any of the functions it lists by following the instructions for the command! I suggest starting with <code>folderharbor account get</code>.</p>
             </div>
           </div>
         </div>
         <div className="flex flex-col gap-2 mt-4">
           <h1 className="text-2xl font-semibold justify-center text-center"><FontAwesomeIcon icon={faStar} /> Done!</h1>
-          <p>Thanks for trying out FolderHarbor! This project has taken over 3 months to complete, with over 100 hours of coding time. I&apos;m truly grateful that you&apos;ve taken the time to look at FolderHarbor. ~Nova</p>
+          <p>Thanks for trying out FolderHarbor! This project has taken over 3 months to complete, with over 100 hours of coding time. I&apos;m truly grateful that you&apos;ve taken the time to look at what I made. ~Nova</p>
           <p>If you want to run your own FolderHarbor server, check out the <Link href={"/server"} target="_blank" className="underline hover:text-sky-500">page for FolderHarbor Server</Link> for self-hosting instructions! You can also self-host the <Link href={"/web"} target="_blank" className="underline hover:text-sky-500">FolderHarbor web panel</Link> if you would rather not use my hosted one.</p>
         </div>
       </div>
