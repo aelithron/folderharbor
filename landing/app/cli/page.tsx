@@ -16,7 +16,7 @@ export default async function Page() {
           <p className="text-lg">A powerful CLI to interact with FolderHarbor servers.</p>
           <DownloadCLI />
         </div>
-        <div className="flex justify-center md:col-span-2"><Image src={cliPhoto} alt="A stylized screenshot of the FolderHarbor web panel." loading="eager" className="rounded-xl md:w-3/4" /></div>
+        <div className="flex justify-center md:col-span-2"><Image src={cliPhoto} alt="A stylized screenshot of the FolderHarbor CLI." loading="eager" className="rounded-xl md:w-3/4" /></div>
       </div>
     </main>
   );
