@@ -15,9 +15,8 @@ router.get("/", async (req, res) => {
     console.error("Server Error - Config not loaded, but requested on the API.");
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
-  config.database = "[redacted]";
   await writeLog(req.session.userID, req.session.username, "config-read", null, "read the config");
-  return res.json(config);
+  return res.json({ ...config, database: "[redacted]" });
 });
 router.patch("/", async (req, res) => {
   if (!req.session) {
