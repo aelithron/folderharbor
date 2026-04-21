@@ -1,4 +1,4 @@
-import { v2 as webdav } from "webdav-server";
+import { ResourceType, v2 as webdav, type ReturnCallback } from "webdav-server";
 import { FolderHarborFileSystem, FolderHarborPrivilegeManager, FolderHarborUserManager } from "./managers.js";
 import { writeLog, type AuditAction } from "../../utils/auditlog.js";
 import { getConfig } from "../../index.js";
@@ -11,8 +11,6 @@ export default async function startWebDAV(port: number, sslKey?: string, sslCert
   }
   await server.setFileSystemAsync("/", new FolderHarborFileSystem("/"));
   server.start(() => console.log(`WebDAV server running (port ${port})`));
-  let action: AuditAction | undefined;
-  let blurb: string;
   server.beforeRequest((arg, next) => {
     if (getConfig()!.filterMetadata) {
       const fileName = arg.fullUri().split('/').pop();
@@ -20,29 +18,42 @@ export default async function startWebDAV(port: number, sslKey?: string, sslCert
         arg.response.statusCode = 200;
         return arg.response.end();
       }
-    } 
+    }
     return next();
   });
-  server.afterRequest((arg, next) => {
+  server.afterRequest(async (arg, next) => {
+    let action: AuditAction | undefined;
+    let blurb: string | undefined;
     const fileName = arg.fullUri().split('/').pop();
     if (fileName && (fileName.startsWith("._") || fileName === ".DS_Store" || fileName === "desktop.ini" || fileName === "thumbs.db")) return next();
     if (arg.response.statusCode >= 400) return next();
     switch (arg.request.method?.toUpperCase()) {
-      case "GET":
-        server.getResource(arg, decodeURIComponent(new URL(arg.fullUri()).pathname), (err, res) => {
-          if (err || !res) {
+      case "GET": {
+        try {
+          const resource = await (new Promise((resolve, reject) => {
+            server.getResource(arg, decodeURIComponent(new URL(arg.fullUri()).pathname), (err, res) => {
+              if (err) { reject(err); }
+              resolve(res);
+            });
+          }));
+          const type = await (new Promise((resolve, reject) => {
+            (resource as { type(callback: ReturnCallback<ResourceType>): void }).type((err, res) => {
+              if (err) { reject(err); }
+              resolve(res);
+            });
+          }));
+          if (!type || !(type as ResourceType).isDirectory) {
             action = "files-read";
             blurb = "read a file";
-          } else {
-            res.type((err, type) => {
-              if (err || !type || !type.isDirectory) {
-                action = "files-read";
-                blurb = "read a file";
-              }
-            });
+            break;
           }
-        });
+        } catch {
+          action = "files-read";
+          blurb = "read a file";
+          break;
+        }
         break;
+      }
       case "PUT":
         action = `files-${arg.response.statusCode === 201 ? "create" : "edit"}`;
         blurb = `${arg.response.statusCode === 201 ? "created" : "edited"} a file`;
@@ -60,7 +71,7 @@ export default async function startWebDAV(port: number, sslKey?: string, sslCert
         blurb = "moved a file";
         break;
     }
-    if (action) writeLog(parseInt(arg.user.uid), arg.user.username, action, { protocol: "webdav", filePath: decodeURIComponent(new URL(arg.fullUri()).pathname), oldFilePath: (arg.request.headers["destination"] ? decodeURIComponent(new URL(arg.request.headers["destination"].toString(), arg.prefixUri()).pathname) : undefined) }, blurb);
+    if (action) await writeLog(parseInt(arg.user.uid), arg.user.username, action, { protocol: "webdav", filePath: decodeURIComponent(new URL(arg.fullUri()).pathname), oldFilePath: (arg.request.headers["destination"] ? decodeURIComponent(new URL(arg.request.headers["destination"].toString(), arg.prefixUri()).pathname) : undefined) }, blurb);
     return next();
   });
   return server;
