@@ -229,7 +229,7 @@ var revokeSessionCMD = &cobra.Command{
   Run: func(cmd *cobra.Command, args []string) {
 		sessionID, err := strconv.Atoi(args[0])
 		if err != nil {
-			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			fmt.Println("Error: This session ID (" + args[0] + ") is not a number!")
 			os.Exit(1)
 		}
 		routes.RevokeSession(sessionID)
