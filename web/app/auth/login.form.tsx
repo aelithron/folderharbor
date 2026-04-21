@@ -70,6 +70,10 @@ export default function LoginForm() {
         const res = await fetch(url.toString());
         body = await res.json();
       } catch (err) {
+        if (err instanceof TypeError && err.message.includes("Failed to fetch") && window.navigator.onLine) {
+          alert(`Error: This server isn't properly configured for this web panel!\nPlease ask your administrator to add "${window.location.origin}" to the "allowedOrigins" list in the server config.`);
+          return;
+        }
         alert(`Error checking your server: ${err}`);
         return;
       }
@@ -123,10 +127,10 @@ export default function LoginForm() {
           <input id="password" type="password" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl w-fit" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         <button type="submit" className="rounded-xl p-1 px-2 mt-3 bg-violet-500 hover:text-sky-500 w-fit">Sign In</button>
-        <div className="flex flex-col items-center justify-center mt-3">
+        {clientConfig?.registration && <div className="flex flex-col items-center justify-center mt-3">
           <p className="text-lg">Or, instead:</p>
-          {clientConfig?.registration && <button type="button" onClick={register} className="rounded-xl p-1 px-2 mt-1 bg-slate-500 hover:text-sky-500 w-fit">Register</button>}
-        </div>
+          <button type="button" onClick={register} className="rounded-xl p-1 px-2 mt-1 bg-slate-500 hover:text-sky-500 w-fit">Register</button>
+        </div>}
       </form>}
     </div>
   );
