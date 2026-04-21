@@ -60,5 +60,10 @@
     "prompt-sync": "^4.2.0",
     "webdav-server": "^2.6.2",
     "zod": "^4.3.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@esbuild-kit/core-utils>esbuild": "^0.25.0"
+    }
   }
 }
