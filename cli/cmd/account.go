@@ -120,7 +120,10 @@ var revokeOwnSessionCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		sessionID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This session ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		routes.RevokeOwnSession(sessionID)
     fmt.Printf("Successfully revoked session %s.\n", fmt.Sprint(sessionID))
 	},

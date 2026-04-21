@@ -36,7 +36,10 @@ var getRoleCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		roleID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This role ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		info := routes.GetRole(roleID)
 		fmt.Println("Information for role " + info.Name + " (ID " + fmt.Sprint(roleID) + ")")
 		fmt.Println("----------------------------")
@@ -76,7 +79,10 @@ var deleteRoleCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		roleID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This role ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		routes.DeleteRole(roleID)
 		fmt.Println("Successfully deleted the role (ID: #" + fmt.Sprint(roleID) + ").")
 	},
@@ -93,7 +99,10 @@ var changeRoleNameCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		roleID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This role ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter the role's new name: ")
 		name, _ := reader.ReadString('\n')
@@ -107,8 +116,11 @@ var grantRoleCMD = &cobra.Command{
 	Long: "grant ACLs/permissions to a role",
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		roleID, err := strconv.Atoi(args[0])
+		if err != nil {
+			fmt.Println("Error: This role ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		var itemInfo string
 		var body []routes.Grant
 		reader := bufio.NewReader(os.Stdin)
@@ -132,7 +144,7 @@ var grantRoleCMD = &cobra.Command{
 				os.Exit(1)
 			}
 		}
-		routes.GrantRole(userID, body)
+		routes.GrantRole(roleID, body)
 		fmt.Println("Successfully granted " + itemInfo + " to the role!")
 	},
 }
@@ -142,8 +154,11 @@ var revokeRoleCMD = &cobra.Command{
 	Long: "revoke ACLs/permissions from a role",
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		roleID, err := strconv.Atoi(args[0])
+		if err != nil {
+			fmt.Println("Error: This role ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		var itemInfo string
 		var body []routes.Grant
 		reader := bufio.NewReader(os.Stdin)
@@ -167,7 +182,7 @@ var revokeRoleCMD = &cobra.Command{
 				os.Exit(1)
 			}
 		}
-		routes.GrantRole(userID, body)
+		routes.GrantRole(roleID, body)
 		fmt.Println("Successfully revoked " + itemInfo + " from the role!")
 	},
 }

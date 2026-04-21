@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"folderharbor-cli/routes"
+	"os"
 	"strconv"
 	"time"
 
@@ -25,7 +26,10 @@ var readLogsCMD = &cobra.Command{
 		var page = 1
 		if len(args) == 1 {
 			pageArg, err := strconv.Atoi(args[0])
-			if err != nil { panic (err) }
+			if err != nil {
+				fmt.Println("Error: This page number (" + args[0] + ") is not a number!")
+				os.Exit(1)
+			}
 			page = pageArg
 		}
 		var logs routes.AuditLog

@@ -39,7 +39,10 @@ var getUserCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		info := routes.GetUser(userID)
 		slices.SortFunc(info.Sessions, func(a, b routes.Session) int { return cmp.Compare(a.ID, b.ID) })
 		fmt.Println("Information for " + info.Username + " (ID " + fmt.Sprint(userID) + ")")
@@ -124,7 +127,10 @@ var deleteUserCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		routes.DeleteUser(userID)
 		fmt.Println("Successfully deleted the user (ID: #" + fmt.Sprint(userID) + ").")
 	},
@@ -141,7 +147,10 @@ var lockUserCMD = &cobra.Command{
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		var locked = true;
 		if len(args) == 2 {
 			switch args[1] {
@@ -169,7 +178,10 @@ var changeUsernameCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter the user's new username: ")
 		username, _ := reader.ReadString('\n')
@@ -184,7 +196,10 @@ var changePasswordCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		fmt.Print("Enter the user's new password: ")
 		password, err := term.ReadPassword(int(os.Stdin.Fd()))
 		routes.UpdateUser(userID, routes.UserInfoWrite{ Password: string(password) })
@@ -198,7 +213,10 @@ var clearFailedLoginsCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		routes.UpdateUser(userID, routes.UserInfoWrite{ ClearLoginAttempts: true })
 		fmt.Println("Successfully reset user #" + fmt.Sprint(userID) + "'s failed login attempts.")
 	},
@@ -210,7 +228,10 @@ var revokeSessionCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		sessionID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		routes.RevokeSession(sessionID)
 		fmt.Println("Successfully revoked session #" + fmt.Sprint(sessionID) + ".")
 	},
@@ -222,7 +243,10 @@ var grantUserCMD = &cobra.Command{
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		var itemInfo string
 		var body []routes.Grant
 		reader := bufio.NewReader(os.Stdin)
@@ -264,7 +288,10 @@ var revokeUserCMD = &cobra.Command{
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This user ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		var itemInfo string
 		var body []routes.Grant
 		reader := bufio.NewReader(os.Stdin)

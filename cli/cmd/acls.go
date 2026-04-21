@@ -36,7 +36,10 @@ var getACLCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		aclID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This ACL ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		info := routes.GetACL(aclID)
 		fmt.Println("Information for ACL " + info.Name + " (ID " + fmt.Sprint(aclID) + ")")
 		fmt.Println("----------------------------")
@@ -77,7 +80,10 @@ var deleteACLCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		aclID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This ACL ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		routes.DeleteACL(aclID)
 		fmt.Println("Successfully deleted the ACL (ID: #" + fmt.Sprint(aclID) + ").")
 	},
@@ -94,7 +100,10 @@ var changeACLNameCMD = &cobra.Command{
 	Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
 		aclID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		if err != nil {
+			fmt.Println("Error: This ACL ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter the ACL's new name: ")
 		name, _ := reader.ReadString('\n')
@@ -108,8 +117,11 @@ var addPathCMD = &cobra.Command{
 	Long: "add a glob pattern to an ACL",
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		aclID, err := strconv.Atoi(args[0])
+		if err != nil {
+			fmt.Println("Error: This ACL ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		var itemInfo string
 		var body []routes.ACLPath
 		reader := bufio.NewReader(os.Stdin)
@@ -133,7 +145,7 @@ var addPathCMD = &cobra.Command{
 				os.Exit(1)
 			}
 		}
-		routes.UpdateACLPath(userID, body)
+		routes.UpdateACLPath(aclID, body)
 		fmt.Println("Successfully added the " + itemInfo + " to the ACL!")
 	},
 }
@@ -143,8 +155,11 @@ var removePathCMD = &cobra.Command{
 	Long: "remove a glob pattern from an ACL",
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		userID, err := strconv.Atoi(args[0])
-		if err != nil { panic (err) }
+		aclID, err := strconv.Atoi(args[0])
+		if err != nil {
+			fmt.Println("Error: This ACL ID (" + args[0] + ") is not a number!")
+			os.Exit(1)
+		}
 		var itemInfo string
 		var body []routes.ACLPath
 		reader := bufio.NewReader(os.Stdin)
@@ -168,7 +183,7 @@ var removePathCMD = &cobra.Command{
 				os.Exit(1)
 			}
 		}
-		routes.UpdateACLPath(userID, body)
+		routes.UpdateACLPath(aclID, body)
 		fmt.Println("Successfully removed the " + itemInfo + " from the ACL!")
 	},
 }
