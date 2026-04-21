@@ -58,6 +58,7 @@ router.patch("/", async (req, res) => {
   if (Object.keys(req.body).length === 0) return res.json({ success: true, message: "No data provided to change." });
   if (req.body.username && !getConfig()?.selfUsernameChanges) return res.status(400).json({ error: "username_change", message: "Changing your own username is disabled, please ask your administrator to change it instead." });
   if (req.body.password) {
+    if ((req.body.password as string).startsWith("token_")) return res.status(400).json({ error: "password", message: `The password can't start with "token_"! Please choose another.` });
     const sessions = await getUserSessions(req.session.userID);
     if ("error" in sessions) {
       switch (sessions.error) {

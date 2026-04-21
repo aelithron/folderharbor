@@ -47,6 +47,7 @@ router.post("/register", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (!req.body.username || (req.body.username as string).length < 1) return res.status(400).json({ error: "username", message: "Your request doesn't include a username." });
   if (!req.body.password || (req.body.password as string).length < 1) return res.status(400).json({ error: "password", message: "Your request doesn't include a password." });
+  if ((req.body.password as string).startsWith("token_")) return res.status(400).json({ error: "password", message: `The password can't start with "token_"! Please choose another.` });
   const newUser = await createUser(req.body.username, req.body.password, { roles: (getConfig()?.registration.defaultRole ? [getConfig()!.registration.defaultRole!] : []) });
     if ("error" in newUser) {
     switch (newUser.error) {

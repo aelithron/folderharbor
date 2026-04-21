@@ -32,6 +32,7 @@ router.post("/", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "request_body", message: "Your request's body is empty or invalid." });
   if (!req.body.username || (req.body.username as string).length < 1) return res.status(400).json({ error: "username", message: 'No username ("username" parameter) provided.' });
   if (!req.body.password || (req.body.password as string).length < 1) return res.status(400).json({ error: "password", message: 'No password ("password" parameter) provided.' });
+  if ((req.body.password as string).startsWith("token_")) return res.status(400).json({ error: "password", message: `The password can't start with "token_"! Please choose another.` });
   const newUser = await createUser(req.body.username, req.body.password, {});
   if ("error" in newUser) {
     switch (newUser.error) {
@@ -94,6 +95,7 @@ router.patch("/:userID", async (req, res) => {
   let updateParams: Partial<{ username: string, password: string, clearLoginAttempts: boolean }> = {};
   updateParams = { username: req.body.username, password: req.body.password, clearLoginAttempts: req.body.clearLoginAttempts };
   if (Object.values(updateParams).filter((value) => value !== undefined).length === 0) return res.json({ success: true, message: "Nothing to update." });
+  if (updateParams && updateParams.password && updateParams.password.startsWith("token_")) return res.status(400).json({ error: "password", message: `The password can't start with "token_"! Please choose another.` });
   const result = await editUser(parseInt(req.params.userID), updateParams);
   if ("error" in result) {
     switch (result.error) {
