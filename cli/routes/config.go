@@ -26,7 +26,7 @@ func ReadConfig() (map[string]any) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -50,7 +50,7 @@ func EditConfig(change ConfigEdit) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }

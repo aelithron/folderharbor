@@ -2,13 +2,16 @@ package routes
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/viper"
 )
@@ -46,6 +49,27 @@ func handleAPIError(error APIError) {
 	fmt.Fprintf(os.Stderr, "Error (%s): %s\n", error.Error, error.Message)
 	os.Exit(1)
 }
+func handleHTTPError(err error) {
+	var urlError *url.Error
+	if !errors.As(err, &urlError) { panic(err) }
+	var opError *net.OpError
+	if errors.As(urlError.Err, &opError) {
+		address, addrErr := url.Parse(urlError.URL)
+		if addrErr != nil { panic(addrErr) }
+		if errors.Is(opError.Err, syscall.ECONNREFUSED) {
+			fmt.Println(`Error: The FolderHarbor server at "` + address.Scheme + "://" + address.Host + `" is unreachable!`)
+			fmt.Println(`Please contact your administrator, or log in to a different server with "folderharbor auth login".`);
+			os.Exit(1)
+		}
+		var dnsError *net.DNSError
+		if errors.As(opError.Err, &dnsError) {
+			fmt.Println(`Error: The FolderHarbor server at "` + address.Scheme + "://" + address.Host + `" could not be found!`)
+			fmt.Println(`Please contact your administrator, or log in to a different server with "folderharbor auth login".`);
+			os.Exit(1)
+		}
+	}
+	panic(err)
+}
 func GetServerAddress() (string) {
 	server, err := url.Parse(viper.GetString("server"))
 	if err != nil {
@@ -60,7 +84,7 @@ func GetClientConfig(address string) (ClientConfig) {
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/clientconfig")
 	res, err := http.Get(addr.String())
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }

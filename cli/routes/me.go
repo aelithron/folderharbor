@@ -39,7 +39,7 @@ func GetOwnInfo() (SelfInfo) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -63,7 +63,7 @@ func UpdateOwnInfo(info SelfInfoWrite) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -85,7 +85,7 @@ func RevokeOwnSession(sessionID int) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }

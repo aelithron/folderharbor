@@ -44,7 +44,7 @@ func ReadLogs(page int) (AuditLog) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -68,7 +68,7 @@ func GetPermissions() ([]Permission) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -92,7 +92,7 @@ func GetProtocols() (ProviderList) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }

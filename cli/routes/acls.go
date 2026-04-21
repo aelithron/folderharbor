@@ -36,7 +36,7 @@ func ListACLs() ([]ACLList) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -63,7 +63,7 @@ func CreateACL(name string) (int) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -87,7 +87,7 @@ func GetACL(aclID int) (ACL) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -112,7 +112,7 @@ func UpdateACL(aclID int, info ACLInfoWrite) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -133,7 +133,7 @@ func UpdateACLPath(aclID int, items []ACLPath) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -152,7 +152,7 @@ func DeleteACL(aclID int) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }

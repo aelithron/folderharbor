@@ -42,7 +42,7 @@ func ListUsers() ([]UserList) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -66,7 +66,7 @@ func GetUser(userID int) (User) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -94,7 +94,7 @@ func CreateUser(username, password string) (int) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -120,7 +120,7 @@ func UpdateUser(userID int, info UserInfoWrite) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -142,7 +142,7 @@ func LockUser(userID int, locked bool) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -163,7 +163,7 @@ func GrantUser(userID int, items []Grant) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -182,7 +182,7 @@ func DeleteUser(userID int) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -202,7 +202,7 @@ func RevokeSession(sessionID int) {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }

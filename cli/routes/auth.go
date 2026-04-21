@@ -24,7 +24,7 @@ func Login(address, username, password string) {
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/auth")
 	resp, err := http.Post(addr.String(), "application/json", bytes.NewBuffer(reqBody))
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer resp.Body.Close()
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil { panic (err) }
@@ -48,7 +48,7 @@ func Logout() {
 	if err != nil { panic (err) }
 	client := &http.Client{}
 	res, err := client.Do(req)
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil { panic (err) }
@@ -69,7 +69,7 @@ func Register(address, username, password string) {
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/auth/register")
 	resp, err := http.Post(addr.String(), "application/json", bytes.NewBuffer(reqBody))
-	if err != nil { panic (err) }
+	if err != nil { handleHTTPError(err) }
 	defer resp.Body.Close()
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil { panic (err) }
