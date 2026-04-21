@@ -43,11 +43,13 @@ export default async function startWebDAV(port: number, sslKey?: string, sslCert
             });
           }));
           if (!type || !(type as ResourceType).isDirectory) {
+            console.log(decodeURIComponent(new URL(arg.fullUri()).pathname), type);
             action = "files-read";
             blurb = "read a file";
             break;
           }
-        } catch {
+        } catch (err) {
+          console.log(decodeURIComponent(new URL(arg.fullUri()).pathname), err);
           action = "files-read";
           blurb = "read a file";
           break;
