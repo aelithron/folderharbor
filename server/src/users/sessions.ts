@@ -11,7 +11,7 @@ export async function prepareSession(username: string, password: string): Promis
   const config = getConfig();
   let user;
   try {
-    user = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
+    user = await db().select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -21,7 +21,7 @@ export async function prepareSession(username: string, password: string): Promis
   if (user[0].failedLogins >= (config?.failedLoginLimit || 5)) {
     if (user[0].resetFailedLogins && user[0].resetFailedLogins.getTime() <= new Date().getTime()) {
       try {
-        await db.update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.id, user[0].id));
+        await db().update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.id, user[0].id));
         user[0].failedLogins = 0;
         user[0].resetFailedLogins = null;
       } catch (e) {
@@ -34,9 +34,9 @@ export async function prepareSession(username: string, password: string): Promis
     if (!await argon2.verify(user[0].password, password)) {
       if (user[0].failedLogins + 1 >= (config?.failedLoginLimit || 5)) {
         // todo: make this duration a config option
-        await db.update(usersTable).set({ failedLogins: user[0].failedLogins + 1, resetFailedLogins: DateTime.now().plus({ hours: 1 }).toJSDate() }).where(eq(usersTable.id, user[0].id));
+        await db().update(usersTable).set({ failedLogins: user[0].failedLogins + 1, resetFailedLogins: DateTime.now().plus({ hours: 1 }).toJSDate() }).where(eq(usersTable.id, user[0].id));
       } else {
-        await db.update(usersTable).set({ failedLogins: user[0].failedLogins + 1 }).where(eq(usersTable.id, user[0].id));
+        await db().update(usersTable).set({ failedLogins: user[0].failedLogins + 1 }).where(eq(usersTable.id, user[0].id));
       }
       return { error: "wrong_password", userID: user[0].id };
     }
@@ -55,8 +55,8 @@ export async function createSession(username: string, password: string): Promise
   const token = crypto.randomBytes(32).toString("base64url");
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   try {
-    await db.update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.id, userData.userID));
-    await db.insert(sessionsTable).values({ token: tokenHash, userid: userData.userID, expiry: DateTime.now().plus({ weeks: 1 }).toJSDate() });
+    await db().update(usersTable).set({ failedLogins: 0, resetFailedLogins: null }).where(eq(usersTable.id, userData.userID));
+    await db().insert(sessionsTable).values({ token: tokenHash, userid: userData.userID, expiry: DateTime.now().plus({ weeks: 1 }).toJSDate() });
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -67,7 +67,7 @@ export async function getSession(token: string): Promise<Session | { error: "ser
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   let session;
   try {
-    session = await db.select().from(sessionsTable).where(eq(sessionsTable.token, tokenHash));
+    session = await db().select().from(sessionsTable).where(eq(sessionsTable.token, tokenHash));
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
@@ -75,7 +75,7 @@ export async function getSession(token: string): Promise<Session | { error: "ser
   if (!session || session.length < 1 || !session[0]) return { error: "invalid" };
   if (session[0].expiry.getTime() < new Date().getTime()) {
     try {
-      await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
+      await db().delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
     } catch (e) {
       console.error(`Database Error - ${e}`);
       return { error: "server" };
@@ -84,14 +84,14 @@ export async function getSession(token: string): Promise<Session | { error: "ser
   }
   let user;
   try {
-    user = await db.select().from(usersTable).where(eq(usersTable.id, session[0].userid));
+    user = await db().select().from(usersTable).where(eq(usersTable.id, session[0].userid));
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };
   }
   if (!user || user.length === 0 || !user[0]) {
     try {
-      await db.delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
+      await db().delete(sessionsTable).where(eq(sessionsTable.id, session[0].id));
     } catch (e) {
       console.error(`Database Error - ${e}`);
       return { error: "server" };
@@ -105,7 +105,7 @@ export async function extendSession(sessionID: number, until?: Date): Promise<{ 
   if (!until) until = DateTime.now().plus({ weeks: 1 }).toJSDate();
   if (until.getTime() < new Date().getTime()) return { error: "invalid_date" };
   try {
-    const session = await db.update(sessionsTable).set({ expiry: until }).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
+    const session = await db().update(sessionsTable).set({ expiry: until }).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
     if (!session || session.length < 1) return { error: "not_found" };
     return { success: true };
   } catch (e) {
@@ -115,7 +115,7 @@ export async function extendSession(sessionID: number, until?: Date): Promise<{ 
 }
 export async function revokeSession(sessionID: number): Promise<{ success: boolean } | { error: "server" | "not_found" }> {
   try {
-    const session = await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
+    const session = await db().delete(sessionsTable).where(eq(sessionsTable.id, sessionID)).returning({ id: sessionsTable.id });
     if (!session || session.length < 1) return { error: "not_found" };
     return { success: true };
   } catch (e) {
@@ -127,7 +127,7 @@ export async function revokeSession(sessionID: number): Promise<{ success: boole
 export async function getUserSessions(userID: number): Promise<{ id: number, createdAt: Date, expiry: Date }[]  | { error: "server" | "no_sessions" }> {
   let sessions;
   try {
-    sessions = await db.select({ id: sessionsTable.id, createdAt: sessionsTable.createdAt, expiry: sessionsTable.expiry }).from(sessionsTable).where(eq(sessionsTable.userid, userID));
+    sessions = await db().select({ id: sessionsTable.id, createdAt: sessionsTable.createdAt, expiry: sessionsTable.expiry }).from(sessionsTable).where(eq(sessionsTable.userid, userID));
     if (!sessions || sessions.length < 1) return { error: "no_sessions" };
     return sessions;
   } catch (e) {
@@ -137,7 +137,7 @@ export async function getUserSessions(userID: number): Promise<{ id: number, cre
 }
 export async function revokeAllSessions(userID: number): Promise<{ success: boolean } | { error: "server" }> {
   try {
-    await db.delete(sessionsTable).where(eq(sessionsTable.userid, userID));
+    await db().delete(sessionsTable).where(eq(sessionsTable.userid, userID));
     return { success: true };
   } catch (e) {
     console.error(`Database Error - ${e}`);

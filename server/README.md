@@ -15,8 +15,7 @@ Then, move the file named `folderharbor-server` to `/usr/bin`.
 4. Setup \
 If you don't plan to run the server as root, create a user and group called `folderharbor`.
 Then, move the `folderharbor.service` file to `/etc/systemd/system`. \
-Make sure to edit this file! You need to set the `DATABASE_URL` environment variable to your PostgreSQL connection string, formatted as `postgres://<user>:<password>@<host>:<port>/<database>`. \
-Next, create a folder at `/etc/folderharbor`, and copy the `example.config.json` file to `/etc/folderharbor/config.json`. Edit this to configure your server as needed. \
+Next, create a folder at `/etc/folderharbor`, and copy the `example.config.json` file to `/etc/folderharbor/config.json`. Edit this to configure your server as needed. This includes adding the database connection string (formatted as `postgres://<user>:<password>@<host>:<port>/<database>`). \
 Finally, run `sudo folderharbor-server --setup`. This will guide you through the last parts of setup :3
 5. Start \
 Run `sudo systemctl daemon-reload && sudo systemctl enable --now folderharbor.service`. This will start your server! \

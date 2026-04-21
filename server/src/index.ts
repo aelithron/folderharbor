@@ -5,7 +5,6 @@ import loadConfig, { Config } from "./utils/config.js";
 import startAPI from "./api/api.js";
 import type { Server } from "http";
 import type { WebDAVServer } from "webdav-server/lib/index.v2.js";
-import dotenv from "dotenv";
 import startWebDAV from "./protocols/webdav/webdav.js";
 import loadCert from "./utils/ssl.js";
 import { recoverServer, setUpServer } from "./utils/scripts.js";
@@ -26,14 +25,6 @@ program
   .option("--recovery", "run folderharbor in recovery mode, don't start the full server");
 async function startServer() {
   await program.parseAsync();
-  dotenv.config({ quiet: true });
-  if (program.opts().setup) await setUpServer();
-  if (program.opts().recovery) await recoverServer();
-  if ((process.getuid && process.getgid) && (process.getuid() === 0 || process.getgid() === 0) && !program.opts().allowRootUser) {
-    console.error('You started FolderHarbor as root! This is a security risk.\nIf you understand the risks, you can override this check with the "--allow-root-user" argument.');
-    process.exit(1);
-  }
-  console.log(`Starting FolderHarbor...`);
   configPath = (program.opts().config as string | undefined) ? path.resolve(program.opts().config as string) : undefined;
   try {
     config = await loadConfig(program.opts().allowPermissiveConfig, configPath);
@@ -41,6 +32,13 @@ async function startServer() {
     console.error(`Config Error - ${e}`);
     process.exit(1);
   }
+  if (program.opts().setup) await setUpServer();
+  if (program.opts().recovery) await recoverServer();
+  if ((process.getuid && process.getgid) && (process.getuid() === 0 || process.getgid() === 0) && !program.opts().allowRootUser) {
+    console.error('You started FolderHarbor as root! This is a security risk.\nIf you understand the risks, you can override this check with the "--allow-root-user" argument.');
+    process.exit(1);
+  }
+  console.log(`Starting FolderHarbor...`);
   let ssl = null;
   if (config.api.ssl || config.webdav.ssl || config.ftp.ssl) {
     try {

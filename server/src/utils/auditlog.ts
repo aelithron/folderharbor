@@ -15,7 +15,7 @@ export type AuditBody = Partial<{ filePath: string, oldFilePath: string, fileTyp
 
 export async function writeLog(userID: number, username: string | null, action: AuditAction, body: AuditBody | null, blurb?: string) {
   try {
-    await db.insert(logsTable).values({ userid: userID, username, action, blurb, body });
+    await db().insert(logsTable).values({ userid: userID, username, action, blurb, body });
   } catch (e) {
     console.error(`Logging - Database Error - ${e}`);
     return;
@@ -26,8 +26,8 @@ export async function readLogs(page?: number): Promise<{ pageCount: number, logs
   let logs;
   let pageCount;
   try {
-    logs = await db.select({ userID: logsTable.userid, username: logsTable.username, action: logsTable.action, body: logsTable.body, blurb: logsTable.blurb, createdAt: logsTable.createdAt }).from(logsTable).orderBy(desc(logsTable.createdAt)).limit(20).offset((page-1)*20);
-    pageCount = Math.ceil((await db.$count(logsTable)) / 20);
+    logs = await db().select({ userID: logsTable.userid, username: logsTable.username, action: logsTable.action, body: logsTable.body, blurb: logsTable.blurb, createdAt: logsTable.createdAt }).from(logsTable).orderBy(desc(logsTable.createdAt)).limit(20).offset((page-1)*20);
+    pageCount = Math.ceil((await db().$count(logsTable)) / 20);
   } catch (e) {
     console.error(`Database Error - ${e}`);
     return { error: "server" };

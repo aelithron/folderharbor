@@ -1,13 +1,14 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import dotenv from "dotenv";
+import { getConfig } from "../index.js";
 
-dotenv.config({ quiet: true });
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
-  max: 10,
-  idleTimeoutMillis: 20000,
-  connectionTimeoutMillis: 20000
-});
-const db = drizzle(pool);
-export default db;
+export default function db() {
+  const pool = new Pool({
+    connectionString: getConfig()?.database,
+    max: 10,
+    idleTimeoutMillis: 20000,
+    connectionTimeoutMillis: 20000
+  });
+  const db = drizzle(pool);
+  return db;
+}

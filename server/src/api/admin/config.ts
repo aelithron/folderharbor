@@ -10,12 +10,14 @@ router.get("/", async (req, res) => {
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
   if (!await checkPermission(req.session.userID, "config:read")) return res.status(403).json({ error: "forbidden", message: "You don't have permission to do this!" });
-  if (!getConfig()) {
+  const config = getConfig();
+  if (!config) {
     console.error("Server Error - Config not loaded, but requested on the API.");
     return res.status(500).json({ error: "server", message: "Something went wrong on the server's end, please contact your administrator." });
   }
+  config.database = "[redacted]";
   await writeLog(req.session.userID, req.session.username, "config-read", null, "read the config");
-  return res.json(getConfig());
+  return res.json(config);
 });
 router.patch("/", async (req, res) => {
   if (!req.session) {

@@ -6,6 +6,7 @@ import { merge } from "lodash-es";
 import { getConfig, getConfigPath, setConfig } from "../index.js";
 
 export const Config = z.strictObject({
+  database: z.string().readonly(),
   api: z.strictObject({
     port: z.int().positive(),
     ssl: z.boolean(),
@@ -73,7 +74,7 @@ export async function editConfig(newConfig: Partial<z.Infer<typeof Config>>): Pr
     console.error("Server Error - The config isn't loaded, but was attempted to be edited!");
     return { error: "config_unloaded" };
   }
-  if (newConfig.globalExclusions || newConfig.globalExclusionBypasses || newConfig.registration?.defaultRole) return { error: "editing_readonly" };
+  if (newConfig.globalExclusions || newConfig.globalExclusionBypasses || newConfig.registration?.defaultRole || newConfig.database) return { error: "editing_readonly" };
   let config;
   try {
     config = Config.parse(merge({}, oldConfig, newConfig));
