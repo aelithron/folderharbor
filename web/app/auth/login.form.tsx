@@ -70,7 +70,7 @@ export default function LoginForm() {
         const res = await fetch(url.toString());
         body = await res.json();
       } catch (err) {
-        if (err instanceof TypeError && err.message.includes("Failed to fetch") && window.navigator.onLine) {
+        if (err instanceof TypeError && (err.message.includes("Failed to fetch") || err.message.includes("NetworkError when attempting to fetch resource.")) && window.navigator.onLine) {
           alert(`Error: This server isn't properly configured for this web panel!\nPlease ask your administrator to add "${window.location.origin}" to the "allowedOrigins" list in the server config.`);
           return;
         }
