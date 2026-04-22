@@ -4,11 +4,11 @@ import { router as authRouter } from "./auth.js";
 import { router as meRouter } from "./me.js";
 import { router as adminRouter } from "./admin/admin.js";
 //import { router as filesRouter } from "./files/files.js";
+import { router as welcomeRouter } from "./welcome.js";
 import { getSession } from "../users/sessions.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { getConfig } from "../index.js";
-import path from "path";
 import https from "https";
 import os from "os";
 
@@ -19,7 +19,6 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
   app.use(express.json());
   app.use(cookieParser());
   app.use(auth);
-  app.use(express.static(path.join(import.meta.dirname, "./welcome"), { extensions: ["html", "css"] }));
   app.get("/clientconfig", (req, res) => {
     const config = getConfig();
     if (!config) return res.status(503).json({ error: "server", message: "Please wait for the server to finish starting!" });
@@ -67,6 +66,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
   app.use("/auth", authRouter);
   app.use("/me", meRouter);
   app.use("/admin", adminRouter);
+  app.use("/", welcomeRouter);
   //app.use("/files", filesRouter);
   let server: Server;
   if (sslKey && sslCert) {
