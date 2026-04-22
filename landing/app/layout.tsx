@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
-import { Header } from "./(ui)/ui.module";
+import { Footer, Header } from "./(ui)/ui.module";
 import { config } from '@fortawesome/fontawesome-svg-core'
 import "./globals.css";
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -21,6 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${lato.className} antialiased`}>
         <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );
