@@ -1,5 +1,3 @@
-**⚠️ This project is not completed yet, and will have bugs! DO NOT use this in production.**
-
 <img src="web/public/logo.webp" height=125>
 
 # FolderHarbor ![IMG](https://hackatime-badge.hackclub.com/U08RJ1PEM7X/folderharbor)
