@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { getConfig } from "../index.js";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 export default function db() {
   const pool = new Pool({
@@ -11,4 +12,12 @@ export default function db() {
   });
   const db = drizzle(pool);
   return db;
+}
+export async function migrateDB() {
+  try {
+    //await migrate(db(), { migrationsFolder: "./drizzle" });
+  } catch (e) {
+    console.error(`Database Error - ${e}`);
+    process.exit(1);
+  }
 }

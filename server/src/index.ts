@@ -10,6 +10,7 @@ import loadCert from "./utils/ssl.js";
 import { recoverServer, setUpServer } from "./utils/scripts.js";
 import type { FtpSrv } from "ftp-srv";
 import startFTP from "./protocols/ftp/ftp.js";
+import { migrateDB } from "./utils/db.js";
 
 let config: z.Infer<typeof Config>;
 let configPath: string | undefined;
@@ -32,6 +33,7 @@ async function startServer() {
     console.error(`Config Error - ${e}`);
     process.exit(1);
   }
+  await migrateDB();
   if (program.opts().setup) await setUpServer();
   if (program.opts().recovery) await recoverServer();
   if ((process.getuid && process.getgid) && (process.getuid() === 0 || process.getgid() === 0) && !program.opts().allowRootUser) {
