@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     defaults:
       run:
         working-directory: "./server"
@@ -54,6 +56,10 @@ jobs:
           cd dist/x86_64
           pnpm install --prod --frozen-lockfile
           tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-x86_64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
+      - name: Attest Builds
+        uses: actions/attest@v4
+        with:
+          subject-path: 'server/release/*'
       - name: Release
         uses: softprops/action-gh-release@v2
         env:
@@ -115,8 +121,6 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: 'cli/dist/*'
-      - name: Checksums
-        run: sha256sum dist/* > dist/checksums.txt
       - name: Release
         uses: softprops/action-gh-release@v2
         env:
