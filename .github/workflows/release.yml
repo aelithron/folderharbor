@@ -31,10 +31,29 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "server/pnpm-lock.yaml"
       - run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm lint
-      - name: Compile
-        run: pnpm build
+      - name: Lint / Type-check
+        run: |
+          pnpm lint
+          pnpm check-types
+      - name: Bundle (x86_64)
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          mkdir -p dist/x86_64/
+          mkdir release/
+          pnpm build
+          cp dist/index.js dist/x86_64/index.js
+          cp extras/folderharbor.service dist/x86_64/folderharbor.service
+          cp extras/folderharbor-server dist/x86_64/folderharbor-server
+          cp -r drizzle/ dist/x86_64/drizzle/
+          cp -r patches/ dist/x86_64/patches/
+          cp example.config.json dist/x86_64/example.config.json
+          cp pnpm-workspace.yaml dist/x86_64/pnpm-workspace.yaml
+          cp pnpm-lock.yaml dist/x86_64/pnpm-lock.yaml
+          cp package.json dist/x86_64/package.json
+          cd dist/x86_64
+          pnpm install --prod --frozen-lockfile
+          tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-x86_64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
       - name: Release
         uses: softprops/action-gh-release@v2
         env:
@@ -42,7 +61,12 @@ jobs:
         with:
           name: "Server ${{ env.VERSION }}"
           make_latest: true
-          body: "This is the FolderHarbor Server, the core you need to run to use the server."
+          files: "server/release/**"
+          body: |
+            This is the FolderHarbor Server, the core that includes everything but the client!
+            Need a client for your server instance? Check out:
+            - [FolderHarbor Web](https://fh.novatea.dev/web)
+            - [FolderHarbor CLI](https://fh.novatea.dev/cli)
   cli-release:
     name: Release CLI
     if: startsWith(github.ref, 'refs/tags/cli/')

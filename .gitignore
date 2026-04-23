@@ -6,3 +6,4 @@ dist/
 pnpm-debug.log*
 logs
 !web/app/admin/tools/logs
+release
