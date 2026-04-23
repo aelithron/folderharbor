@@ -251,7 +251,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          context: ./web
+          context: ./landing
           push: true
           sbom: true
           provenance: mode=max
