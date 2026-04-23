@@ -1,0 +1,12 @@
+[Unit]
+Description=A powerful, multi-protocol file server with RBAC
+After=network.target
+
+[Service]
+ExecStart=/usr/lib/folderharbor/node /usr/lib/folderharbor/index.js
+User=folderharbor
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
