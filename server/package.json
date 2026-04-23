@@ -17,7 +17,7 @@
   "scripts": {
     "dev": "nodemon -w package.json -w src -w config.json -w /etc/folderharbor/config.json -x 'tsx' --delay 2.5s ./src/index.ts",
     "start": "node .",
-    "build": "tsc",
+    "build": "tsx esbuild.config.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "check-types": "tsc --noEmit"
@@ -55,6 +55,7 @@
     "@types/pg": "^8.16.0",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.8",
+    "esbuild": "^0.28.0",
     "eslint": "^9.39.2",
     "globals": "^17.0.0",
     "jiti": "^2.6.1",

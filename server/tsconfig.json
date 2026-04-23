@@ -3,7 +3,7 @@
   "compilerOptions": {
     // File Layout
     "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "./build",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
@@ -41,5 +41,5 @@
     "skipLibCheck": true,
     "typeRoots": ["./src/types", "./node_modules/@types"]
   },
-  "exclude": ["./eslint.config.ts", "./drizzle.config.ts", "./dist"]
+  "exclude": ["./eslint.config.ts", "./esbuild.config.ts", "./drizzle.config.ts", "./dist", "./build"]
 }
