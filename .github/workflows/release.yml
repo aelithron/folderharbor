@@ -6,6 +6,7 @@ on:
       - "server/v*"
       - "cli/v*"
       - "web/v*"
+      - "landing/v*"
 
 jobs:
   server-release:
