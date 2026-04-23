@@ -18,7 +18,7 @@ let api: Server;
 let webdav: WebDAVServer;
 let ftp: FtpSrv;
 program
-  .name("folderharbor").description("A powerful file server that supports many protocols")
+  .name("folderharbor-server").description("a powerful file server with RBAC that supports many protocols")
   .option("-c, --config <path>", "path to server config")
   .option("--allow-root-user", "allow the server to run as root (this can cause security risks!)")
   .option("--allow-permissive-config", "allow the server to load a configuration that is overly permissive")
@@ -76,7 +76,7 @@ async function stopServer() {
   if (webdav) webdav.stop(() => console.log("Stopped WebDAV server."));
   if (ftp) ftp.close().then(() => console.log("Stopped FTP server."));
 }
-await startServer();
+startServer();
 process.on("SIGTERM", async () => await stopServer());
 process.on("SIGINT", async () => await stopServer());
 
