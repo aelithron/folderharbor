@@ -3,6 +3,8 @@ import { Pool } from "pg";
 import { getConfig } from "../index.js";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { sql } from "drizzle-orm";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export default function db() {
   const pool = new Pool({
@@ -22,9 +24,9 @@ export async function migrateDB() {
     process.exit(1);
   }
   try {
-    await migrate(db(), { migrationsFolder: "./drizzle" });
+    await migrate(db(), { migrationsFolder: path.join(process.env.INSTALL_PATH || (path.dirname(fileURLToPath(import.meta.url)) + "../../../"), "/drizzle") });
   } catch (e) {
-    console.error(`Database Error - ${e}`);
+    console.error(`Database Error (with migrations) - ${e}`);
     process.exit(1);
   }
 }
