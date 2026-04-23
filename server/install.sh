@@ -16,3 +16,5 @@ case "$(uname -m)" in
     ;;
 esac
 echo "Finding latest server version..."
+LATEST=$(curl -fs -A "https://fh.novatea.dev/api/serverversion")
+echo "$LATEST"

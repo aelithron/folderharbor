@@ -1,2 +1,3 @@
 #!/bin/bash
+INSTALL_PATH="/usr/lib/folderharbor"
 /usr/lib/folderharbor/node /usr/lib/folderharbor/index.js "$@"
