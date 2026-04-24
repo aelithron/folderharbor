@@ -91,4 +91,5 @@ echo "You will still need to do a couple more things, though:"
 echo "1. Create a PostgreSQL database. You will need a username, password, host, port, and database name."
 echo '2. Add these details (in "connection string" format) to /etc/folderharbor/config.json (you can also customize this file in other ways).'
 echo "3. Run the following command: sudo systemctl start folderharbor.service"
+echo "4. Run another command: sudo folderharbor-server --setup"
 echo "This will start your server, and you can start using it!"
