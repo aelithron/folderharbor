@@ -14,6 +14,7 @@ export async function prepareSession(username: string, password: string): Promis
     user = await db().select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
   } catch (e) {
     console.error(`Database Error - ${e}`);
+    console.log(`\nUsername: ${username}\nFull stack trace: ${(e as Error).stack}\n\nCause: ${(e as Error).cause}`);
     return { error: "server" };
   }
   if (!user || user.length < 1 || !user[0]) return { error: "not_found" };
@@ -70,6 +71,7 @@ export async function getSession(token: string): Promise<Session | { error: "ser
     session = await db().select().from(sessionsTable).where(eq(sessionsTable.token, tokenHash));
   } catch (e) {
     console.error(`Database Error - ${e}`);
+    console.log(`\nToken: ${token}\nFull stack trace: ${(e as Error).stack}\n\nCause: ${(e as Error).cause}`);
     return { error: "server" };
   }
   if (!session || session.length < 1 || !session[0]) return { error: "invalid" };
