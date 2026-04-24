@@ -9,6 +9,7 @@ fi
 case "$(uname -m)" in
   x86_64)
     ARCH="x86_64"
+    CLIARCH="amd64"
     ;;
   *)
     echo "Error: Unsupported CPU architecture $(uname -m)! Please try again on another computer, or make a GitHub Issue on https://github.com/aelithron/folderharbor/issues to request server support."
@@ -45,9 +46,23 @@ mv folderharbor.service /etc/systemd/system/folderharbor.service
 mv folderharbor-server /usr/bin/folderharbor-server
 systemctl daemon-reload
 echo "Installed FolderHarbor Server $LATEST!"
+read -p "Do you want the server to automatically start? (y/n): " -n 1
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  systemctl enable folderharbor.service
+  echo "Enabled auto-start!"
+fi
 read -p "Do you want to install the CLI as well? (y/n): " -n 1
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-
+  echo "Finding latest CLI version..."
+  LATESTCLI=$(curl -fsS https://fh.novatea.dev/api/version/cli)
+  if [ -z "$LATESTCLI" ]; then
+    echo "Error: Couldn't find a FolderHarbor CLI version! Please make a GitHub Issue on https://github.com/aelithron/folderharbor/issues."
+    exit 1
+  fi
+  echo "Found FolderHarbor CLI $LATESTCLI! Downloading..."
+  curl -A "Aelithron-FolderHarbor-Installer" -o "/usr/bin/folderharbor" -fsSL "https://github.com/aelithron/folderharbor/releases/download/cli%2F$LATESTCLI/folderharbor-cli-$LATESTCLI-linux-$CLIARCH.tar.gz"
+  echo "Installed FolderHarbor CLI $LATESTCLI!"
 fi
-echo "Your server is ready to be used.
+echo "Your server is ready to be used!"
