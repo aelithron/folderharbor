@@ -6,7 +6,7 @@ An information-filled landing page to describe what FolderHarbor is, with downlo
 Save the following compose file to your system, naming it `compose.yml`:
 ```yaml
 services:
-  folderharbor-web:
+  folderharbor-landing:
     image: ghcr.io/aelithron/folderharbor/landing:latest
     container_name: folderharbor-landing
     ports:
