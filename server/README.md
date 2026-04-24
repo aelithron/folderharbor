@@ -8,10 +8,11 @@ Simply run `curl -fsSL https://fh.novatea.dev/install.sh | sudo bash`! It will i
 1. Prepare a PostgreSQL database \
 Set up a PostgreSQL database, then create a database under a name of your choice (I would suggest `folderharbor`).
 2. Download the server \
-Go to the [GitHub Releases]() tab and look for the latest server release. Download the bundle for your system architecture.
+Go to the [GitHub Release](https://github.com/aelithron/folderharbor/releases/latest) for the latest server version. Download the bundle for your system architecture.
 3. Install \
 Create a folder at `/usr/lib/folderharbor`, then extract the bundle files there. Make sure they aren't in a sub-folder (the `/usr/lib/folderharbor` folder should directly have the `index.js` file, as well as the others). \
 Then, move the file named `folderharbor-server` to `/usr/bin`.
+You will also need to [download Node.JS](https://nodejs.org/en/download) as a standalone binary, then name the folder it gives you `node` and put that folder in `/usr/lib/folderharbor`.
 4. Setup \
 If you don't plan to run the server as root, create a user and group called `folderharbor`.
 Then, move the `folderharbor.service` file to `/etc/systemd/system`. \
