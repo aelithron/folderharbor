@@ -65,7 +65,7 @@ mv folderharbor-server /usr/bin/folderharbor-server
 chown -R folderharbor /etc/folderharbor
 systemctl daemon-reload
 echo "Installed FolderHarbor Server $LATEST!"
-read -p "Do you want the server to automatically start? (y/n): " -n 1 </dev/tty
+read -p "Do you want the server to automatically start when this device does? (y/n): " -n 1 </dev/tty
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   systemctl enable folderharbor.service
@@ -86,4 +86,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   chown root /usr/bin/folderharbor
   echo "Installed FolderHarbor CLI $LATESTCLI!"
 fi
-echo "Your server is ready to be used!"
+echo "FolderHarbor Server is now installed! Welcome, and thanks for using FolderHarbor! ~Nova"
+echo "You will still need to do a couple more things, though:"
+echo "1. Create a PostgreSQL database. You will need a username, password, host, port, and database name."
+echo '2. Add these details (in "connection string" format) to /etc/folderharbor/config.json (you can also customize this file in other ways).'
+echo "3. Run the following command: sudo systemctl start folderharbor.service"
+echo "This will start your server, and you can start using it!"

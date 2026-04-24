@@ -3,7 +3,7 @@ This is the server/core for FolderHarbor. It can run independently, and provides
 ## Setup
 > Note: The FolderHarbor server is designed for Linux only! These instructions likely will not work on non-Linux platforms, or if your CPU architecture isn't x86_64 or AMD64.
 ### Automated
-I'm working on an installation script, which will come later!
+Simply run 
 ### Manual
 1. Prepare a PostgreSQL database \
 Set up a PostgreSQL database, then create a database under a name of your choice (I would suggest `folderharbor`).
