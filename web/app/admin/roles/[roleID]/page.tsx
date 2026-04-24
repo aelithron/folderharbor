@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import RoleSettings from "./role.module";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Role Info • Admin" }
 export default async function Page({ params }: { params: Promise<{ roleID: string }> }) {
   return (

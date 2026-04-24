@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Dashboard from "./dashboard.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin" }
 export default function Page() {
   return (

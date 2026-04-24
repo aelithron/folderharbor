@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import ErrorModules from "./errors.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Error" }
 export default async function Page({ params }: { params: Promise<{ error: string }> }) {
   return (

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Roles from "./roles.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Roles • Admin" }
 export default function Page() {
   return (

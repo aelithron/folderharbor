@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Header from "../header.module";
 import Home from "./home.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Home" }
 export default function Page() {
   return (

@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import ACLSettings from "./acl.module";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ACL Info • Admin" }
 export default async function Page({ params }: { params: Promise<{ aclID: string }> }) {
   return (

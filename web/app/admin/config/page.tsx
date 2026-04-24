@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Config from "./config.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Config • Admin" }
 export default async function Page() {
   return (

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import ACLs from "./acls.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ACLs • Admin" }
 export default function Page() {
   return (

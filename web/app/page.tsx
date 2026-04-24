@@ -4,6 +4,7 @@ import AccountSelector from "./selector.module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
+export const dynamic = "force-dynamic";
 export default function Home() {
   return (
     <main className="flex flex-col p-8 md:p-20 min-h-screen">

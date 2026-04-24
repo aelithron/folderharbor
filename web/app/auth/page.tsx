@@ -3,6 +3,7 @@ import logo from "@/public/logo.webp";
 import LoginForm from "./login.form";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Sign In" }
 export default function Page() {
   return (

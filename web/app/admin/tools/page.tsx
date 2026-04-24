@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Tools from "./tools.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Tools • Admin" }
 export default function Page() {
   return (

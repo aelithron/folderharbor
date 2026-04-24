@@ -4,6 +4,7 @@ import Settings from "./settings.module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Settings" }
 export default function Page() {
   return (

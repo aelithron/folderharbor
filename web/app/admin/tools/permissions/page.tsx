@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Permissions from "./permissions.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Permissions • Admin" }
 export default function Page() {
   return (

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import CreateUser from "./create.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "New User • Admin" }
 export default function Page() {
   return (

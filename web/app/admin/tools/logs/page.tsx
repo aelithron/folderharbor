@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Logs from "./logs.module";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Logs • Admin" }
 export default function Page() {
   return (

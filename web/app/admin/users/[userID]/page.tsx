@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import UserSettings from "./user.module";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "User Info • Admin" }
 export default async function Page({ params }: { params: Promise<{ userID: string }> }) {
   return (
