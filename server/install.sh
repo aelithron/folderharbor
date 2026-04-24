@@ -61,7 +61,7 @@ chown -R folderharbor /usr/lib/folderharbor
 echo "Setting up some things..."
 mv folderharbor.service /etc/systemd/system/folderharbor.service
 mv folderharbor-server /usr/bin/folderharbor-server
-cp example.config.json /etc/folderharbor/config.json
+[ ! -f "/etc/folderharbor/config.json" ] && cp example.config.json /etc/folderharbor/config.json
 chown -R folderharbor /etc/folderharbor
 systemctl daemon-reload
 echo "Installed FolderHarbor Server $LATEST!"
@@ -82,6 +82,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   fi
   echo "Found FolderHarbor CLI $LATESTCLI! Downloading..."
   curl -A "Aelithron-FolderHarbor-Installer" -o "/usr/bin/folderharbor" -fsSL "https://github.com/aelithron/folderharbor/releases/download/cli%2F$LATESTCLI/folderharbor-cli-$LATESTCLI-linux-$CLIARCH"
+  chmod 755 /usr/bin/folderharbor
+  chown root /usr/bin/folderharbor
   echo "Installed FolderHarbor CLI $LATESTCLI!"
 fi
 echo "Your server is ready to be used!"
