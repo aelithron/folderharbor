@@ -6,7 +6,7 @@ if [ "$EUID" -ne 0 ]; then
   echo 'Error: Not running as root! Please invoke this script with "sudo".'
   exit 1
 fi
-NODEVER="22.0.0"
+NODEVER="24.15.0"
 case "$(uname -m)" in
   x86_64)
     ARCH="x86_64"
