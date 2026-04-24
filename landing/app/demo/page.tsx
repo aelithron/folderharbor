@@ -55,7 +55,7 @@ export default function Page() {
         </div>
         <div className="flex flex-col gap-2 mt-4">
           <h1 className="text-2xl font-semibold justify-center text-center"><FontAwesomeIcon icon={faStar} /> Done!</h1>
-          <p>Thanks for trying out FolderHarbor! This project has taken over 3 months to complete, with over 100 hours of coding time. I&apos;m truly grateful that you&apos;ve taken the time to look at what I made. ~Nova</p>
+          <p>Thanks for trying out FolderHarbor! This project has taken over 3 months to complete, with over 115 hours of coding time. I&apos;m truly grateful that you&apos;ve taken the time to look at what I made. ~Nova</p>
           <p>If you want to run your own FolderHarbor server, check out the <Link href={"/server"} target="_blank" className="underline hover:text-sky-500">page for FolderHarbor Server</Link> for self-hosting instructions! You can also self-host the <Link href={"/web"} target="_blank" className="underline hover:text-sky-500">FolderHarbor web panel</Link> if you would rather not use my hosted one.</p>
         </div>
       </div>

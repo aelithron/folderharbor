@@ -1,9 +1,10 @@
-import { faServer, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faServer, faStar, faTerminal } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import Image from "next/image";
 import serverPhoto from "@/public/shots/server.webp";
 import Link from "next/link";
+import { CopyButton } from "./copy.module";
 
 export const metadata: Metadata = { title: "Server" }
 export default async function Page() {
@@ -21,7 +22,7 @@ export default async function Page() {
           <p className="text-lg">The fully-featured server at the core of FolderHarbor.</p>
           <div className="flex flex-col gap-2 bg-slate-700 p-3 rounded-xl my-4">
             <h1 className="text-lg font-semibold">Download {version ? version.name : "Server"}</h1>
-            <p>coming soon :3</p>
+            <CopyButton text="curl -fsSL https://fh.novatea.dev/install.sh | sudo bash"><code className="bg-slate-800 p-2 rounded-xl flex gap-1 items-center text-sm"><FontAwesomeIcon icon={faTerminal} /> curl -fsSL https://fh.novatea.dev/install.sh | sudo bash</code></CopyButton>
           </div>
         </div>
         <div className="flex justify-center"><Image src={serverPhoto} alt="A stylized screenshot of two macOS Finder windows, showing the FolderHarbor server working." loading="eager" className="rounded-xl" /></div>
