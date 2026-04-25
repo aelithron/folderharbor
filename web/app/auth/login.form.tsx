@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
 
-export default function LoginForm() {
+export default function LoginForm({ defaultURL }: { defaultURL: string | undefined }) {
   const router = useRouter();
   const [stage, setStage] = useState<"server" | "credentials">("server");
   const [server, setServer] = useState<string>("");
@@ -89,13 +89,13 @@ export default function LoginForm() {
     <div className="flex flex-col gap-2 items-center">
       {stage === "server" && <div className="flex flex-col items-center gap-2">
         <h2 className="text-lg font-semibold">Select a Server</h2>
-        {process.env.NEXT_PUBLIC_DEFAULT_URL && <button className="flex p-2.5 gap-2 bg-slate-600 rounded-lg items-center text-center w-full" onClick={() => {
-          setServer(process.env.NEXT_PUBLIC_DEFAULT_URL!);
+        {defaultURL && <button className="flex p-2.5 gap-2 bg-slate-600 rounded-lg items-center text-center w-full" onClick={() => {
+          setServer(defaultURL);
           setStage("credentials");
         }}>
           <div className="flex flex-col gap-1 items-center w-full">
             <h3 className="font-semibold text-lg">Default Server</h3>
-            <p className="text-sm">{process.env.NEXT_PUBLIC_DEFAULT_URL}</p>
+            <p className="text-sm">{defaultURL}</p>
           </div>
           <FontAwesomeIcon icon={faArrowRight} className="hover:text-sky-500" />
         </button>}
@@ -109,7 +109,7 @@ export default function LoginForm() {
           }
           setStage("credentials");
         }}>
-          <label htmlFor="server">{process.env.NEXT_PUBLIC_DEFAULT_URL ? "Or, e" : "E"}nter a server address:</label>
+          <label htmlFor="server">{defaultURL ? "Or, e" : "E"}nter a server address:</label>
           <div className="flex gap-2">
             <input id="server" className="border-2 border-black bg-slate-500 text-black p-1 rounded-xl" value={server} onChange={(e) => setServer(e.target.value)} />
             <button type="submit" className="hover:text-sky-500"><FontAwesomeIcon icon={faArrowRight} /></button>

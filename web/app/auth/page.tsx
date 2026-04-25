@@ -12,7 +12,7 @@ export default function Page() {
         <Image src={logo} alt="FolderHarbor Logo" loading="eager" className="w-1/4 h-1/4" />
         <h1 className="text-2xl font-semibold">Sign In</h1>
         <p>Please sign in to your FolderHarbor server to continue.</p>
-        <LoginForm />
+        <LoginForm defaultURL={process.env.DEFAULT_URL} />
       </div>
     </main>
   );

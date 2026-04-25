@@ -22,20 +22,20 @@ services:
     ports:
       - "3000:3000"
     environment:
-      #NEXT_PUBLIC_DEFAULT_URL: ""
+      #DEFAULT_URL: ""
     restart: unless-stopped
 
 ```
-From there, customize it if you want to! I'd suggest changing the port (change the front number, leave the second as `3000`), as well as setting the `NEXT_PUBLIC_DEFAULT_URL` to your FolderHarbor server's URL. This is in the format of `http(s)://[domain]:[port]`.
+From there, customize it if you want to! I'd suggest changing the port (change the front number, leave the second as `3000`), as well as setting the `DEFAULT_URL` to your FolderHarbor server's URL. This is in the format of `http(s)://[domain]:[port]`.
 Once you have applied any customizations you want and saved the file, run `docker compose up -d` and wait for it to complete. Then, go to the port you have set in the file, and you should see the "Welcome to FolderHarbor" page! \
 Continue to [Post-Install](https://github.com/aelithron/folderharbor/blob/main/web/README.md#L34) below.
 ### Docker (non-Compose)
-Customize this command as you want to, then run it! I'd suggest changing the port (change the front number, leave the second as `3000`), as well as setting the `NEXT_PUBLIC_DEFAULT_URL` to your FolderHarbor server's URL. This is in the format of `http(s)://[domain]:[port]`.
+Customize this command as you want to, then run it! I'd suggest changing the port (change the front number, leave the second as `3000`), as well as setting the `DEFAULT_URL` to your FolderHarbor server's URL. This is in the format of `http(s)://[domain]:[port]`.
 ```sh
 docker run -d \
   --name folderharbor-web \
   -p 3000:3000 \
-  #-e NEXT_PUBLIC_DEFAULT_URL="" \
+  #-e DEFAULT_URL="" \
   --restart unless-stopped \
   ghcr.io/aelithron/folderharbor/web:latest
 ```
