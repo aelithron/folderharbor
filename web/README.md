@@ -1,5 +1,13 @@
 # FolderHarbor Web
-This is a web client for FolderHarbor administration! It requires an operational FolderHarbor server, and you must be able to edit the config on said server.
+A powerful web client for FolderHarbor administration! This requires an operational [FolderHarbor server](https://fh.novatea.dev/server), and you must be able to edit the config on said server.
+<img src="" height="125" />
+
+## Highlights
+- Powerful and robust administration panels
+- User self-service panels
+- Support for multiple active sessions at once
+- Designed for the FolderHarbor Server
+- Fully free and open source under the MIT license
 ## Setup
 I recommend running this in Docker! You can theoretically run it without Docker, but it isn't supported, and you will need to manually build from the source code to do so.
 ### Docker Compose

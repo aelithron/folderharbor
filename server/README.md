@@ -1,5 +1,14 @@
 # FolderHarbor Server
 This is the server/core for FolderHarbor. It can run independently, and provides the protocols, file server, API, and much more.
+## Highlights
+- Multiple protocols supported (WebDAV and FTP)
+- Powerful Role-Based Access Control (RBAC)
+- Granular permission and Access Control List (ACL) system
+- Detailed audit logging system
+- Easily configurable through a JSON file
+- Many security systems and options
+- Powerful CLI and Web Panel for administration
+- Fully free and open source under the MIT license
 ## Setup
 > Note: The FolderHarbor server is designed for Linux only! These instructions likely will not work on non-Linux platforms, or if your CPU architecture isn't x86_64 or AMD64.
 ### Automated

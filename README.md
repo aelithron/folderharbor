@@ -5,7 +5,11 @@
 A powerful, multi-protocol file server with Role-Based Access Control (RBAC). \
 This project was made for Hack Club [Flavortown](https://flavortown.hackclub.com)!
 ## Highlights
-FolderHarbor is a powerful file server, designed in a multi-component "stack" style.
+FolderHarbor is a powerful file server, designed in a multi-component "stack" style. \
+Some cool things it features:
+- Multiple protocols (WebDAV and FTP), supporting macOS, Windows, and most Linux file managers (no extra software needed for these!)
+- Role-Based Access Control, granular permissions, and Access Control Lists, letting you manage security exactly how you want
+- Detailed, highly specific audit logging
 ## Components
 ### Server &ensp;[ [Info](https://fh.novatea.dev/server) | [README](https://github.com/aelithron/folderharbor/blob/main/server/README.md) | [Source](https://github.com/aelithron/folderharbor/tree/main/server) ]
 The server is the core of FolderHarbor. This provides the admin API, WebDAV, and FTP support. \
