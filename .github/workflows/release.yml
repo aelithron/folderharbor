@@ -131,7 +131,7 @@ jobs:
           make_latest: false
           body: |
             This is the FolderHarbor CLI, used for server administration and access.
-            **You need a running FolderHarbor Server to use this!**
+            **You need a running [FolderHarbor Server](https://fh.novatea.dev/server) to use this!**
   web-release:
     name: Release Web Panel
     if: startsWith(github.ref, 'refs/tags/web/')
@@ -204,7 +204,7 @@ jobs:
           body: |
             This is the FolderHarbor web panel, used for server administration and access.
             This is released as a [Docker image](https://github.com/users/aelithron/packages/container/package/folderharbor%2Fweb), so you should get it from there.
-            **You need a running FolderHarbor Server to use this!**
+            **You need a running [FolderHarbor Server](https://fh.novatea.dev/server) to use this!**
   landing-release:
     name: Release Landing Page
     if: startsWith(github.ref, 'refs/tags/landing/')
