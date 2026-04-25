@@ -1,7 +1,7 @@
 # FolderHarbor Server
 This is the server/core for FolderHarbor. It can run independently, and provides the protocols, file server, API, and much more.
 
-<img src="/landing/public/shots/server.webp" height="125" />
+<img src="/landing/public/shots/server.webp" height="250" />
 
 ## Highlights
 - Multiple protocols supported (WebDAV and FTP)

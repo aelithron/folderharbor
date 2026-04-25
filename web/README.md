@@ -1,8 +1,9 @@
 # FolderHarbor Web
 A powerful web client for FolderHarbor administration! This requires an operational [FolderHarbor server](https://fh.novatea.dev/server), and you must be able to edit the config on said server.
 
-<img src="/landing/public/shots/web.webp" height="125" />
+<img src="/landing/public/shots/web.webp" height="250" />
 
+### [Public Demo](https://panel.fh.novatea.dev) | [Extra Info](https://fh.novatea.dev/web)
 ## Highlights
 - Powerful and robust administration panels
 - User self-service panels
