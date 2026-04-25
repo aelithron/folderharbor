@@ -30,7 +30,7 @@ export default function Home() {
     });
   }, [session]);
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 mt-6 md:mt-0">
       <h1 className="text-center text-2xl font-semibold">Welcome{session ? `, ${session.username}` : ""}</h1>
       <div className="flex flex-col gap-4 mt-2 items-center">
         {webdavURL && <div className="flex flex-col text-center gap-2 items-center p-2 bg-slate-600 rounded-lg w-fit">

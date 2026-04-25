@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Role Info • Admin" }
 export default async function Page({ params }: { params: Promise<{ roleID: string }> }) {
   return (
-    <div className="flex flex-col min-h-screen p-8 md:p-20 items-center text-center">
+    <div className="flex flex-col min-h-screen p-8 md:p-20 items-center text-center mt-10 md:mt-0">
       <h1 className="text-2xl font-semibold text-center">Role Info</h1>
       {!isNaN(parseInt((await params).roleID)) ? <RoleSettings roleID={parseInt((await params).roleID)} /> : <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">Error</h1>
