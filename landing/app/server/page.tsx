@@ -1,10 +1,11 @@
-import { faServer, faStar, faTerminal } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faServer, faStar, faTerminal } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import Image from "next/image";
 import serverPhoto from "@/public/shots/server.webp";
 import Link from "next/link";
 import { CopyButton } from "./copy.module";
+import { YouTubeEmbed } from "@next/third-parties/google";
 
 export const metadata: Metadata = { title: "Server" }
 export default async function Page() {
@@ -13,7 +14,7 @@ export default async function Page() {
     const res = await fetch("https://api.github.com/repos/aelithron/folderharbor/releases", { headers: { "User-Agent": "Aelithron-FolderHarbor-LandingPage", "Authorization": `Bearer ${process.env.GITHUB_PAT!}` } });
     const tag = (await res.json() as { tag_name: string, name: string }[]).find((item) => item.tag_name.startsWith("server/"));
     if (tag) version = { name: tag.name, tag: tag.tag_name.split("/")[1] }
-  } catch {}
+  } catch { }
   return (
     <main className="flex flex-col min-h-screen p-8 md:px-16">
       <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-2">
@@ -27,18 +28,24 @@ export default async function Page() {
         </div>
         <div className="flex justify-center"><Image src={serverPhoto} alt="A stylized screenshot of two macOS Finder windows, showing the FolderHarbor server working." loading="eager" className="rounded-xl" /></div>
       </div>
-      <div className="flex flex-col gap-2 mt-4 text-center items-center">
-        <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Highlights</h2>
-        <ul className="list-disc text-start">
-          <li>Multiple protocols supported (WebDAV and FTP)</li>
-          <li>Powerful Role-Based Access Control (RBAC)</li>
-          <li>Granular permission and Access Control List (ACL) system</li>
-          <li>Detailed audit logging system</li>
-          <li>Easily configurable through a JSON file</li>
-          <li>Many security systems and options</li>
-          <li>Powerful <Link href={"/cli"} className="underline hover:text-sky-500">CLI</Link> and <Link href={"/web"} className="underline hover:text-sky-500">Web Panel</Link> for administration</li>
-          <li>Fully <a href="https://github.com/aelithron/folderharbor" className="underline hover:text-sky-500">free and open source</a> under the MIT license</li>
-        </ul>
+      <div className="grid grid-cols-1 md:grid-cols-2 mt-4 md:mt-12">
+        <div className="flex flex-col gap-2 mt-4 text-center items-center">
+          <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Highlights</h2>
+          <ul className="list-disc text-start">
+            <li>Multiple protocols supported (WebDAV and FTP)</li>
+            <li>Powerful Role-Based Access Control (RBAC)</li>
+            <li>Granular permission and Access Control List (ACL) system</li>
+            <li>Detailed audit logging system</li>
+            <li>Easily configurable through a JSON file</li>
+            <li>Many security systems and options</li>
+            <li>Powerful <Link href={"/cli"} className="underline hover:text-sky-500">CLI</Link> and <Link href={"/web"} className="underline hover:text-sky-500">Web Panel</Link> for administration</li>
+            <li>Fully <a href="https://github.com/aelithron/folderharbor" className="underline hover:text-sky-500">free and open source</a> under the MIT license</li>
+          </ul>
+        </div>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold mb-1"><FontAwesomeIcon icon={faPlay} /> Demo</h1>
+          <YouTubeEmbed videoid="2cTzO3nWaGU" params="controls=0&rel=0" />
+        </div>
       </div>
     </main>
   );
