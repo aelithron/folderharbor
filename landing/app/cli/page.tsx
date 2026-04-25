@@ -8,6 +8,7 @@ import Link from "next/link";
 import { YouTubeEmbed } from "@next/third-parties/google";
 
 export const metadata: Metadata = { title: "CLI" }
+export const dynamic = "force-dynamic";
 export default async function Page() {
   return (
     <main className="flex flex-col min-h-screen p-8 md:px-16">
@@ -19,7 +20,7 @@ export default async function Page() {
         </div>
         <div className="flex justify-center"><Image src={cliPhoto} alt="A stylized screenshot of the FolderHarbor CLI." loading="eager" className="rounded-xl" /></div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 mt-4 md:mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 mt-4 md:mt-12 gap-4">
         <div className="flex flex-col gap-2 text-center items-center">
           <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Highlights</h2>
           <ul className="list-disc text-start">
@@ -110,6 +111,7 @@ async function DownloadCLI() {
         <a href={`${base}-${version.tag}-windows-amd64.exe`} target="_blank" className="hover:text-sky-500"><FontAwesomeIcon icon={faDownload} /> Windows</a>
         <a href={`https://github.com/aelithron/folderharbor/releases/cli%2F${version.tag}`} target="_blank" className="hover:text-sky-500 mt-2"><FontAwesomeIcon icon={faUpRightFromSquare} /> GitHub Release</a>
       </div>}
+      <a href="https://github.com/aelithron/folderharbor/blob/main/cli/README.md#installing" target="_blank" className="hover:text-sky-500 mt-2 p-2 rounded-xl bg-violet-700"><FontAwesomeIcon icon={faUpRightFromSquare} /> README/Instructions</a>
     </div>
   )
 }

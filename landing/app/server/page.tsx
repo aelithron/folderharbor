@@ -1,4 +1,4 @@
-import { faPlay, faServer, faStar, faTerminal } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faServer, faStar, faTerminal, faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Metadata } from "next";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { CopyButton } from "./copy.module";
 import { YouTubeEmbed } from "@next/third-parties/google";
 
 export const metadata: Metadata = { title: "Server" }
+export const dynamic = "force-dynamic";
 export default async function Page() {
   let version;
   try {
@@ -24,11 +25,12 @@ export default async function Page() {
           <div className="flex flex-col gap-2 bg-slate-700 p-3 rounded-xl my-4">
             <h1 className="text-lg font-semibold">Download {version ? version.name : "Server"}</h1>
             <CopyButton text="curl -fsSL https://fh.novatea.dev/install.sh | sudo bash"><code className="bg-slate-800 p-2 rounded-xl flex gap-1 items-center text-sm"><FontAwesomeIcon icon={faTerminal} /> curl -fsSL https://fh.novatea.dev/install.sh | sudo bash</code></CopyButton>
+            <a href="https://github.com/aelithron/folderharbor/blob/main/server/README.md#setup" target="_blank" className="hover:text-sky-500 mt-2 p-2 rounded-xl bg-violet-700"><FontAwesomeIcon icon={faUpRightFromSquare} /> README/Instructions</a>
           </div>
         </div>
         <div className="flex justify-center"><Image src={serverPhoto} alt="A stylized screenshot of two macOS Finder windows, showing the FolderHarbor server working." loading="eager" className="rounded-xl" /></div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 mt-4 md:mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 mt-4 md:mt-12 gap-4">
         <div className="flex flex-col gap-2 mt-4 text-center items-center">
           <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Highlights</h2>
           <ul className="list-disc text-start">

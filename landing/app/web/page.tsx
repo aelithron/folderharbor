@@ -7,6 +7,7 @@ import Link from "next/link";
 import { YouTubeEmbed } from "@next/third-parties/google";
 
 export const metadata: Metadata = { title: "Web" }
+export const dynamic = "force-dynamic";
 export default async function Page() {
   let version;
   try {
@@ -33,7 +34,7 @@ export default async function Page() {
         </div>
         <div className="flex justify-center"><Image src={webPhoto} alt="A stylized screenshot of the FolderHarbor web panel." loading="eager" className="rounded-xl" /></div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 mt-4 md:mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 mt-4 md:mt-12 gap-4">
         <div className="flex flex-col gap-2 mt-4 text-center items-center">
           <h2 className="text-2xl font-semibold"><FontAwesomeIcon icon={faStar} /> Highlights</h2>
           <ul className="list-disc text-start">
