@@ -31,7 +31,7 @@ export default function AccountSelector() {
       {sessions?.length === 0 && <div className="flex flex-col items-center">
         <p>FolderHarbor is a powerful, multi-protocol file server.</p>
         <p>If you know your server address, you can continue to log in.</p>
-        <p>Don&apos;t have a FolderHarbor server? <a href="https://github.com/aelithron/folderharbor" className="hover:text-sky-500 underline">Run one!</a></p>
+        <p>Don&apos;t have a FolderHarbor server? <a href="https://fh.novatea.dev/server" className="hover:text-sky-500 underline">Run one!</a></p>
         <Link href={"/auth"} className="bg-violet-500 text-white hover:text-sky-500 p-1 px-2 text-lg rounded-lg mt-3 w-fit">Sign In</Link>
       </div>}
       {(sessions && sessions?.length !== 0) && <div className="flex flex-col gap-2 mt-2 items-center">
