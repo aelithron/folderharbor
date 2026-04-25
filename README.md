@@ -4,6 +4,11 @@
 
 A powerful, multi-protocol file server with Role-Based Access Control (RBAC). \
 This project was made for Hack Club [Flavortown](https://flavortown.hackclub.com)!
+
+<a href="https://notbyai.fyi" target="_blank">
+  <img src="landing/public/not-by-ai.svg" alt="Developed by a human, not by AI!">
+</a>
+
 ## Highlights
 FolderHarbor is a powerful file server, designed in a multi-component "stack" style. \
 Some cool things it features:

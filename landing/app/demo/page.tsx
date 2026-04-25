@@ -78,6 +78,7 @@ export default function Page() {
             <li>Transfers are slow: Check your Internet connection! You may also want to try with FTP instead of WebDAV, as it is better for transfer speeds (especially for bigger files).</li>
             <li>Can&apos;t login to WebDAV/FTP: Make sure your username and password are the same as the ones used on the web panel when you registered! You can also use token-based login by copying your token from the web home page.</li>
             <li>CLI installation failing: If you have any reason why you can&apos;t get the CLI installed, try just running it in place. Open a terminal in your Downloads folder and type <code>./folderharbor-cli-[version]-[os]-[arch] --help</code> (add <code>.exe</code> to the end if on Windows). If that works, please just use that instead!</li>
+            <li>WebDAV opening in the browser: Change the `https://` URL start to `webdavs://` or `davs://`. I&apos;ve mainly noticed this change needed in Dolphin (in Linux distros using KDE).</li>
           </ul>
           <p>You can also watch the demo videos to see the intended behavior, if you would like!</p>
         </div>

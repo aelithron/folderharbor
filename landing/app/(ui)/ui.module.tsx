@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe, faPlay, faServer, faTerminal } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import notByAI from "@/public/not-by-ai.svg";
 
 export function Header() {
   return (
@@ -22,6 +23,7 @@ export function Footer() {
   return (
     <footer className="flex gap-4 bg-violet-600/30 p-3 md:px-8 justify-between items-center align-middle rounded-xl m-4">
       <a href="https://github.com/aelithron/folderharbor" target="_blank" className="hover:text-sky-500 text-slate-500 text-lg flex gap-1 items-center"><FontAwesomeIcon icon={faGithub} /> <p className="underline">Source</p></a>
+      <a href="https://notbyai.fyi" target="_blank"><Image src={notByAI} alt="Developed by a human, not by AI!" /></a>
     </footer>
   );
 }
