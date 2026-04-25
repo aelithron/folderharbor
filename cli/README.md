@@ -1,9 +1,12 @@
 # FolderHarbor CLI
 A cross-platform administration CLI for FolderHarbor, written in Go! This requires an operational [FolderHarbor server](https://fh.novatea.dev/server) to use.
+
+<img src="/landing/public/shots/cli.webp" height="125" />
+
 # [Download](https://fh.novatea.dev/cli)
 ## Highlights
 - Easy-to-use syntax with help menus
 - Information-dense outputs
 - Speed (the CLI is built to work fast!)
-- Designed for the FolderHarbor Server
+- Designed for the [FolderHarbor Server](https://fh.novatea.dev/server)
 - Fully free and open source under the MIT license
