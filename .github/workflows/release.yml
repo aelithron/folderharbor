@@ -32,30 +32,45 @@ jobs:
           node-version: 24
           cache: "pnpm"
           cache-dependency-path: "server/pnpm-lock.yaml"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
       - run: pnpm install --frozen-lockfile
       - name: Lint / Type-check
         run: |
           pnpm lint
           pnpm check-types
+      - name: Bundle (shared)
+        run: |
+          mkdir -p dist/shared/
+          mkdir release/
+          pnpm build
+          cp dist/index.js dist/shared/index.js
+          cp extras/folderharbor.service dist/shared/folderharbor.service
+          cp extras/folderharbor-server dist/shared/folderharbor-server
+          cp -r drizzle/ dist/shared/drizzle/
+          cp -r patches/ dist/shared/patches/
+          cp example.config.json dist/shared/example.config.json
+          cp pnpm-workspace.yaml dist/shared/pnpm-workspace.yaml
+          cp pnpm-lock.yaml dist/shared/pnpm-lock.yaml
+          cp package.json dist/shared/package.json
       - name: Bundle (x86_64)
         env:
           VERSION: ${{ env.VERSION }}
         run: |
           mkdir -p dist/x86_64/
-          mkdir release/
-          pnpm build
-          cp dist/index.js dist/x86_64/index.js
-          cp extras/folderharbor.service dist/x86_64/folderharbor.service
-          cp extras/folderharbor-server dist/x86_64/folderharbor-server
-          cp -r drizzle/ dist/x86_64/drizzle/
-          cp -r patches/ dist/x86_64/patches/
-          cp example.config.json dist/x86_64/example.config.json
-          cp pnpm-workspace.yaml dist/x86_64/pnpm-workspace.yaml
-          cp pnpm-lock.yaml dist/x86_64/pnpm-lock.yaml
-          cp package.json dist/x86_64/package.json
-          cd dist/x86_64
+          cp -r dist/shared/. dist/x86_64/
+          cd dist/x86_64/
           pnpm install --prod --frozen-lockfile
           tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-x86_64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
+      - name: Bundle (ARM64)
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          mkdir -p dist/arm64/
+          cp -r dist/shared/. dist/arm64/
+          cd dist/arm64/
+          docker run --rm --platform linux/arm64 -v $(pwd):/work -w /work node:24-slim sh -c "npm i -g pnpm && pnpm install --prod --frozen-lockfile"
+          tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-arm64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
       - name: Attest Builds
         uses: actions/attest@v4
         with:
