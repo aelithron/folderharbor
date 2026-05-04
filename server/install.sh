@@ -31,10 +31,12 @@ case "$(uname -s)" in
     exit 1
     ;;
 esac
-echo "Note that this is the full server! If you want to connect to an existing server, check out the Web Panel (https://fh.novatea.dev/web) and the CLI (https://fh.novatea.dev/cli)."
-read -p "Do you want to install FolderHarbor Server? (y/n): " -n 1  </dev/tty
+echo "Note that this is the full server, not something to connect to an existing server!"
+echo "If you want to connect to an existing server, check out the Web Panel (https://fh.novatea.dev/web) and the CLI (https://fh.novatea.dev/cli)."
+read -p "Do you want to install FolderHarbor Server on this machine? (y/n): " -n 1  </dev/tty
 echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && exit 1
+echo ""
 echo "Finding latest server version..."
 LATEST=$(curl -fsS https://fh.novatea.dev/api/version/server)
 if [ -z "$LATEST" ]; then
@@ -91,10 +93,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   chown root /usr/bin/folderharbor
   echo "Installed FolderHarbor CLI $LATESTCLI!"
 fi
-echo "FolderHarbor Server is now installed! Welcome, and thanks for using FolderHarbor! ~Nova"
-echo "You will still need to do a couple more things, though:"
+echo ""
+echo "FolderHarbor Server is now installed!"
+echo "You still need to do a few more things, though:"
 echo "1. Create a PostgreSQL database. You will need a username, password, host, port, and database name."
 echo '2. Add these details (in "connection string" format) to /etc/folderharbor/config.json (you can also customize this file in other ways).'
 echo "3. Run the following command: sudo systemctl start folderharbor.service"
 echo "4. Run another command: sudo folderharbor-server --setup"
-echo "This will start your server, and you can start using it!"
+echo "After that, you will have a running and usable FolderHarbor Server! Welcome, and thanks for using FolderHarbor! ~Nova"
