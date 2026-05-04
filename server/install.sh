@@ -13,6 +13,11 @@ case "$(uname -m)" in
     NODEARCH="x64"
     CLIARCH="amd64"
     ;;
+  aarch64 | arm64)
+    ARCH="arm64"
+    NODEARCH="arm64"
+    CLIARCH="arm64"
+    ;;
   *)
     echo "Error: Unsupported CPU architecture $(uname -m)! Please try again on another computer/server, or make a GitHub Issue on https://github.com/aelithron/folderharbor/issues to request we support your architecture."
     exit 1
