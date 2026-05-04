@@ -13,7 +13,7 @@ This is the server/core for FolderHarbor. It can run independently, and provides
 - Powerful [CLI](https://fh.novatea.dev/cli) and [Web Panel](https://fh.novatea.dev/web) for administration
 - Fully free and open source under the MIT license
 ## Setup
-> Note: The FolderHarbor server is designed for Linux only! These instructions likely will not work on non-Linux platforms, or if your CPU architecture isn't x86_64 or AMD64.
+> Note: The FolderHarbor server is designed for Linux only! These instructions likely will not work on non-Linux platforms, or if your CPU architecture isn't x86_64 or ARM64.
 ### Automated
 Simply run `curl -fsSL https://fh.novatea.dev/install.sh | sudo bash`! It will install the latest version of FolderHarbor Server (as well as the CLI if you tell it to), and guide you through database setup as well.
 ### Manual
