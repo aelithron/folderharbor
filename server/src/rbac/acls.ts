@@ -35,6 +35,8 @@ export async function getPaths(userID: number): Promise<{ allow: string[], deny:
 export async function checkPath(userID: number, checkedPath: string): Promise<boolean> {
   const paths = await getPaths(userID);
   if ("error" in paths) return false;
+  const user = await getUser(userID);
+  if ("error" in user || user.locked) return false;
   let allowed = false;
   const itemPath = path.normalize(checkedPath);
   if (itemPath === "/") return true;

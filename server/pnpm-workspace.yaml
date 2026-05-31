@@ -1,2 +1,6 @@
+allowBuilds:
+  argon2: true
+  dtrace-provider: false
+  esbuild: true
 patchedDependencies:
   ftp-srv: patches/ftp-srv.patch
