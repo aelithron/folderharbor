@@ -1,7 +1,8 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
+import { FHRole } from "@folderharbor/sdk";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { isEqual } from "lodash-es";
@@ -9,10 +10,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-type Role = { name: string, acls: number[], permissions: string[] }
 export default function RoleSettings({ roleID }: { roleID: number }) {
   const [session, setSession] = useState<Session | undefined>();
-  const [role, setRole] = useState<Role | undefined>();
+  const [role, setRole] = useState<FHRole | undefined>();
   useEffect(() => {
     async function loadSession() { if (localStorage.getItem("activeSession")) setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
@@ -20,16 +20,13 @@ export default function RoleSettings({ roleID }: { roleID: number }) {
   useEffect(() => {
     async function loadRole() {
       if (!session) return;
-      const res = await query(session, `admin/roles/${roleID}`);
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setRole(await getClient(session).admin.roles.get(roleID));
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setRole(res.body);
     }
     loadRole();
   }, [session, roleID]);
@@ -41,34 +38,30 @@ export default function RoleSettings({ roleID }: { roleID: number }) {
     </div>
   );
 }
-function SettingsPanel({ session, role, roleID }: { session: Session, role: Role, roleID: number }) {
+function SettingsPanel({ session, role, roleID }: { session: Session, role: FHRole, roleID: number }) {
   const router = useRouter();
   const [name, setName] = useState<string>(role.name);
   async function updateInfo(e: React.SubmitEvent) {
     e.preventDefault();
-    const res = await query(session, `admin/roles/${roleID}`, { method: "PATCH", body: JSON.stringify({ name: (name !== role.name ? name : undefined) }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
-    }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
+    try {
+        await getClient(session).admin.roles.edit(roleID, { name: (name !== role.name ? name : undefined) });
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
+      }
     alert(`Updated ${name !== role.name ? name : role.name}'s information!`);
   }
   async function deleteRole() {
     const check = confirm(`Are you sure you want to permanently delete the role "${role.name}" (ID ${roleID}) on "${session.server}"?`);
     if (!check) return;
-    const res = await query(session, `admin/roles/${roleID}`, { method: "DELETE" });
-    if ("error" in res) {
-      alert(res.error);
-      return;
-    }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
+    try {
+        await getClient(session).admin.roles.delete(roleID);
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
+      }
     router.push("/admin/roles");
   }
   return (
@@ -96,7 +89,7 @@ function SettingsPanel({ session, role, roleID }: { session: Session, role: Role
     </div>
   );
 }
-function RoleGrants({ session, role, roleID }: { session: Session, role: Role, roleID: number }) {
+function RoleGrants({ session, role, roleID }: { session: Session, role: FHRole, roleID: number }) {
   const [acls, setACLs] = useState<number[]>(role.acls);
   const [permissions, setPermissions] = useState<string[]>(role.permissions);
   const [newGrant, setNewGrant] = useState<{ acl: string, permission: string }>({ acl: "", permission: "" });
@@ -106,26 +99,23 @@ function RoleGrants({ session, role, roleID }: { session: Session, role: Role, r
       if (!session) return;
       let acls;
       if (session.permissions.includes("acls:list")) {
-        acls = await query(session, `admin/acls`);
-        if ("error" in acls) {
-          alert(acls.error);
-          return;
-        }
-        if ("redirect" in acls) {
-          window.location.href = acls.redirect;
-          return;
+        try {
+          acls = await getClient(session).admin.acls.list();
+        } catch (e) {
+          const errBody = handleError(e as Error);
+          if ("error" in errBody) alert(errBody.error);
+          if ("redirect" in errBody) window.location.href = errBody.redirect;
         }
       }
-      const permissions = await query(session, `admin/permissions`);
-      if ("error" in permissions) {
-        alert(permissions.error);
-        return;
+      let permissions;
+      try {
+        permissions = await getClient(session).admin.permissions();
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in permissions) {
-        window.location.href = permissions.redirect;
-        return;
-      }
-      setLists({ acls: (acls ? acls.body : undefined), permissions: permissions.body });
+      setLists({ acls, permissions });
     }
     loadLists();
   }, [session]);
@@ -140,16 +130,14 @@ function RoleGrants({ session, role, roleID }: { session: Session, role: Role, r
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function revokeItem(item: any, state: any[], setState: Dispatch<SetStateAction<any[]>>) { setState(state.filter((current) => current !== item)); }
   async function applyChanges() {
-    const res = await query(session, `admin/roles/${roleID}`, { method: "PATCH", body: JSON.stringify({ acls: (!isEqual(acls, role.acls) ? acls : undefined), permissions: (!isEqual(permissions, role.permissions) ? permissions : undefined) }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.roles.edit(roleID, { acls: (!isEqual(acls, role.acls) ? acls : undefined), permissions: (!isEqual(permissions, role.permissions) ? permissions : undefined) });
+      alert("Saved new grants successfully!");
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    if (res.body.message !== "Nothing to update.") alert("Saved new grants successfully!");
   }
   return (
     <div className="flex flex-col gap-4 items-center md:col-span-2">
