@@ -5,4 +5,4 @@ ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
 minimumReleaseAgeExclude:
-  - '@folderharbor/sdk@1.1.2'
+  - '@folderharbor/sdk@1.1.3'

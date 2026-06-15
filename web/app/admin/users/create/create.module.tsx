@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,16 +16,15 @@ export default function CreateUser() {
   }, []);
   async function updateInfo(e: React.SubmitEvent) {
     e.preventDefault();
-    const res = await query(session!, `admin/users`, { method: "POST", body: JSON.stringify({ username, password }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    let newID;
+    try {
+      newID = (await getClient(session!).admin.users.create({ username, password })).id;
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    router.push(`/admin/users/${res.body.id}`);
+    router.push(`/admin/users/${newID}`);
   }
   return (
     <form onSubmit={updateInfo} className="flex flex-col gap-2">

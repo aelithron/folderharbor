@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,16 +17,13 @@ export default function Users() {
   useEffect(() => {
     async function loadUsers() {
       if (!session) return;
-      const res = await query(session, "admin/users");
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setUsers(await getClient(session).admin.users.list());
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setUsers(res.body);
     }
     loadUsers();
   }, [session]);

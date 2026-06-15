@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,12 +8,11 @@ import { isEqual } from "lodash-es";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { FHFullUser, FHLimitedUser } from "@folderharbor/sdk";
 
-type LimitedUser = { access: "limited" | "full", username: string, locked: boolean, failedLogins: number }
-type FullUser = LimitedUser & { access: "full", roles: number[], acls: number[], permissions: string[], sessions?: { id: number, createdAt: string, expiry: string }[] }
 export default function UserSettings({ userID }: { userID: number }) {
   const [session, setSession] = useState<Session | undefined>();
-  const [user, setUser] = useState<LimitedUser | FullUser | undefined>();
+  const [user, setUser] = useState<FHFullUser | FHLimitedUser | undefined>();
   useEffect(() => {
     async function loadSession() { if (localStorage.getItem("activeSession")) setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
@@ -21,16 +20,13 @@ export default function UserSettings({ userID }: { userID: number }) {
   useEffect(() => {
     async function loadUser() {
       if (!session) return;
-      const res = await query(session, `admin/users/${userID}`);
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setUser(await getClient(session).admin.users.get(userID));
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setUser(res.body);
     }
     loadUser();
   }, [session, userID]);
@@ -42,74 +38,64 @@ export default function UserSettings({ userID }: { userID: number }) {
     </div>
   );
 }
-function SettingsPanel({ session, user, userID }: { session: Session, user: LimitedUser | FullUser, userID: number }) {
+function SettingsPanel({ session, user, userID }: { session: Session, user: FHFullUser | FHLimitedUser, userID: number }) {
   const router = useRouter();
   const [username, setUsername] = useState<string>(user.username);
   const [password, setPassword] = useState<string>("");
   async function updateInfo(e: React.SubmitEvent) {
     e.preventDefault();
-    const res = await query(session, `admin/users/${userID}`, { method: "PATCH", body: JSON.stringify({ username: (username !== user.username ? username : undefined), password: (password !== "" ? password : undefined) }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.users.edit(userID, { username: (username !== user.username ? username : undefined), password: (password !== "" ? password : undefined) });
+      alert(`Updated ${username !== user.username ? username : user.username}'s information!${password !== "" ? "\nThey have been signed out across their devices, and will need to log in again." : ""}`);
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    alert(`Updated ${username !== user.username ? username : user.username}'s information!${password !== "" ? "\nThey have been signed out across their devices, and will need to log in again." : ""}`);
   }
   async function toggleLock() {
-    const res = await query(session, `admin/users/${userID}/lock`, { method: "PATCH", body: JSON.stringify({ locked: !user.locked }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.users.lock(userID, !user.locked);
+      window.location.reload();
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    window.location.reload();
   }
   async function deleteUser() {
     const check = confirm(`Are you sure you want to permanently delete "${user.username}" (ID ${userID}) on "${session.server}"?`);
     if (!check) return;
-    const res = await query(session, `admin/users/${userID}`, { method: "DELETE" });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.users.delete(userID);
+      router.push("/admin/users");
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    router.push("/admin/users");
   }
   async function revokeSession(id: number) {
-    const res = await query(session, `admin/sessions/${id}`, { method: "DELETE" });
-    if ("error" in res) {
-      alert(res.error);
-      return;
-    }
-    if ("redirect" in res) {
+    try {
+      await getClient(session).admin.revokeSession(id);
+      window.location.reload();
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
       // eslint-disable-next-line react-hooks/immutability
-      window.location.href = res.redirect;
-      return;
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    window.location.reload();
   }
   async function clearFailedLogins() {
-    const res = await query(session, `admin/users/${userID}`, { method: "PATCH", body: JSON.stringify({ clearLoginAttempts: true }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.users.edit(userID, { clearFailedLogins: true });
+      alert("Successfully reset failed login attempts!");
+      window.location.reload();
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    alert("Successfully reset failed login attempts!");
-    window.location.reload();
   }
   return (
     <div className={`grid gap-4 grid-cols-1 ${user.access === "full" ? "md:grid-cols-3 md:grid-rows-2" : ""}`}>
@@ -144,11 +130,11 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
           <button onClick={deleteUser} className="rounded-xl p-1 px-2 bg-red-500 hover:text-sky-500 w-fit mt-2">Delete User</button>
         </div>}
       </div>
-      {user.access === "full" && <UserGrants session={session} user={user as FullUser} userID={userID} />}
+      {user.access === "full" && <UserGrants session={session} user={user as FHFullUser} userID={userID} />}
       {user.access === "full" && <div className="flex flex-col gap-3 items-center md:col-span-3">
         <h2 className="text-xl font-semibold">Sessions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          {(user as FullUser).sessions && (user as FullUser).sessions!.map((sessionItem) => <div key={sessionItem.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
+          {(user as FHFullUser).sessions && (user as FHFullUser).sessions!.map((sessionItem) => <div key={sessionItem.id} className="flex gap-4 bg-slate-600 p-2 rounded-lg items-center">
             <div className="flex flex-col">
               <p className="text-lg">Session #{sessionItem.id}</p>
               <p>Created {new Date(sessionItem.createdAt).toLocaleString()}</p>
@@ -156,13 +142,13 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: Limi
             </div>
             {session.permissions.includes("users:edit") && <button className="hover:text-sky-500 bg-red-500 p-1 rounded-xl" onClick={() => revokeSession(sessionItem.id)}><FontAwesomeIcon icon={faTrash} /></button>}
           </div>)}
-          {(!(user as FullUser).sessions || (user as FullUser).sessions!.length === 0) && <p className="md:col-span-3">None</p>}
+          {(!(user as FHFullUser).sessions || (user as FHFullUser).sessions!.length === 0) && <p className="md:col-span-3">None</p>}
         </div>
       </div>}
     </div>
   );
 }
-function UserGrants({ session, user, userID }: { session: Session, user: FullUser, userID: number }) {
+function UserGrants({ session, user, userID }: { session: Session, user: FHFullUser, userID: number }) {
   const [roles, setRoles] = useState<number[]>(user.roles);
   const [acls, setACLs] = useState<number[]>(user.acls);
   const [permissions, setPermissions] = useState<string[]>(user.permissions);
@@ -174,37 +160,32 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
       let roles;
       let acls;
       if (session.permissions.includes("roles:list")) {
-        roles = await query(session, `admin/roles`);
-        if ("error" in roles) {
-          alert(roles.error);
-          return;
-        }
-        if ("redirect" in roles) {
-          window.location.href = roles.redirect;
-          return;
+        try {
+          roles = await getClient(session).admin.roles.list();
+        } catch (e) {
+          const errBody = handleError(e as Error);
+          if ("error" in errBody) alert(errBody.error);
+          if ("redirect" in errBody) window.location.href = errBody.redirect;
         }
       }
       if (session.permissions.includes("acls:list")) {
-        acls = await query(session, `admin/acls`);
-        if ("error" in acls) {
-          alert(acls.error);
-          return;
-        }
-        if ("redirect" in acls) {
-          window.location.href = acls.redirect;
-          return;
+        try {
+          acls = await getClient(session).admin.acls.list();
+        } catch (e) {
+          const errBody = handleError(e as Error);
+          if ("error" in errBody) alert(errBody.error);
+          if ("redirect" in errBody) window.location.href = errBody.redirect;
         }
       }
-      const permissions = await query(session, `admin/permissions`);
-      if ("error" in permissions) {
-        alert(permissions.error);
-        return;
+      let permissions;
+      try {
+        permissions = await getClient(session).admin.permissions();
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in permissions) {
-        window.location.href = permissions.redirect;
-        return;
-      }
-      setLists({ roles: (roles ? roles.body : undefined), acls: (acls ? acls.body : undefined), permissions: permissions.body });
+      setLists({ roles, acls, permissions });
     }
     loadLists();
   }, [session]);
@@ -219,16 +200,14 @@ function UserGrants({ session, user, userID }: { session: Session, user: FullUse
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function revokeItem(item: any, state: any[], setState: Dispatch<SetStateAction<any[]>>) { setState(state.filter((current) => current !== item)); }
   async function applyChanges() {
-    const res = await query(session, `admin/users/${userID}/grant`, { method: "PUT", body: JSON.stringify({ roles: (!isEqual(roles, user.roles) ? roles : undefined), acls: (!isEqual(acls, user.acls) ? acls : undefined), permissions: (!isEqual(permissions, user.permissions) ? permissions : undefined) }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.users.editGrants(userID, { roles: (!isEqual(roles, user.roles) ? roles : undefined), acls: (!isEqual(acls, user.acls) ? acls : undefined), permissions: (!isEqual(permissions, user.permissions) ? permissions : undefined) });
+      alert("Saved new grants successfully!");
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    if (res.body.message !== "Nothing to update.") alert("Saved new grants successfully!");
   }
   return (
     <div className="flex flex-col gap-4 items-center md:col-span-2">
