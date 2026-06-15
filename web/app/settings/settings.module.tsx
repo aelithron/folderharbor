@@ -1,17 +1,17 @@
 "use client"
-import { ClientConfig, Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { Session } from "@/folderharborweb";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
+import { FHClientConfig, FHSelfInfo } from "@folderharbor/sdk";
 import { faLock, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type SelfInfo = { id: number, username: string, sessions: { id: number, createdAt: string, expiry: string }[], activeSession: number, failedLoginLockout: boolean, permissions: string[] };
 export default function Settings() {
   const [session, setSession] = useState<Session | undefined>();
-  const [selfInfo, setSelfInfo] = useState<SelfInfo | undefined>();
-  const [clientConfig, setClientConfig] = useState<ClientConfig | undefined>();
+  const [selfInfo, setSelfInfo] = useState<FHSelfInfo | undefined>();
+  const [clientConfig, setClientConfig] = useState<FHClientConfig | undefined>();
   useEffect(() => {
     async function loadSession() { if (localStorage.getItem("activeSession")) setSession(await db.sessions.get(parseInt(localStorage.getItem("activeSession")!))); }
     loadSession();
@@ -19,29 +19,23 @@ export default function Settings() {
   useEffect(() => {
     async function loadSelfInfo() {
       if (!session) return;
-      const res = await query(session, "me");
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setSelfInfo(await getClient(session).me.info());
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setSelfInfo(res.body);
     }
     async function loadClientConfig() {
       if (!session) return;
-      const res = await query(session, "clientconfig");
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setClientConfig(await getClient(session).clientconfig());
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setClientConfig({ selfUsernameChanges: res.body.selfUsernameChanges, registration: res.body.registration });
     }
     loadSelfInfo();
     loadClientConfig();
@@ -53,55 +47,49 @@ export default function Settings() {
     </div>
   );
 }
-function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, selfInfo: SelfInfo, clientConfig: ClientConfig }) {
+function SettingsForm({ session, selfInfo, clientConfig }: { session: Session, selfInfo: FHSelfInfo, clientConfig: FHClientConfig }) {
   const router = useRouter();
   const [username, setUsername] = useState<string>(selfInfo.username);
   const [password, setPassword] = useState<string>("");
   async function clearFailedLogins() {
-    const res = await query(session, "me", { method: "PATCH", body: JSON.stringify({ clearLoginAttempts: true }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).me.edit({ clearLoginAttempts: true });
+      alert("Successfully reset failed login attempts!");
+      window.location.reload();
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    alert("Successfully reset failed login attempts!");
-    window.location.reload();
   }
   async function revokeSession(id: number) {
-    const res = await query(session, "me/session", { method: "DELETE", body: JSON.stringify({ sessionID: id }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
-    }
-    if ("redirect" in res) {
+    try {
+      await getClient(session).me.revokeSession(id);
+      window.location.reload();
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
       // eslint-disable-next-line react-hooks/immutability
-      window.location.href = res.redirect;
-      return;
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    window.location.reload();
   }
   async function updateInfo(e: React.SubmitEvent) {
     e.preventDefault();
-    const res = await query(session, "me", { method: "PATCH", body: JSON.stringify({ username: (username !== selfInfo.username ? username : undefined), password: (password !== "" ? password : undefined) }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).me.edit({ username: (username !== selfInfo.username ? username : undefined), password: (password !== "" ? password : undefined) });
+      alert(`Updated your info successfully!${password !== "" ? `\nYou have been signed out of all sessions, and will need to log in again.\nAs a reminder, your server address is "${session.server}", and your username is "${username !== selfInfo.username ? username : selfInfo.username}".` : ""}`);
+      if (password !== "") {
+        db.sessions.delete(parseInt(localStorage.getItem("activeSession")!));
+        localStorage.removeItem("activeSession");
+        router.push("/");
+        return;
+      }
+      if (username !== selfInfo.username) db.sessions.update(parseInt(localStorage.getItem("activeSession")!), { username: username });
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    alert(`Updated your info successfully!${password !== "" ? `\nYou have been signed out of all sessions, and will need to log in again.\nAs a reminder, your server address is "${session.server}", and your username is "${username !== selfInfo.username ? username : selfInfo.username}".` : ""}`);
-    if (password !== "") {
-      db.sessions.delete(parseInt(localStorage.getItem("activeSession")!));
-      localStorage.removeItem("activeSession");
-      router.push("/");
-      return;
-    }
-    if (username !== selfInfo.username) db.sessions.update(parseInt(localStorage.getItem("activeSession")!), { username: username });
   }
   return (
     <div className={`grid grid-cols-1 ${selfInfo.permissions.length >= 1 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-4 md:gap-2 my-4`}>

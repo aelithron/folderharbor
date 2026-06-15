@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 export default function Logs() {
   const [session, setSession] = useState<Session | undefined>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [logs, setLogs] = useState<{ userID: number, username: string | null, action: string, body: any | null, blurb: string, createdAt: string }[] | undefined>();
+  const [logs, setLogs] = useState<{ userID: number, username: string | null, action: string, body: any | null, blurb: string, createdAt: Date }[] | undefined>();
   const [page, setPage] = useState<number>(1);
   const [pageCount, setPageCount] = useState<number>(1);
   useEffect(() => {
@@ -19,24 +19,22 @@ export default function Logs() {
   useEffect(() => {
     async function loadLogs() {
       if (!session) return;
-      const res = await query(session, `admin/logs?page=${page}`);
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        const logs = await getClient(session).admin.logs(page);
+        setLogs(logs.logs);
+        setPageCount(logs.pageCount);
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setLogs(res.body.logs);
-      setPageCount(res.body.pageCount);
     }
     loadLogs();
   }, [session, page]);
   return (
     <div className="flex flex-col mt-4">
       {(session && logs) && <div className="flex flex-col gap-2">
-        {logs.map((entry) => <div key={entry.createdAt} className="bg-slate-700 p-2 rounded-lg">
+        {logs.map((entry) => <div key={entry.createdAt.getTime()} className="bg-slate-700 p-2 rounded-lg">
           <div className="flex gap-1"><p className="font-semibold">{entry.username}</p> (ID #{entry.userID}) {entry.blurb} at {new Date(entry.createdAt).toLocaleString()} ({entry.action})</div>
           {entry.body && <pre className="word-wrap break-all">{JSON.stringify(entry.body, null, 2)}</pre>}
         </div>)}
