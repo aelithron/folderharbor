@@ -1,8 +1,7 @@
 "use client"
-import { ClientConfig } from "@/folderharborweb";
 import { handleError } from "@/utils/api";
 import { db } from "@/utils/db";
-import { FolderHarbor } from "@folderharbor/sdk";
+import { FHClientConfig, FolderHarbor } from "@folderharbor/sdk";
 import { faArrowRight, faPencil } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
@@ -14,7 +13,7 @@ export default function LoginForm({ defaultURL }: { defaultURL: string | undefin
   const [server, setServer] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [clientConfig, setClientConfig] = useState<ClientConfig | undefined>();
+  const [clientConfig, setClientConfig] = useState<FHClientConfig | undefined>();
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     let authRes;
