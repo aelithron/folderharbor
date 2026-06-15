@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,16 +19,13 @@ export default function ACLSettings({ aclID }: { aclID: number }) {
   useEffect(() => {
     async function loadACL() {
       if (!session) return;
-      const res = await query(session, `admin/acls/${aclID}`);
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setACL(await getClient(session).admin.acls.get(aclID));
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setACL(res.body);
     }
     loadACL();
   }, [session, aclID]);
@@ -45,30 +42,26 @@ function SettingsPanel({ session, acl, aclID }: { session: Session, acl: ACL, ac
   const [name, setName] = useState<string>(acl.name);
   async function updateInfo(e: React.SubmitEvent) {
     e.preventDefault();
-    const res = await query(session, `admin/acls/${aclID}`, { method: "PATCH", body: JSON.stringify({ name: (name !== acl.name ? name : undefined) }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.acls.edit(aclID, { name: (name !== acl.name ? name : undefined) });
+      alert(`Updated ${name !== acl.name ? name : acl.name}'s information!`);
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    alert(`Updated ${name !== acl.name ? name : acl.name}'s information!`);
   }
   async function deleteACL() {
     const check = confirm(`Are you sure you want to permanently delete the ACL "${acl.name}" (ID ${aclID}) on "${session.server}"?`);
     if (!check) return;
-    const res = await query(session, `admin/acls/${aclID}`, { method: "DELETE" });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.acls.delete(aclID);
+      router.push("/admin/acls");
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    router.push("/admin/acls");
   }
   return (
     <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
@@ -108,16 +101,14 @@ function ACLPaths({ session, acl, aclID }: { session: Session, acl: ACL, aclID: 
   }
   function removePath(item: string, state: string[], setState: Dispatch<SetStateAction<string[]>>) { setState(state.filter((current) => current !== item)); }
   async function applyChanges() {
-    const res = await query(session, `admin/acls/${aclID}`, { method: "PATCH", body: JSON.stringify({ allow: (!isEqual(allow, acl.allow) ? allow : undefined), deny: (!isEqual(deny, acl.deny) ? deny : undefined) }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      await getClient(session).admin.acls.edit(aclID, { allow: (!isEqual(allow, acl.allow) ? allow : undefined), deny: (!isEqual(deny, acl.deny) ? deny : undefined) });
+      alert("Saved new paths successfully!");
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    if (res.body.message !== "Nothing to update.") alert("Saved new paths successfully!");
   }
   return (
     <div className="flex flex-col gap-4 items-center md:col-span-2">

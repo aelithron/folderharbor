@@ -88,7 +88,7 @@ function SettingsPanel({ session, user, userID }: { session: Session, user: FHFu
   }
   async function clearFailedLogins() {
     try {
-      await getClient(session).admin.users.edit(userID, { clearFailedLogins: true });
+      await getClient(session).admin.users.edit(userID, { clearLoginAttempts: true });
       alert("Successfully reset failed login attempts!");
       window.location.reload();
     } catch (e) {
