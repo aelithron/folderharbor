@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { faServer, faTrash, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,9 +14,13 @@ export default function AccountSelector() {
   async function logOut(session: Session) {
     const tokenCheck = confirm("Do you want to invalidate this session's token? This will disconnect any clients you logged into with this token.");
     if (tokenCheck) {
-      const delReq = await query(session, "auth", { method: "DELETE" });
-      if ("error" in delReq) alert(delReq.error);
-      if ("redirect" in delReq) router.push(delReq.redirect);
+      try {
+        await getClient(session).auth.logout();
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) router.push(errBody.redirect);
+      }
     }
     await db.sessions.delete(session.webID);
     localStorage.removeItem("activeSession");

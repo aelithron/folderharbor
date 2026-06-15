@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { useEffect, useState } from "react";
 
@@ -14,16 +14,13 @@ export default function Permissions() {
   useEffect(() => {
     async function loadPermissions() {
       if (!session) return;
-      const res = await query(session, `admin/permissions`);
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setPermissions(await getClient(session).admin.permissions());
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setPermissions(res.body);
     }
     loadPermissions();
   }, [session]);

@@ -1,6 +1,8 @@
 "use client"
 import { ClientConfig } from "@/folderharborweb";
+import { handleError } from "@/utils/api";
 import { db } from "@/utils/db";
+import { FolderHarbor } from "@folderharbor/sdk";
 import { faArrowRight, faPencil } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
@@ -15,21 +17,16 @@ export default function LoginForm({ defaultURL }: { defaultURL: string | undefin
   const [clientConfig, setClientConfig] = useState<ClientConfig | undefined>();
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
-    let body;
-    const url = new URL(server);
-    url.pathname += "auth";
+    let authRes;
     try {
-      const res = await fetch(url.toString(), { method: "POST", body: JSON.stringify({ username, password }), headers: { "Content-Type": "application/json" } });
-      body = await res.json();
-    } catch (err) {
-      alert(`Error logging you in: ${err}`);
+      authRes = await (new FolderHarbor({ server })).auth.login({ username, password });
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) router.push(errBody.redirect);
       return;
     }
-    if (body.error) {
-      alert(`Error logging you in: ${body.message} (${body.error})`);
-      return;
-    }
-    const session = await db.sessions.add({ server: new URL(server).toString(), token: body.token, username: username, permissions: body.permissions || [] });
+    const session = await db.sessions.add({ server: new URL(server).toString(), token: authRes.token, username: username, permissions: authRes.permissions || [] });
     if (session) localStorage.setItem("activeSession", session.toString());
     if (await db.sessions.count() === 1) {
       router.push("/home");
@@ -38,21 +35,16 @@ export default function LoginForm({ defaultURL }: { defaultURL: string | undefin
     router.push("/");
   }
   async function register() {
-    let body;
-    const url = new URL(server);
-    url.pathname += "auth/register";
+    let res;
     try {
-      const res = await fetch(url.toString(), { method: "POST", body: JSON.stringify({ username, password }), headers: { "Content-Type": "application/json" } });
-      body = await res.json();
-    } catch (err) {
-      alert(`Error registering you: ${err}`);
+      res = await (new FolderHarbor({ server })).auth.register({ username, password });
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) router.push(errBody.redirect);
       return;
     }
-    if (body.error) {
-      alert(`Error registering you: ${body.message} (${body.error})`);
-      return;
-    }
-    const session = await db.sessions.add({ server: new URL(server).toString(), token: body.token, username: username, permissions: body.permissions || [] });
+    const session = await db.sessions.add({ server: new URL(server).toString(), token: res.token, username: username, permissions: res.permissions || [] });
     if (session) localStorage.setItem("activeSession", session.toString());
     if (await db.sessions.count() === 1) {
       router.push("/home");

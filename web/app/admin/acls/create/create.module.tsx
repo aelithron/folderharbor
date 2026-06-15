@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,16 +15,14 @@ export default function CreateACL() {
   }, []);
   async function updateInfo(e: React.SubmitEvent) {
     e.preventDefault();
-    const res = await query(session!, `admin/acls`, { method: "POST", body: JSON.stringify({ name }) });
-    if ("error" in res) {
-      alert(res.error);
-      return;
+    try {
+      const acl = await getClient(session!).admin.acls.create({ name });
+      router.push(`/admin/acls/${acl.id}`);
+    } catch (e) {
+      const errBody = handleError(e as Error);
+      if ("error" in errBody) alert(errBody.error);
+      if ("redirect" in errBody) window.location.href = errBody.redirect;
     }
-    if ("redirect" in res) {
-      window.location.href = res.redirect;
-      return;
-    }
-    router.push(`/admin/acls/${res.body.id}`);
   }
   return (
     <form onSubmit={updateInfo} className="flex flex-col gap-2">

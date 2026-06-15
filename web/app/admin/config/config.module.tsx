@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { useEffect, useState } from "react";
 
@@ -14,16 +14,13 @@ export default function Config() {
   useEffect(() => {
     async function loadConfig() {
       if (!session) return;
-      const res = await query(session, `admin/config`);
-      if ("error" in res) {
-        alert(res.error);
-        return;
+      try {
+        setConfig(await getClient(session).admin.config.read());
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setConfig(res.body);
     }
     loadConfig();
   }, [session]);

@@ -1,6 +1,6 @@
 "use client"
 import { Session } from "@/folderharborweb";
-import query from "@/utils/api";
+import { getClient, handleError } from "@/utils/api";
 import { db } from "@/utils/db";
 import { Source_Code_Pro } from "next/font/google";
 import { useEffect, useState } from "react";
@@ -15,19 +15,21 @@ export default function Home() {
     loadSession();
   }, []);
   useEffect(() => {
-    if (!session) return;
-    query(session, "protocols").then((res) => {
-      if ("error" in res) {
-        alert(res.error);
+    async function load() {
+      if (!session) return;
+      let protocols;
+      try {
+        protocols = await getClient(session).protocols();
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) window.location.href = errBody.redirect;
         return;
       }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
-      }
-      setWebdavURL(res.body.webdav);
-      setftpURL(res.body.ftp);
-    });
+      setWebdavURL(protocols.webdav);
+      setftpURL(protocols.ftp);
+    }
+    load();
   }, [session]);
   return (
     <div className="flex flex-col gap-2 mt-6 md:mt-0">
