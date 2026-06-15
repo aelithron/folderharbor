@@ -7,8 +7,8 @@ import { ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
 import logo from "@/public/logo.webp";
 import Link from "next/link";
-import query from "@/utils/api";
 import { usePathname, useRouter } from "next/navigation";
+import { getClient, handleError } from "@/utils/api";
 
 export default function Header({ children }: { children?: ReactNode }) {
   const router = useRouter();
@@ -22,14 +22,12 @@ export default function Header({ children }: { children?: ReactNode }) {
   async function signOut() {
     const tokenCheck = confirm("Do you want to invalidate this session's token? This will disconnect any clients you logged into with this token.");
     if (tokenCheck) {
-      const res = await query(session!, "auth", { method: "DELETE" });
-      if ("error" in res) {
-        alert(res.error);
-        return;
-      }
-      if ("redirect" in res) {
-        window.location.href = res.redirect;
-        return;
+      try {
+        await getClient(session!).auth.logout();
+      } catch (e) {
+        const errBody = handleError(e as Error);
+        if ("error" in errBody) alert(errBody.error);
+        if ("redirect" in errBody) router.push(errBody.redirect);
       }
     }
     await db.sessions.delete(session!.webID);
