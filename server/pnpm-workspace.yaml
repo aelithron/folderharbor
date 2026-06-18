@@ -4,3 +4,5 @@ allowBuilds:
   esbuild: true
 patchedDependencies:
   ftp-srv: patches/ftp-srv.patch
+overrides: 
+  "@esbuild-kit/core-utils>esbuild": "^0.25.0"
