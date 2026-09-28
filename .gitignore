@@ -7,3 +7,4 @@ pnpm-debug.log*
 logs
 !web/app/admin/tools/logs
 release
+cli/folderharbor-cli
