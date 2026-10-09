@@ -1,4 +1,4 @@
-import express, { type RequestHandler } from "express";
+import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import type { Server } from "http";
 import { router as authRouter } from "./auth.js";
 import { router as meRouter } from "./me.js";
@@ -75,6 +75,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
     server = app.listen(port);
   }
   server.on("listening", () => console.log(`API server running (port ${port})`));
+  app.use(errorHandler());
   return server;
 }
 
@@ -95,7 +96,7 @@ const auth: RequestHandler = async (req, res, next) => {
         req.session = undefined;
         return next();
       default:
-        return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+        return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
     }
   }
   req.session = session;
@@ -113,7 +114,7 @@ export function enforceAuth(): RequestHandler {
         case "expired":
           return res.status(403).json({ error: "expired", message: "Your session expired, please sign in again." });
         default:
-          return res.status(500).json({ error: "unknown", message: "An unknown error occured." });
+          return res.status(500).json({ error: "unknown", message: "An unknown error occurred." });
       }
     }
     if (!req.session) return res.status(401).json({ error: "unauthorized", message: "No authentication token provided, or an invalid one was sent." });
@@ -124,5 +125,13 @@ function contentTypeFixer(): RequestHandler {
   return (req, res, next) => {
     if (!req.headers["content-type"]) req.headers["content-type"] = "application/json";
     return next();
+  };
+}
+function errorHandler(): ErrorRequestHandler {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return (err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500);
+    res.json({ error: "unknown", message: "An unknown error occurred." });
   };
 }
