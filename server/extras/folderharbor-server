@@ -1,2 +1,2 @@
 #!/bin/bash
-INSTALL_PATH="/usr/lib/folderharbor" /usr/lib/folderharbor/node/bin/node /usr/lib/folderharbor/index.js "$@"
+INSTALL_PATH="/usr/lib/folderharbor" VERSION="unknown_version" /usr/lib/folderharbor/node/bin/node /usr/lib/folderharbor/index.js "$@"

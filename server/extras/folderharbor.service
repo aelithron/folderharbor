@@ -5,6 +5,7 @@ After=network.target
 [Service]
 ExecStart=/usr/lib/folderharbor/node/bin/node /usr/lib/folderharbor/index.js
 Environment="INSTALL_PATH=/usr/lib/folderharbor"
+Environment="VERSION=unknown_version"
 User=folderharbor
 Restart=always
 RestartSec=5

@@ -19,6 +19,7 @@ let webdav: WebDAVServer;
 let ftp: FtpSrv;
 program
   .name("folderharbor-server").description("a powerful file server with RBAC that supports many protocols")
+  .version(process.env.VERSION || "unknown-version")
   .option("-c, --config <path>", "path to server config")
   .option("--allow-root-user", "allow the server to run as root (this can cause security risks!)")
   .option("--allow-permissive-config", "allow the server to load a configuration that is overly permissive")
@@ -40,7 +41,7 @@ async function startServer() {
     console.error('You started FolderHarbor as root! This is a security risk.\nIf you understand the risks, you can override this check with the "--allow-root-user" argument.');
     process.exit(1);
   }
-  console.log(`Starting FolderHarbor...`);
+  console.log(`Starting FolderHarbor ${process.env.VERSION || "(unknown version)"}...`);
   let ssl = null;
   if (config.api.ssl || config.webdav.ssl || config.ftp.ssl) {
     try {

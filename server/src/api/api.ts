@@ -55,7 +55,7 @@ export default async function startAPI(port: number, sslKey?: string, sslCert?: 
       case "":
         break;
       case null:
-        ftp = `ftp${config.webdav.ssl ? "s" : ""}://${localIP}:${config.ftp.port}`;
+        ftp = `ftp${config.ftp.ssl ? "s" : ""}://${localIP}:${config.ftp.port}`;
         break;
       default:
         ftp = config.ftp.publicAddress;

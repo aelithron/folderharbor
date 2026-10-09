@@ -40,6 +40,8 @@ jobs:
           pnpm lint
           pnpm check-types
       - name: Bundle (shared)
+        env:
+          VERSION: ${{ env.VERSION }}
         run: |
           mkdir -p dist/shared/
           mkdir release/
@@ -53,6 +55,8 @@ jobs:
           cp pnpm-workspace.yaml dist/shared/pnpm-workspace.yaml
           cp pnpm-lock.yaml dist/shared/pnpm-lock.yaml
           cp package.json dist/shared/package.json
+          sed -i "s/unknown_version/${{ env.VERSION }}/g" dist/shared/folderharbor-server
+          sed -i "s/unknown_version/${{ env.VERSION }}/g" dist/shared/folderharbor.service
       - name: Bundle (x86_64)
         env:
           VERSION: ${{ env.VERSION }}
