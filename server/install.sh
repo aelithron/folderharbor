@@ -55,6 +55,12 @@ echo "Creating user..."
 useradd -r -s /usr/sbin/nologin folderharbor
 echo "Downloading..."
 curl -A "Aelithron-FolderHarbor-Installer" -o "/usr/lib/folderharbor/folderharbor.tar.gz" -fsSL "https://github.com/aelithron/folderharbor/releases/download/server%2F$LATEST/folderharbor-server-$LATEST-linux-$ARCH.tar.gz"
+#echo "Verifying..."
+#CHECKSUM=$(curl -fsS https://fh.novatea.dev/api/version/server)
+#if [ -z "$CHECKSUM" ]; then
+#  echo "Error: Couldn't find the FolderHarbor Server checksum! Please make a GitHub Issue on https://github.com/aelithron/folderharbor/issues."
+#  exit 1
+#fi
 echo "Extracting..."
 tar -xzf /usr/lib/folderharbor/folderharbor.tar.gz
 chmod +x folderharbor-server
