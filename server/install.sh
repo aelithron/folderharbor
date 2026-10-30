@@ -100,9 +100,22 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   fi
   echo "Found FolderHarbor CLI $LATESTCLI! Downloading..."
   curl -A "Aelithron-FolderHarbor-Installer" -o "/usr/bin/folderharbor" -fsSL "https://github.com/aelithron/folderharbor/releases/download/cli%2F$LATESTCLI/folderharbor-cli-$LATESTCLI-linux-$CLIARCH"
-  chmod 755 /usr/bin/folderharbor
-  chown root /usr/bin/folderharbor
-  echo "Installed FolderHarbor CLI $LATESTCLI!"
+  echo "Verifying..."
+  CHECKSUMCLI=$(curl -fsS https://fh.novatea.dev/api/shasum/cli/$LATESTCLI/$CLIARCH)
+  if [ -z "$CHECKSUMCLI" ]; then
+    echo "Error: Couldn't find the FolderHarbor CLI checksum! Please make a GitHub Issue on https://github.com/aelithron/folderharbor/issues."
+    exit 1
+  fi
+  cd /usr/bin
+  if echo "$CHECKSUMCLI  folderharbor" | sha256sum --check --status; then
+    echo "The checksum was invalid for the downloaded FolderHarbor CLI binary! This likely means it got corrupted in the downloading process."
+    echo "Please try installing the CLI separately, the invalid file has been deleted."
+    rm /usr/bin/folderharbor
+  else
+    chmod 755 /usr/bin/folderharbor
+    chown root /usr/bin/folderharbor
+    echo "Installed FolderHarbor CLI $LATESTCLI!"
+  fi
 fi
 echo ""
 echo "FolderHarbor Server is now installed!"

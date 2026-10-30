@@ -4,7 +4,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
   const { type, version, arch } = await params;
   if (type !== "server" && type !== "cli") return new NextResponse(null, { status: 404 });
   if (!version.match(/v[0-9]\.[0-9]\.[0-9]/g)) return new NextResponse(null, { status: 404 });
-  if (arch !== "amd64" && arch !== "arm64") return new NextResponse(null, { status: 404 });
+  if (arch !== "x86_64" && arch !== "amd64" && arch !== "arm64") return new NextResponse(null, { status: 404 });
   try {
     const ghRes = await fetch(`https://api.github.com/repos/aelithron/folderharbor/releases/tags/${type}/${version}`, { headers: { "User-Agent": "Aelithron-FolderHarbor-LandingPage", "Authorization": `Bearer ${process.env.GITHUB_PAT!}` } });
     const body = await ghRes.json();
