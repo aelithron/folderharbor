@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  allowedDevOrigins: ["192.168.5.1", "192.168.7.36"],
+  allowedDevOrigins: ["spaces.hackclub.com"],
   async redirects() { return [{ source: "/install.sh", destination: "https://raw.githubusercontent.com/aelithron/folderharbor/refs/heads/main/server/install.sh", permanent: true }] }
 };
 
