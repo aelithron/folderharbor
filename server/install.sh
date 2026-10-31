@@ -55,6 +55,17 @@ echo "Creating user..."
 useradd -r -s /usr/sbin/nologin folderharbor
 echo "Downloading..."
 curl -A "Aelithron-FolderHarbor-Installer" -o "/usr/lib/folderharbor/folderharbor.tar.gz" -fsSL "https://github.com/aelithron/folderharbor/releases/download/server%2F$LATEST/folderharbor-server-$LATEST-linux-$ARCH.tar.gz"
+echo "Verifying..."
+CHECKSUM=$(curl -fsS https://fh.novatea.dev/api/shasum/server/$LATEST/$ARCH)
+if [ -z "$CHECKSUM" ]; then
+  echo "Error: Couldn't find the FolderHarbor Server checksum! Please make a GitHub Issue on https://github.com/aelithron/folderharbor/issues."
+  exit 1
+fi
+if echo "$CHECKSUM  folderharbor.tar.gz" | sha256sum --check --status; then
+  echo "The checksum was invalid for the downloaded FolderHarbor Server files! This likely means they got corrupted in the downloading process."
+  echo "Please try running this script again, and make a GitHub Issue on https://github.com/aelithron/folderharbor/issues if it persists."
+  exit 1  
+fi
 echo "Extracting..."
 tar -xzf /usr/lib/folderharbor/folderharbor.tar.gz
 chmod +x folderharbor-server
@@ -89,9 +100,22 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   fi
   echo "Found FolderHarbor CLI $LATESTCLI! Downloading..."
   curl -A "Aelithron-FolderHarbor-Installer" -o "/usr/bin/folderharbor" -fsSL "https://github.com/aelithron/folderharbor/releases/download/cli%2F$LATESTCLI/folderharbor-cli-$LATESTCLI-linux-$CLIARCH"
-  chmod 755 /usr/bin/folderharbor
-  chown root /usr/bin/folderharbor
-  echo "Installed FolderHarbor CLI $LATESTCLI!"
+  echo "Verifying..."
+  CHECKSUMCLI=$(curl -fsS https://fh.novatea.dev/api/shasum/cli/$LATESTCLI/$CLIARCH)
+  if [ -z "$CHECKSUMCLI" ]; then
+    echo "Error: Couldn't find the FolderHarbor CLI checksum! Please make a GitHub Issue on https://github.com/aelithron/folderharbor/issues."
+    exit 1
+  fi
+  cd /usr/bin
+  if echo "$CHECKSUMCLI  folderharbor" | sha256sum --check --status; then
+    echo "The checksum was invalid for the downloaded FolderHarbor CLI binary! This likely means it got corrupted in the downloading process."
+    echo "Please try installing the CLI separately, the invalid file has been deleted."
+    rm /usr/bin/folderharbor
+  else
+    chmod 755 /usr/bin/folderharbor
+    chown root /usr/bin/folderharbor
+    echo "Installed FolderHarbor CLI $LATESTCLI!"
+  fi
 fi
 echo ""
 echo "FolderHarbor Server is now installed!"
