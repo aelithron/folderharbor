@@ -212,7 +212,6 @@ jobs:
         with:
           subject-name: ghcr.io/${{ github.repository }}/web
           subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
       - name: Release
         uses: softprops/action-gh-release@v2
         env:
@@ -283,4 +282,3 @@ jobs:
         with:
           subject-name: ghcr.io/${{ github.repository }}/landing
           subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
