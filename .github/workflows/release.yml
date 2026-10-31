@@ -63,7 +63,7 @@ jobs:
         run: |
           cd dist/shared
           pnpm --filter=folderharbor --prod deploy ../x86_64
-          cd dist/x86_64/
+          cd ../x86_64/
           tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-x86_64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
       - name: Bundle (ARM64)
         env:
@@ -72,7 +72,7 @@ jobs:
           mkdir -p dist/arm64
           cd dist/shared
           docker run --rm --platform linux/arm64 -v $(pwd):/shared -v $(pwd)/../arm64:/arm64 -w /shared node:24-slim sh -c "npm i -g pnpm && pnpm --filter=folderharbor --prod deploy /arm64"
-          cd dist/arm64/
+          cd ../arm64/
           tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-arm64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
       - name: Attest Builds
         uses: actions/attest@v4
