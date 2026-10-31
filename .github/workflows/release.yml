@@ -69,10 +69,11 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         run: |
-          mkdir -p dist/arm64
-          cd dist/shared
-          docker run --rm --platform linux/arm64 -v $(pwd):/shared -v $(pwd)/../arm64:/arm64 -w /shared node:24-slim sh -c "npm i -g pnpm && pnpm --filter=folderharbor --prod deploy /arm64"
-          cd ../arm64/
+          mkdir -p dist/scratchpad
+          cd dist/
+          docker run --rm --platform linux/arm64 -v $(pwd)/shared:/shared -v $(pwd)/../scratchpad:/scratchpad -w /shared node:24-slim sh -c "npm i -g pnpm && pnpm --filter=folderharbor --prod deploy /scratchpad/arm64"
+          mv ./scratchpad/arm64 ./arm64
+          cd arm64/
           tar -czvf ../../release/folderharbor-server-${{ env.VERSION }}-linux-arm64.tar.gz index.js example.config.json folderharbor.service folderharbor-server node_modules/ drizzle/
       - name: Attest Builds
         uses: actions/attest@v4
