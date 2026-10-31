@@ -51,7 +51,7 @@ cd /usr/lib/folderharbor
 echo "Downloading Node.JS..."
 curl -A "Aelithron-FolderHarbor-Installer" -fsSL "https://nodejs.org/dist/v$NODEVER/node-v$NODEVER-linux-$NODEARCH.tar.gz" | tar -xz
 mv node-v$NODEVER-linux-$NODEARCH/ node/
-if ! id "folderharbor"; then
+if ! id "folderharbor" &> /dev/null; then
   echo "Creating user..."
   useradd -r -s /usr/sbin/nologin folderharbor
 else
@@ -112,7 +112,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     exit 1
   fi
   cd /usr/bin
-  if echo "$CHECKSUMCLI  folderharbor" | sha256sum --check --status; then
+  if ! echo "$CHECKSUMCLI  folderharbor" | sha256sum --check --status; then
     echo "The checksum was invalid for the downloaded FolderHarbor CLI binary! This likely means it got corrupted in the downloading process."
     echo "Please try installing the CLI separately, the invalid file has been deleted."
     rm /usr/bin/folderharbor
