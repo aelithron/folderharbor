@@ -51,8 +51,12 @@ cd /usr/lib/folderharbor
 echo "Downloading Node.JS..."
 curl -A "Aelithron-FolderHarbor-Installer" -fsSL "https://nodejs.org/dist/v$NODEVER/node-v$NODEVER-linux-$NODEARCH.tar.gz" | tar -xz
 mv node-v$NODEVER-linux-$NODEARCH/ node/
-echo "Creating user..."
-useradd -r -s /usr/sbin/nologin folderharbor
+if ! id "folderharbor"; then
+  echo "Creating user..."
+  useradd -r -s /usr/sbin/nologin folderharbor
+else
+  echo "This server already has a user for FolderHarbor! If you have installed FolderHarbor before on it, this is expected behavior."
+fi
 echo "Downloading..."
 curl -A "Aelithron-FolderHarbor-Installer" -o "/usr/lib/folderharbor/folderharbor.tar.gz" -fsSL "https://github.com/aelithron/folderharbor/releases/download/server%2F$LATEST/folderharbor-server-$LATEST-linux-$ARCH.tar.gz"
 echo "Verifying..."
@@ -61,11 +65,12 @@ if [ -z "$CHECKSUM" ]; then
   echo "Error: Couldn't find the FolderHarbor Server checksum! Please make a GitHub Issue on https://github.com/aelithron/folderharbor/issues."
   exit 1
 fi
-if echo "$CHECKSUM  folderharbor.tar.gz" | sha256sum --check --status; then
-  echo "The checksum was invalid for the downloaded FolderHarbor Server files! This likely means they got corrupted in the downloading process."
+if ! echo "$CHECKSUM  folderharbor.tar.gz" | sha256sum --check --status; then
+  echo "Checksum $CHECKSUM is invalid for the downloaded FolderHarbor Server files! This likely means the files were corrupted in the downloading process."
   echo "Please try running this script again, and make a GitHub Issue on https://github.com/aelithron/folderharbor/issues if it persists."
   exit 1  
 fi
+echo "Checksum $CHECKSUM is valid for folderharbor.tar.gz."
 echo "Extracting..."
 tar -xzf /usr/lib/folderharbor/folderharbor.tar.gz
 chmod +x folderharbor-server
