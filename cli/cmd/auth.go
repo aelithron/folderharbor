@@ -31,8 +31,8 @@ var loginCMD = &cobra.Command{
 			token, err := term.ReadPassword(int(os.Stdin.Fd()))
 			if err != nil { panic (err) }
 			fmt.Println()
-			routes.LoginToken(strings.TrimSpace(url), string(token))
-			fmt.Println("Successfully logged in with a token!")
+			result := routes.LoginToken(strings.TrimSpace(url), strings.Replace(string(token), "token_", "", 1))
+			fmt.Printf("Successfully logged in as %s, using a token! (Session #%d)\n", result.Username, result.Session)
 			return;
 		}
 		fmt.Print("Enter your username: ")
@@ -41,8 +41,8 @@ var loginCMD = &cobra.Command{
 		password, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil { panic (err) }
 		fmt.Println()
-		routes.Login(strings.TrimSpace(url), strings.TrimSpace(username), string(password))
-		fmt.Println("Successfully logged in with credentials!")
+		result := routes.Login(strings.TrimSpace(url), strings.TrimSpace(username), string(password))
+		fmt.Printf("Successfully logged in as %s, using credentials! (Session #%d)\n", result.Username, result.Session)
 	},
 }
 var logoutCMD = &cobra.Command{
@@ -50,9 +50,23 @@ var logoutCMD = &cobra.Command{
 	Short: "log out of a folderharbor server",
 	Long:  "log out of a folderharbor server",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Do you want to invalidate your token? Doing so will cause any FTP/WebDAV clients using it to lose authentication. (Y/n)")
-		routes.Logout(true)
-		fmt.Println("Logged out successfully.")
+		fmt.Print("Do you want to invalidate your token?\nDoing so will cause any FTP/WebDAV clients using it to lose authentication. (y/n) ")
+		fd := os.Stdin.Fd()
+		state, err := term.MakeRaw(int(fd))
+		if err != nil { panic (err) }
+		defer term.Restore(int(fd), state)
+		reader := bufio.NewReader(os.Stdin)
+		letter, _, err := reader.ReadRune()
+		if err != nil { panic (err) }
+		term.Restore(int(fd), state)
+  	fmt.Println(string(letter))
+		if strings.ToLower(string(letter)) == "y" {
+			routes.Logout(true)
+			fmt.Println("Logged out and invalidated token successfully.")
+		} else {
+			routes.Logout(false)
+			fmt.Println("Logged out successfully.")
+		}
 	},
 }
 var registerCMD = &cobra.Command{

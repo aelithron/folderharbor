@@ -26,6 +26,7 @@ var ownInfoCMD = &cobra.Command{
 	Use: "get",
 	Short: "get own account info",
 	Long: "get information about your account",
+	Aliases: []string{"info"},
 	Run: func(cmd *cobra.Command, args []string) {
 		info := routes.GetOwnInfo()
 		slices.SortFunc(info.Sessions, func(a, b routes.Session) int { return cmp.Compare(a.ID, b.ID) })
