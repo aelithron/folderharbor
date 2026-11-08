@@ -37,8 +37,25 @@ func Login(address, username, password string) {
 	viper.Set("token", body.Token)
 	viper.WriteConfig()
 }
-func Logout() {
+func LoginToken(address, token string) {
+	addr, err := url.Parse(address)
+	if err != nil { panic (err) }
+	addr.Path = path.Join(addr.Path, "/auth")
+	req, err := http.NewRequest(http.MethodDelete, addr.String(), nil)
+	cookie := http.Cookie{ Name: "token", Value: token, Path: "/" }
+	req.AddCookie(&cookie)
+	viper.Set("server", addr.Scheme + "://" + addr.Host)
+	viper.Set("token", token)
+	viper.WriteConfig()
+}
+func Logout(invalidate bool) {
 	auth := getAuth()
+	if invalidate == false {
+		viper.Set("server", "")
+		viper.Set("token", "")
+		viper.WriteConfig()
+		return
+	}
 	addr, err := url.Parse(auth.Server)
 	if err != nil { panic (err) }
 	addr.Path = path.Join(addr.Path, "/auth")
