@@ -34,7 +34,7 @@ export default function Logs() {
   return (
     <div className="flex flex-col mt-4">
       {(session && logs) && <div className="flex flex-col gap-2">
-        {logs.map((entry) => <div key={entry.createdAt.getTime()} className="bg-slate-700 p-2 rounded-lg">
+        {logs.map((entry) => <div key={new Date(entry.createdAt).getTime() + entry.userID} className="bg-slate-700 p-2 rounded-lg">
           <div className="flex gap-1"><p className="font-semibold">{entry.username}</p> (ID #{entry.userID}) {entry.blurb} at {new Date(entry.createdAt).toLocaleString()} ({entry.action})</div>
           {entry.body && <pre className="word-wrap break-all">{JSON.stringify(entry.body, null, 2)}</pre>}
         </div>)}
