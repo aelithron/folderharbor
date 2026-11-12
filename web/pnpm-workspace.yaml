@@ -5,7 +5,7 @@ ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
 minimumReleaseAgeExclude:
-  - '@folderharbor/sdk@1.1.4'
+  - '@folderharbor/sdk@1.1.4 || 1.1.6'
 overrides:
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
